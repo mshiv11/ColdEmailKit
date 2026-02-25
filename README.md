@@ -8,12 +8,12 @@
   <br />
   <a href="https://coldemailkit.com">Website</a>
   ·
-  <a href="https://github.com/mshiv11/ColdEmailKit-Open-Source/issues">Issues</a>
+  <a href="https://github.com/mshiv11/ColdEmailKit/issues">Issues</a>
 </p>
 
 <p align="center">
-   <a href="https://github.com/mshiv11/ColdEmailKit-Open-Source/stargazers"><img src="https://img.shields.io/github/stars/mshiv11/ColdEmailKit-Open-Source" alt="Github Stars" /></a>
-   <a href="https://github.com/mshiv11/ColdEmailKit-Open-Source/blob/main/LICENSE"><img src="https://img.shields.io/github/license/mshiv11/ColdEmailKit-Open-Source" alt="License" /></a>
+   <a href="https://github.com/mshiv11/ColdEmailKit/stargazers"><img src="https://img.shields.io/github/stars/mshiv11/ColdEmailKit" alt="Github Stars" /></a>
+   <a href="https://github.com/mshiv11/ColdEmailKit/blob/main/LICENSE"><img src="https://img.shields.io/github/license/mshiv11/ColdEmailKit" alt="License" /></a>
 </p>
 
 ## About this project
@@ -59,7 +59,7 @@ The following major changes have been made from the original project:
 
 This derivative work is also licensed under [GPL-3.0](LICENSE). In compliance with GPL-3.0:
 
-1. **Source Code Availability**: The complete source code is available at https://github.com/mshiv11/ColdEmailKit-Open-Source
+1. **Source Code Availability**: The complete source code is available at [https://github.com/mshiv11/ColdEmailKit](https://github.com/mshiv11/ColdEmailKit)
 2. **License Preservation**: This project maintains the same GPL-3.0 license as the original
 3. **Modification Notice**: All modifications are documented in this README and git history
 4. **No Warranty**: This software is provided "as is" without warranty of any kind
