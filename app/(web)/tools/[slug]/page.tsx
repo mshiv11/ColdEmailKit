@@ -64,7 +64,7 @@ const getTool = cache(async ({ params }: PageProps) => {
 
 const getMetadata = (tool: ToolOne): Metadata => {
   return {
-    title: `${tool.name} - Overview, Pricing, Features, Pros, and Cons`,
+    title: tool.customTitle || `${tool.name} Review (2026): Pricing, Features & Alternatives`,
     description: tool.description,
   }
 }
@@ -84,10 +84,12 @@ export const generateMetadata = async (props: PageProps): Promise<Metadata> => {
     `${tool.name} review`,
     `${tool.name} pricing`,
     `${tool.name} alternatives`,
-    ...tool.categories.map(c => c.name),
-    ...tool.topics.map(t => t.slug),
+    `${tool.name} lifetime deal`,
+    `${tool.name} discount`,
     "cold email tools",
     "email outreach",
+    ...tool.categories.map(c => c.name),
+    ...tool.topics.map(t => t.slug),
   ].filter(Boolean)
 
   return {

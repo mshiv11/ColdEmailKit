@@ -176,6 +176,7 @@ model Tool {
   pricingStarting String?
   bestFor         String?
   hasFreeTrial    Boolean    @default(false)
+  customTitle     String?
   
   // Specifications & Features (JSON fields for flexibility and comparison)
   specifications          Json?    @default("{}")  // Core capabilities (0-5 ratings)
@@ -237,6 +238,7 @@ model Alternative {
   discountCode   String?
   discountAmount String?
   pageviews      Int?     @default(0)
+  customTitle    String?
   adPrice        Float?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

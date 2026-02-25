@@ -27,6 +27,7 @@ export const toolIntegrationPayload = Prisma.validator<Prisma.Tool$integrationsA
 export const toolOnePayload = Prisma.validator<Prisma.ToolSelect>()({
   id: true,
   name: true,
+  customTitle: true,
   slug: true,
   websiteUrl: true,
   affiliateUrl: true,

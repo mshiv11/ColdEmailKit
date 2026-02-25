@@ -46,6 +46,7 @@ export const toolSchema = z.object({
   trustScore: z.coerce.number().optional(),
   pricingStarting: z.string().optional(),
   bestFor: z.string().optional(),
+  customTitle: z.string().optional(),
   overallRating: z.coerce.number().min(0).max(5).optional(),
 
   // Platform-specific ratings and reviews

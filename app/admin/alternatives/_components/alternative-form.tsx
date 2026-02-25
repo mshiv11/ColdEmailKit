@@ -53,6 +53,7 @@ export function AlternativeForm({
     resolver: zodResolver(alternativeSchema),
     defaultValues: {
       name: alternative?.name ?? "",
+      customTitle: alternative?.customTitle ?? "",
       slug: alternative?.slug ?? "",
       websiteUrl: alternative?.websiteUrl ?? "",
       description: alternative?.description ?? "",
@@ -143,6 +144,20 @@ export function AlternativeForm({
               <FormLabel>Slug</FormLabel>
               <FormControl>
                 <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="customTitle"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Custom SEO Title</FormLabel>
+              <FormControl>
+                <Input placeholder="Leave empty to use auto-generated title" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

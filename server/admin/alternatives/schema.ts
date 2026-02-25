@@ -30,6 +30,7 @@ export const alternativeSchema = z.object({
   faviconUrl: z.string().optional(),
   discountCode: z.string().optional(),
   discountAmount: z.string().optional(),
+  customTitle: z.string().optional(),
   tools: z.array(z.string()).optional(),
 })
 

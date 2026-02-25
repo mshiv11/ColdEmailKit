@@ -213,6 +213,7 @@ export function ToolForm({
     resolver: zodResolver(toolSchema),
     defaultValues: {
       name: tool?.name ?? "",
+      customTitle: tool?.customTitle ?? "",
       slug: tool?.slug ?? "",
       websiteUrl: tool?.websiteUrl ?? "",
       affiliateUrl: tool?.affiliateUrl ?? "",
@@ -387,6 +388,20 @@ export function ToolForm({
               <FormLabel>Name</FormLabel>
               <FormControl>
                 <Input data-1p-ignore {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="customTitle"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Custom SEO Title</FormLabel>
+              <FormControl>
+                <Input placeholder="Leave empty to use auto-generated title" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

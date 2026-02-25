@@ -4,6 +4,7 @@ import { adOnePayload } from "~/server/web/ads/payloads"
 export const alternativeOnePayload = Prisma.validator<Prisma.AlternativeSelect>()({
   id: true,
   name: true,
+  customTitle: true,
   slug: true,
   description: true,
   websiteUrl: true,
