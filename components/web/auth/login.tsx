@@ -6,7 +6,7 @@ import { Stack } from "~/components/common/stack"
 export const Login = () => {
   return (
     <Stack direction="column" className="items-stretch w-full">
-      <LoginButton provider="google" />
+      <LoginForm />
 
       <div className="relative flex items-center gap-3 my-1">
         <div className="flex-1 border-t" />
@@ -14,8 +14,9 @@ export const Login = () => {
         <div className="flex-1 border-t" />
       </div>
 
-      <LoginForm />
+      <LoginButton provider="google" />
     </Stack>
   )
 }
+
 
