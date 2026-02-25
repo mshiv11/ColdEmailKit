@@ -18,7 +18,7 @@
 
 ## About this project
 
-ColdEmailKit is a community-driven directory of **cold email tools** and applications.
+ColdEmailKit is a community-driven directory of **cold email tools**.
 
 Our goal is to be your first stop when researching for a new service to help you grow your business through cold email outreach. We will help you **find and compare** the best tools available.
 
