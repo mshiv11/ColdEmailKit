@@ -1,3 +1,4 @@
+import { LoginButton } from "~/components/web/auth/login-button"
 import { LoginForm } from "~/components/web/auth/login-form"
 
 import { Stack } from "~/components/common/stack"
@@ -5,6 +6,14 @@ import { Stack } from "~/components/common/stack"
 export const Login = () => {
   return (
     <Stack direction="column" className="items-stretch w-full">
+      <LoginButton provider="google" />
+
+      <div className="relative flex items-center gap-3 my-1">
+        <div className="flex-1 border-t" />
+        <span className="text-xs text-muted-foreground">or</span>
+        <div className="flex-1 border-t" />
+      </div>
+
       <LoginForm />
     </Stack>
   )
