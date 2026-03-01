@@ -1,28 +1,36 @@
 import type { Logger } from "inngest/middleware/logger"
-import { env } from "~/env"
-import { getPlausibleApi } from "~/services/plausible"
+import { getPostHogQueryApi } from "~/services/posthog-api"
 import { tryCatch } from "~/utils/helpers"
 
-type AnalyticsPageResponse = {
-  results: { metrics: [number, number]; dimensions: [] }[]
+type HogQLResponse = {
+  results: any[][]
+  columns: string[]
 }
 
 /**
  * Get the page analytics for a given page and period
- * @param page - The page to get the analytics for
- * @param period - The period to get the analytics for
- * @returns The page analytics
+ * @param page - The page path to get the analytics for (e.g. "/my-tool")
+ * @param period - The period in days to look back (default: 30)
+ * @returns The page analytics (visitors, pageviews)
  */
-const getPageAnalytics = async (page: string, period = "30d") => {
+const getPageAnalytics = async (page: string, period = 30) => {
   const query = {
-    site_id: env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN,
-    metrics: ["visitors", "pageviews"],
-    date_range: period,
-    filters: [["is", "event:page", [page]]],
+    query: {
+      kind: "HogQLQuery",
+      query: `
+        SELECT
+          count(DISTINCT person_id) AS visitors,
+          count() AS pageviews
+        FROM events
+        WHERE event = '$pageview'
+          AND properties.$pathname = '${page}'
+          AND timestamp >= now() - interval ${period} day
+      `,
+    },
   }
 
   const { data, error } = await tryCatch(
-    getPlausibleApi().post(query).json<AnalyticsPageResponse>(),
+    getPostHogQueryApi().post(query).json<HogQLResponse>(),
   )
 
   if (error) {
@@ -30,31 +38,38 @@ const getPageAnalytics = async (page: string, period = "30d") => {
     return { visitors: 0, pageviews: 0 }
   }
 
+  // HogQL returns results as arrays: [[visitors, pageviews]]
+  const row = data.results[0]
   return {
-    visitors: data.results[0].metrics[0],
-    pageviews: data.results[0].metrics[1],
+    visitors: row ? Number(row[0]) : 0,
+    pageviews: row ? Number(row[1]) : 0,
   }
-}
-
-type AnalyticsTotalResponse = {
-  results: { metrics: [number]; dimensions: [string] }[]
 }
 
 /**
  * Get the total analytics for a given period
- * @param period - The period to get the analytics for
- * @returns The total analytics
+ * @param period - The period in days to look back (default: 30)
+ * @returns The total analytics with daily breakdown
  */
-export const getTotalAnalytics = async (period = "30d") => {
+export const getTotalAnalytics = async (period = 30) => {
   const query = {
-    site_id: env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN,
-    metrics: ["visitors"],
-    date_range: period,
-    dimensions: ["time:day"],
+    query: {
+      kind: "HogQLQuery",
+      query: `
+        SELECT
+          toDate(timestamp) AS date,
+          count(DISTINCT person_id) AS visitors
+        FROM events
+        WHERE event = '$pageview'
+          AND timestamp >= now() - interval ${period} day
+        GROUP BY date
+        ORDER BY date ASC
+      `,
+    },
   }
 
   const { data, error } = await tryCatch(
-    getPlausibleApi().post(query).json<AnalyticsTotalResponse>(),
+    getPostHogQueryApi().post(query).json<HogQLResponse>(),
   )
 
   if (error) {
@@ -62,12 +77,13 @@ export const getTotalAnalytics = async (period = "30d") => {
     return { results: [], totalVisitors: 0, averageVisitors: 0 }
   }
 
-  const totalVisitors = data.results.reduce((acc, curr) => acc + curr.metrics[0], 0)
-  const averageVisitors = totalVisitors / data.results.length
-  const results = data.results.map(({ metrics, dimensions }) => ({
-    date: dimensions[0],
-    visitors: metrics[0],
+  const results = data.results.map((row) => ({
+    date: String(row[0]),
+    visitors: Number(row[1]),
   }))
+
+  const totalVisitors = results.reduce((acc, curr) => acc + curr.visitors, 0)
+  const averageVisitors = results.length > 0 ? totalVisitors / results.length : 0
 
   return { results, totalVisitors, averageVisitors }
 }

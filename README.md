@@ -93,7 +93,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 - **Authentication**: [Better Auth](https://www.better-auth.com/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **Email**: [Resend](https://resend.com/) with [React Email](https://react.email/)
-- **Analytics**: [Plausible](https://plausible.io/), [PostHog](https://posthog.com/)
+- **Analytics**: [PostHog](https://posthog.com/)
 
 ---
 
@@ -106,8 +106,7 @@ ColdEmailKit uses the following third-party services:
 | **Neon** | PostgreSQL Database | [neon.tech](https://neon.tech) |
 | **Meilisearch** | Full-text Search | [meilisearch.com](https://www.meilisearch.com/) |
 | **Upstash** | Redis Cache & Rate Limiting | [upstash.com](https://upstash.com/) |
-| **Plausible** | Privacy-friendly Analytics | [plausible.io](https://plausible.io/) |
-| **PostHog** | Product Analytics | [posthog.com](https://posthog.com/) |
+| **PostHog** | Web & Product Analytics | [posthog.com](https://posthog.com/) |
 | **Beehiiv** | Newsletter | [beehiiv.com](https://www.beehiiv.com/?via=mshiv) |
 | **Resend** | Transactional Email | [resend.com](https://resend.com/) |
 | **Inngest** | Background Jobs | [inngest.com](https://inngest.com/) |
@@ -209,7 +208,7 @@ Copy `.env.example` to `.env` and configure the following variables:
 | **Email** | `RESEND_API_KEY`, `RESEND_SENDER_EMAIL` | ✅ |
 | **Storage** | S3 configuration variables | ✅ |
 | **AI** | API keys for Google, Anthropic, OpenAI, etc. | ✅ |
-| **Analytics** | PostHog and Plausible configuration | ✅ |
+| **Analytics** | PostHog configuration | ✅ |
 | **Payments** | Dodo Payments configuration | ✅ |
 | **Social** | Twitter, Bluesky, Mastodon credentials | Optional |
 

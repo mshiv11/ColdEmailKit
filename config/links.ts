@@ -11,7 +11,7 @@ export const linksConfig = {
   mastodon: "", // Add your Mastodon handle when available
   linkedin: "", // Add your LinkedIn page when available
   reddit: "", // Add your subreddit when available
-  analytics: "", // Add your public analytics URL (e.g., Plausible)
+  analytics: "", // Add your public analytics URL (e.g., PostHog)
 
   feeds: [
     { title: "Cold Email Tools", url: `${siteConfig.url}/rss/tools.xml` },

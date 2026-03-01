@@ -11,7 +11,6 @@ import { Footer } from "~/components/web/footer"
 import { Header, HeaderBackdrop } from "~/components/web/header"
 import { Container } from "~/components/web/ui/container"
 import { config } from "~/config"
-import { env } from "~/env"
 import { getServerSession } from "~/lib/auth"
 
 export default async function RootLayout({ children }: PropsWithChildren) {
@@ -96,12 +95,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Plausible */}
-      <Script
-        defer
-        data-domain={env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN}
-        src={`${env.NEXT_PUBLIC_PLAUSIBLE_URL}/js/script.js`}
-      />
+
     </Providers>
   )
 }
