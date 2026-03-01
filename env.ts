@@ -58,6 +58,9 @@ export const env = createEnv({
     STACK_ANALYZER_API_KEY: z.string().min(1),
     PERPLEXITY_API_KEY: z.string().min(1),
     MISTRAL_API_KEY: z.string().min(1),
+    ENABLE_INDEXNOW: z.string().optional(),
+    POSTHOG_PROJECT_ID: z.string().optional(),
+    POSTHOG_PERSONAL_API_KEY: z.string().optional(),
   },
 
   /**

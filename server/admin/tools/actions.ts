@@ -13,6 +13,7 @@ import { getToolRepositoryData } from "~/lib/repositories"
 import { adminProcedure } from "~/lib/safe-actions"
 import { toolSchema } from "~/server/admin/tools/schema"
 import { db } from "~/services/db"
+import { submitToIndexNow } from "~/services/indexnow"
 import { tryCatch } from "~/utils/helpers"
 
 export const fetchToolRepositoryData = adminProcedure
@@ -101,6 +102,12 @@ export const upsertTool = adminProcedure
           await notifySubmitterOfToolScheduled(tool)
         })
       }
+    }
+
+    if (tool.status === ToolStatus.Published) {
+      after(async () => {
+        await submitToIndexNow([`https://coldemailkit.com/tools/${tool.slug}`])
+      })
     }
 
     revalidatePath("/admin/tools")

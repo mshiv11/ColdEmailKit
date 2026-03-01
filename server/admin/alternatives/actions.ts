@@ -8,6 +8,7 @@ import { removeS3Directories } from "~/lib/media"
 import { adminProcedure } from "~/lib/safe-actions"
 import { alternativeSchema } from "~/server/admin/alternatives/schema"
 import { db } from "~/services/db"
+import { submitToIndexNow } from "~/services/indexnow"
 
 export const upsertAlternative = adminProcedure
   .createServerAction()
@@ -17,24 +18,29 @@ export const upsertAlternative = adminProcedure
 
     const alternative = id
       ? await db.alternative.update({
-          where: { id },
-          data: {
-            ...input,
-            slug: input.slug || slugify(input.name),
-            tools: { set: toolIds },
-          },
-        })
+        where: { id },
+        data: {
+          ...input,
+          slug: input.slug || slugify(input.name),
+          tools: { set: toolIds },
+        },
+      })
       : await db.alternative.create({
-          data: {
-            ...input,
-            slug: input.slug || slugify(input.name),
-            tools: { connect: toolIds },
-          },
-        })
+        data: {
+          ...input,
+          slug: input.slug || slugify(input.name),
+          tools: { connect: toolIds },
+        },
+      })
 
     revalidateTag("alternatives")
     revalidateTag(`alternative-${alternative.slug}`)
     revalidateTag("tools")
+
+    // Submit alternative URL to IndexNow automatically in the background
+    after(async () => {
+      await submitToIndexNow([`https://coldemailkit.com/alternatives/${alternative.slug}`])
+    })
 
     return alternative
   })
