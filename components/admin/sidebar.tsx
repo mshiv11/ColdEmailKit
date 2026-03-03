@@ -82,6 +82,11 @@ export const Sidebar = () => {
           href: "/admin/reports",
           prefix: <Icon name="lucide/triangle-alert" />,
         },
+        {
+          title: "Reviews",
+          href: "/admin/reviews",
+          prefix: <Icon name="lucide/star" />,
+        },
 
         undefined, // Separator
 

@@ -70,6 +70,22 @@ export const toolOnePayload = Prisma.validator<Prisma.ToolSelect>()({
   categories: toolCategoriesPayload,
   topics: toolTopicsPayload,
   integrations: toolIntegrationPayload,
+  reviews: {
+    select: {
+      id: true,
+      rating: true,
+      comment: true,
+      createdAt: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" as const },
+  },
 })
 
 export const toolManyPayload = Prisma.validator<Prisma.ToolSelect>()({

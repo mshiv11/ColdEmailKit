@@ -347,6 +347,7 @@ model Review {
   toolId String
 
   // Indexes
+  @@unique([userId, toolId])
   @@index([userId])
   @@index([toolId])
 }

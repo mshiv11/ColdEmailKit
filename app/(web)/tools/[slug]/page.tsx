@@ -29,6 +29,7 @@ import { ToolActions } from "~/components/web/tools/tool-actions"
 import { ToolAlternatives } from "~/components/web/tools/tool-alternatives"
 import { ToolIntegrations } from "~/components/web/tools/tool-integrations"
 import { ToolListSkeleton } from "~/components/web/tools/tool-list"
+import { ToolReviews } from "~/components/web/tools/tool-reviews"
 import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import { IntroDescription } from "~/components/web/ui/intro"
@@ -273,6 +274,9 @@ export default async function ToolPage(props: PageProps) {
             linkedinFeatures={tool.linkedinFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["linkedinFeatures"]}
             className="max-md:order-5"
           />
+
+          {/* User Reviews */}
+          <ToolReviews tool={tool} className="max-md:order-5.5" />
 
           {/* Categories */}
           {!!tool.categories.length && (

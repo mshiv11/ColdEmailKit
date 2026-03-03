@@ -75,3 +75,5 @@ public/icons/sprite.svg
 types/icons.d.ts
 
 .env*.local
+
+scripts/push-env-to-vercel.ps1
