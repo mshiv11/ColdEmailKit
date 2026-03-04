@@ -13,34 +13,23 @@ export const contentSchema = z.object({
   description: z
     .string()
     .describe(
-      "A concise meta description (max 160 chars) highlighting key features and benefits. Use active voice, avoid tool name.",
+      "A meta description (one sentence, under 160 characters) that includes the tool name and its core value proposition.",
     ),
   content: z.string().describe(
-    `A detailed Markdown-formatted content with the following structure:
+    `Detailed Markdown-formatted content for the full tool page, following this exact structure:
 
-## Key Features
-- **Feature Name**: Brief description of the feature and its benefit to users
-(List 4-6 key features with bold names and descriptions)
+1. OPENING SECTION — exactly three sentences:
+   - Sentence 1: What the tool is, its rating or reputation if available, and its primary use case
+   - Sentence 2: What the tool specifically does — features, workflow, and outcomes
+   - Sentence 3: Who it is best suited for and the starting price
 
-## Pros and Cons
+2. TOP FEATURES — with an H2 heading, bullet points only, no sentences, no descriptions, 5 to 8 bullets maximum
 
-### Pros
-- **Pro**: Why this is a strength or advantage
-(List 3-5 clear advantages)
+3. PRICING SECTION — with an H2 heading, two to four sentences covering the pricing tiers, what each includes, and where to get the best deal. No bullet points.
 
-### Cons
-- **Con**: What limitation or drawback users should know
-(List 2-4 honest limitations)
+4. ADDITIONAL SECTIONS — based on the search data provided, write the remaining sections that match the search intent for this tool using H2 and H3 headings. Do not repeat anything already covered. Follow the natural outline from search results.
 
-## Pricing
-| Plan | Price | Features |
-|------|-------|----------|
-(Include 2-4 pricing tiers with plan name, price, and key features)
-
-**Free trial**: Yes/No with duration if applicable
-**Starting from**: Entry price point
-
-Write like a cold email expert who has hands-on experience. Be specific with numbers and facts. Avoid marketing buzzwords like "Empower", "Streamline", "Revolutionary". Focus on practical value.`,
+Do not use em-dash. Write in a factual, neutral, helpful tone. Do not copy sentences from sources — always rewrite in your own voice.`,
   ),
 })
 

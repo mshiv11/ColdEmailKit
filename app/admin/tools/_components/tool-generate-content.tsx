@@ -11,7 +11,7 @@ import type { ToolSchema } from "~/server/admin/tools/schema"
 export const ToolGenerateContent = () => {
   const { watch, setValue } = useFormContext<ToolSchema>()
 
-  const [url] = watch(["websiteUrl"])
+  const [url, name] = watch(["websiteUrl", "name"])
   const errorMessage = "Something went wrong. Please check the console for more details."
   const successMessage = "Content generated successfully. Please save the tool to update."
 
@@ -39,7 +39,7 @@ export const ToolGenerateContent = () => {
 
   const handleGenerateContent = () => {
     if (isValidUrl(url)) {
-      submit({ url })
+      submit({ url, name })
     } else {
       toast.error("Invalid URL. Please enter a valid URL.")
     }
