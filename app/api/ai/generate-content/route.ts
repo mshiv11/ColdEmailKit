@@ -52,7 +52,7 @@ export const POST = withAdminAuth(async req => {
     const truncatedSearchData = searchData.slice(0, 15000)
 
     const result = streamObject({
-      model: google("gemini-2.5-pro-preview-05-06"),
+      model: google("gemini-2.0-flash"),
       schema: contentSchema,
       system: `You are a content writer for ColdEmailKit.com, a neutral directory of cold email tools.
 Your job is to write structured, SEO-optimized tool pages based on live web data provided to you. Do not use em-dash. Do not use en-dash.
