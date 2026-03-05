@@ -28,6 +28,7 @@ import { ToolFeaturesDisplay } from "~/components/web/tools/tool-features-displa
 import { ToolActions } from "~/components/web/tools/tool-actions"
 import { ToolAlternatives } from "~/components/web/tools/tool-alternatives"
 import { ToolIntegrations } from "~/components/web/tools/tool-integrations"
+import { StickyToolHeader } from "~/components/web/tools/sticky-tool-header"
 import { ToolListSkeleton } from "~/components/web/tools/tool-list"
 import { ToolReviews } from "~/components/web/tools/tool-reviews"
 import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
@@ -165,6 +166,8 @@ export default async function ToolPage(props: PageProps) {
 
       <Section>
         <Section.Content className="max-md:contents">
+          <StickyToolHeader tool={tool} />
+
           <div className="flex flex-1 flex-col items-start gap-6 max-md:order-1 md:gap-8">
             <div className="flex w-full flex-col items-start gap-y-4">
               <Stack className="w-full">
@@ -218,6 +221,7 @@ export default async function ToolPage(props: PageProps) {
                   suffix={<Icon name="lucide/arrow-up-right" />}
                   className="sm:min-w-36"
                   asChild
+                  id="tool-hero-cta"
                 >
                   <ExternalLink
                     href={tool.affiliateUrl || tool.websiteUrl}
@@ -252,7 +256,7 @@ export default async function ToolPage(props: PageProps) {
               eventProps={{ url: tool.websiteUrl, isFeatured: tool.isFeatured, source: "image" }}
               src={tool.screenshotUrl}
               alt={`Screenshot of ${tool.name} website`}
-              className="max-md:order-2"
+              className="max-md:order-3"
             >
               Visit {tool.name}
             </OverlayImage>
@@ -272,15 +276,15 @@ export default async function ToolPage(props: PageProps) {
             outreachFeatures={tool.outreachFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["outreachFeatures"]}
             deliverabilityFeatures={tool.deliverabilityFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["deliverabilityFeatures"]}
             linkedinFeatures={tool.linkedinFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["linkedinFeatures"]}
-            className="max-md:order-5"
+            className="max-md:order-6"
           />
 
           {/* User Reviews */}
-          <ToolReviews tool={tool} className="max-md:order-5.5" />
+          <ToolReviews tool={tool} className="max-md:order-[11]" />
 
           {/* Categories */}
           {!!tool.categories.length && (
-            <Stack size="lg" direction="column" className="w-full max-md:order-6">
+            <Stack size="lg" direction="column" className="w-full max-md:order-8">
               <H5 as="strong">Categories:</H5>
 
               <Stack className="gap-2">
@@ -295,7 +299,7 @@ export default async function ToolPage(props: PageProps) {
 
           {/* Topics */}
           {!!tool.topics.length && (
-            <Stack size="lg" direction="column" className="w-full max-md:order-7">
+            <Stack size="lg" direction="column" className="w-full max-md:order-9">
               <H5 as="strong">Topics:</H5>
 
               <Stack>
@@ -310,14 +314,14 @@ export default async function ToolPage(props: PageProps) {
 
           {/* Integrations */}
           {!!tool.integrations.length && (
-            <Stack size="lg" direction="column" className="w-full max-md:order-8">
+            <Stack size="lg" direction="column" className="w-full max-md:order-10">
               <H5 as="strong">Integrations:</H5>
 
               <ToolIntegrations integrations={tool.integrations} />
             </Stack>
           )}
 
-          <ShareButtons title={`${title}`} direction="column" className="max-md:order-9" />
+          <ShareButtons title={`${title}`} direction="column" className="max-md:order-12" />
         </Section.Content>
 
         <Section.Sidebar className="max-md:contents">
@@ -343,13 +347,13 @@ export default async function ToolPage(props: PageProps) {
           <RepositoryDetails tool={tool} className="max-md:order-5" />
 
           {/* Advertisement */}
-          <Suspense fallback={<AdCardSkeleton className="max-md:order-3" />}>
-            <AdCard where={{ type: "ToolPage" }} className="max-md:order-3" />
+          <Suspense fallback={<AdCardSkeleton className="max-md:order-2" />}>
+            <AdCard where={{ type: "ToolPage" }} className="max-md:order-2" />
           </Suspense>
 
           {/* Featured */}
           <Suspense>
-            <FeaturedTools className="max-md:order-10" />
+            <FeaturedTools className="max-md:order-[13]" />
           </Suspense>
         </Section.Sidebar>
       </Section>
