@@ -53,6 +53,7 @@ export const POST = withAdminAuth(async req => {
 
     const result = streamObject({
       model: anthropic("claude-sonnet-4-20250514"),
+      mode: "json",
       schema: contentSchema,
       system: `You are a content writer for ColdEmailKit.com, a neutral directory of cold email tools.
 Your job is to write structured, SEO-optimized tool pages based on live web data provided to you. Do not use em-dash. Do not use en-dash.
