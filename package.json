@@ -20,7 +20,7 @@
     "postinstall": "bun run db:generate"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.56",
+    "@ai-sdk/anthropic": "^3.0.0",
     "@ai-sdk/google": "^1.2.19",
     "@ai-sdk/react": "^1.2.12",
     "@atproto/api": "^0.15.16",
