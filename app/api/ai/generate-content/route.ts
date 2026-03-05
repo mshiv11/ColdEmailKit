@@ -1,13 +1,11 @@
-import { anthropic } from "@ai-sdk/anthropic"
 import { google } from "@ai-sdk/google"
 import { streamObject } from "ai"
 import { z } from "zod"
-import { isDev } from "~/env"
 import { withAdminAuth } from "~/lib/auth-hoc"
 import { scrapeWebsiteData, searchWebData } from "~/lib/scraper"
 import { contentSchema } from "~/server/admin/shared/schema"
 
-export const maxDuration = 120
+export const maxDuration = 60
 
 const generateContentSchema = z.object({
   url: z.string().url(),
@@ -54,7 +52,7 @@ export const POST = withAdminAuth(async req => {
     const truncatedSearchData = searchData.slice(0, 15000)
 
     const result = streamObject({
-      model: isDev ? google("gemini-2.5-pro-preview-05-06") : anthropic("claude-4-sonnet-20250514"),
+      model: google("gemini-2.5-pro-preview-05-06"),
       schema: contentSchema,
       system: `You are a content writer for ColdEmailKit.com, a neutral directory of cold email tools.
 Your job is to write structured, SEO-optimized tool pages based on live web data provided to you. Do not use em-dash. Do not use en-dash.
