@@ -2,7 +2,7 @@ import { z } from "zod"
 
 /**
  * The schema for the content generator.
- * Produces structured content with Key Features, Pros and Cons, and Pricing sections.
+ * Produces structured content with Opening, Top Features (H3), Pricing (H3), Additional Sections, and 7-question FAQ.
  */
 export const contentSchema = z.object({
   tagline: z
@@ -16,20 +16,27 @@ export const contentSchema = z.object({
       "A meta description (one sentence, under 160 characters) that includes the tool name and its core value proposition.",
     ),
   content: z.string().describe(
-    `Detailed Markdown-formatted content for the full tool page, following this exact structure:
+    `Detailed Markdown-formatted content for the full tool page. Use one blank line between every section. Follow this exact structure:
 
-1. OPENING SECTION — exactly three sentences:
-   - Sentence 1: What the tool is, its rating or reputation if available, and its primary use case
+1. OPENING SECTION — exactly three sentences (no heading):
+   - Sentence 1: What the tool is, its rating/reputation if available, and its primary use case
    - Sentence 2: What the tool specifically does — features, workflow, and outcomes
    - Sentence 3: Who it is best suited for and the starting price
 
-2. TOP FEATURES — with an H2 heading, bullet points only, no sentences, no descriptions, 5 to 8 bullets maximum
+### Top Features
+Bullet points only. 5 to 8 bullets. Each bullet must be specific and factual — no vague marketing language.
 
-3. PRICING SECTION — with an H2 heading, two to four sentences covering the pricing tiers, what each includes, and where to get the best deal. No bullet points.
+### Pricing
+Two to four sentences. Cover pricing tiers, plan names, what each includes, and where to find the best deal. No bullet points.
 
-4. ADDITIONAL SECTIONS — based on the search data provided, write the remaining sections that match the search intent for this tool using H2 and H3 headings. Do not repeat anything already covered. Follow the natural outline from search results.
+Additional ## and ### sections based on search data — do not repeat anything already in Opening, Top Features, or Pricing.
 
-Do not use em-dash. Write in a factual, neutral, helpful tone. Do not copy sentences from sources — always rewrite in your own voice.`,
+---
+
+## Frequently Asked Questions
+Exactly 7 Q&A entries in **Q:** / A: format. Topics: setup complexity, pricing value, feature comparison vs a named competitor, technical requirements, support quality, expected results/timeline, and one tool-specific friction point answered honestly.
+
+Do not use em-dash or en-dash. Write in a factual, neutral, helpful tone. Always rewrite in your own voice.`,
   ),
 })
 
