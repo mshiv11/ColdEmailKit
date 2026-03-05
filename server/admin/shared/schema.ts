@@ -2,7 +2,7 @@ import { z } from "zod"
 
 /**
  * The schema for the content generator.
- * Produces structured content with Opening, Top Features (H3), Pricing (H3), Additional Sections, and 7-question FAQ.
+ * Produces structured content with Opening, Top Features (H3), Pricing (H3), Additional Sections, and search-derived FAQ.
  */
 export const contentSchema = z.object({
   tagline: z
@@ -16,25 +16,23 @@ export const contentSchema = z.object({
       "A meta description (one sentence, under 160 characters) that includes the tool name and its core value proposition.",
     ),
   content: z.string().describe(
-    `Detailed Markdown-formatted content for the full tool page. Use one blank line between every section. Follow this exact structure:
+    `Detailed Markdown-formatted content for the full tool page. Use one blank line between every section. Use "-" for all bullet points, never "." or special characters. Follow this exact structure:
 
-1. OPENING SECTION — exactly three sentences (no heading):
-   - Sentence 1: What the tool is, its rating/reputation if available, and its primary use case
-   - Sentence 2: What the tool specifically does — features, workflow, and outcomes
-   - Sentence 3: Who it is best suited for and the starting price
+1. OPENING SECTION (no heading):
+   Exactly three sentences covering what the tool is, what it does, and who it is for with starting price.
 
 ### Top Features
-Bullet points only. 5 to 8 bullets. Each bullet must be specific and factual — no vague marketing language.
+5 to 8 bullet points using "-". Short factual phrases only.
 
 ### Pricing
-Two to four sentences. Cover pricing tiers, plan names, what each includes, and where to find the best deal. No bullet points.
+Two to four sentences with specific plan names and prices. No bullet points.
 
-Additional ## and ### sections based on search data — do not repeat anything already in Opening, Top Features, or Pricing.
+Additional ## and ### sections based on search data. Do not repeat opening, features, or pricing content.
 
 ---
 
 ## Frequently Asked Questions
-Exactly 7 Q&A entries in **Q:** / A: format. Topics: setup complexity, pricing value, feature comparison vs a named competitor, technical requirements, support quality, expected results/timeline, and one tool-specific friction point answered honestly.
+Exactly 7 FAQ entries. Each question is a numbered ### heading (### 1., ### 2., etc.) followed by a 2-4 sentence answer paragraph. Questions must be extracted from search results data, targeting real search intent and featured snippets.
 
 Do not use em-dash or en-dash. Write in a factual, neutral, helpful tone. Always rewrite in your own voice.`,
   ),
