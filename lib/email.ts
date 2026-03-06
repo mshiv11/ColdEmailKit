@@ -44,5 +44,14 @@ export const sendEmail = async (email: EmailParams) => {
     return
   }
 
-  return resend.emails.send(preparedEmail)
+
+  const result = await resend.emails.send(preparedEmail)
+
+  if (result.error) {
+    console.error("❌ [Resend] Failed to send email:", result.error)
+  } else {
+    console.log("✅ [Resend] Email sent successfully:", result.data?.id)
+  }
+
+  return result
 }

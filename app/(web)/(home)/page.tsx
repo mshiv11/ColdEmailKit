@@ -24,6 +24,8 @@ type PageProps = {
   searchParams: Promise<SearchParams>
 }
 
+export const revalidate = 86400 // Cache for 24 hours
+
 export default function Home(props: PageProps) {
   const homepageFAQs = generateHomepageFAQs()
 

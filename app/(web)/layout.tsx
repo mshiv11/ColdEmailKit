@@ -1,5 +1,4 @@
-import { getSessionCookie } from "better-auth/cookies"
-import { headers } from "next/headers"
+
 import Script from "next/script"
 import { type PropsWithChildren, Suspense } from "react"
 import type { Graph } from "schema-dts"
@@ -11,7 +10,6 @@ import { Footer } from "~/components/web/footer"
 import { Header, HeaderBackdrop } from "~/components/web/header"
 import { Container } from "~/components/web/ui/container"
 import { config } from "~/config"
-import { getServerSession } from "~/lib/auth"
 
 export default async function RootLayout({ children }: PropsWithChildren) {
   const url = config.site.url
@@ -64,13 +62,12 @@ export default async function RootLayout({ children }: PropsWithChildren) {
     ],
   }
 
-  const hasSessionCookie = getSessionCookie(new Headers(await headers()))
-  const session = hasSessionCookie ? await getServerSession() : null
+
 
   return (
     <Providers>
       <div className="flex flex-col min-h-dvh overflow-clip pt-(--header-offset)">
-        <Header session={session} />
+        <Header />
         <HeaderBackdrop />
 
         <Suspense>

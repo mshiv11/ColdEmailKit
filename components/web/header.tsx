@@ -22,11 +22,9 @@ import { useSearch } from "~/contexts/search-context"
 import type { auth } from "~/lib/auth"
 import { cx } from "~/utils/cva"
 
-type HeaderProps = ComponentProps<"div"> & {
-  session: typeof auth.$Infer.Session | null
-}
+type HeaderProps = ComponentProps<"div">
 
-const Header = ({ children, className, session, ...props }: HeaderProps) => {
+const Header = ({ children, className, ...props }: HeaderProps) => {
   const pathname = usePathname()
   const search = useSearch()
   const [isNavOpen, setNavOpen] = useState(false)
@@ -139,7 +137,7 @@ const Header = ({ children, className, session, ...props }: HeaderProps) => {
               <Link href="/submit">Submit</Link>
             </Button>
 
-            <UserMenu session={session} />
+            <UserMenu />
           </Stack>
         </div>
 

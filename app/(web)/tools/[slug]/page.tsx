@@ -49,6 +49,8 @@ import { FAQSchema, generateToolFAQs } from "~/components/web/seo/faq-schema"
 import type { ToolOne } from "~/server/web/tools/payloads"
 import { findTool, findToolSlugs } from "~/server/web/tools/queries"
 
+export const revalidate = 86400 // Cache for 24 hours
+
 type PageProps = {
   params: Promise<{ slug: string }>
 }

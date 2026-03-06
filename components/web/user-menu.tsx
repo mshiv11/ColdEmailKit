@@ -19,9 +19,12 @@ import { UserLogout } from "~/components/web/user-logout"
 import type { auth } from "~/lib/auth"
 import { useSession } from "~/lib/auth-client"
 
-const UserMenu = (props: { session: typeof auth.$Infer.Session | null }) => {
-  const { data } = useSession()
-  const session = data ?? props.session
+const UserMenu = () => {
+  const { data: session, isPending } = useSession()
+
+  if (isPending) {
+    return <UserMenuSkeleton />
+  }
 
   if (!session) {
     return (

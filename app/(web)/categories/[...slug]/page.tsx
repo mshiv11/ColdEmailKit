@@ -30,6 +30,8 @@ import {
 } from "~/server/web/categories/queries"
 import { findTools } from "~/server/web/tools/queries"
 
+export const revalidate = 86400 // Cache for 24 hours
+
 type PageProps = {
   params: Promise<{ slug: string[] }>
   searchParams: Promise<SearchParams>
