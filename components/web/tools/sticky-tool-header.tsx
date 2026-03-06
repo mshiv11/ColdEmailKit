@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react"
 import { Button } from "~/components/common/button"
 import { Icon } from "~/components/common/icon"
-import { Stack } from "~/components/common/stack"
-import { Tooltip } from "~/components/common/tooltip"
 import { ExternalLink } from "~/components/web/external-link"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import { VerifiedBadge } from "~/components/web/verified-badge"
@@ -43,7 +41,7 @@ export function StickyToolHeader({ tool }: StickyToolHeaderProps) {
     }, [])
 
     return (
-        <div className="sticky top-(--header-offset) z-40 h-0 overflow-visible max-md:hidden">
+        <div className="sticky top-(--header-offset) z-40 h-0 overflow-visible">
             <div
                 className={cx(
                     "absolute top-0 inset-x-0 flex items-center justify-between py-1.5 bg-background transition-all duration-300",
@@ -52,51 +50,31 @@ export function StickyToolHeader({ tool }: StickyToolHeaderProps) {
             >
                 <div className="flex items-center gap-2.5">
                     <FaviconImage src={tool.faviconUrl} title={tool.name} className="size-6" />
-                    <span className="font-semibold text-sm leading-none truncate max-w-[200px] md:max-w-[280px]">
+                    <span className="font-semibold text-sm leading-none truncate max-w-[140px] sm:max-w-[200px] md:max-w-[280px]">
                         {tool.name}
                     </span>
                     {tool.ownerId && <VerifiedBadge size="sm" />}
                 </div>
 
-                <Stack size="sm" wrap={false}>
-                    <Tooltip tooltip="Write a review">
-                        <Button
-                            size="sm"
-                            variant="secondary"
-                            prefix={<Icon name="lucide/star" />}
-                            onClick={() => {
-                                // Scroll to review section or trigger review dialog
-                                const reviewSection = document.querySelector("[data-review-trigger]")
-                                if (reviewSection) {
-                                    (reviewSection as HTMLButtonElement).click()
-                                }
-                            }}
-                            aria-label="Review"
-                        >
-                            Review
-                        </Button>
-                    </Tooltip>
-
-                    <Button
-                        variant="cta"
-                        size="sm"
-                        suffix={<Icon name="lucide/arrow-up-right" className="size-3.5" />}
-                        asChild
+                <Button
+                    variant="cta"
+                    size="sm"
+                    suffix={<Icon name="lucide/arrow-up-right" className="size-3.5" />}
+                    asChild
+                >
+                    <ExternalLink
+                        href={tool.affiliateUrl || tool.websiteUrl}
+                        doFollow={tool.isFeatured}
+                        eventName="click_website"
+                        eventProps={{
+                            url: tool.websiteUrl,
+                            isFeatured: tool.isFeatured,
+                            source: "sticky_header",
+                        }}
                     >
-                        <ExternalLink
-                            href={tool.affiliateUrl || tool.websiteUrl}
-                            doFollow={tool.isFeatured}
-                            eventName="click_website"
-                            eventProps={{
-                                url: tool.websiteUrl,
-                                isFeatured: tool.isFeatured,
-                                source: "sticky_header",
-                            }}
-                        >
-                            Visit {tool.name}
-                        </ExternalLink>
-                    </Button>
-                </Stack>
+                        Visit {tool.name}
+                    </ExternalLink>
+                </Button>
             </div>
         </div>
     )
