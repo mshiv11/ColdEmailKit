@@ -16,6 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         "/privacy",
         "/terms",
         "/contact",
+        "/compare",
     ].map((route) => ({
         url: `${baseUrl}${route}`,
         lastModified: new Date(),
@@ -81,11 +82,53 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.85
     }))
 
+    // Comparisons (derived from ComparisonFaq pairs)
+    const comparisonFaqs = await db.comparisonFaq.findMany({
+        select: {
+            tool1: { select: { slug: true } },
+            tool2: { select: { slug: true } },
+            updatedAt: true,
+        },
+    })
+
+    const comparisonSlugs = new Map<string, Date>()
+    for (const faq of comparisonFaqs) {
+        const slug = `${faq.tool1.slug}-vs-${faq.tool2.slug}`
+        const existing = comparisonSlugs.get(slug)
+        if (!existing || faq.updatedAt > existing) {
+            comparisonSlugs.set(slug, faq.updatedAt)
+        }
+    }
+
+    const comparisonRoutes = Array.from(comparisonSlugs.entries()).map(([slug, updatedAt]) => ({
+        url: `${baseUrl}/compare/${slug}`,
+        lastModified: updatedAt,
+        changeFrequency: "weekly" as const,
+        priority: 0.85,
+    }))
+
+    // Integrations
+    const integrations = await db.integration.findMany({
+        select: {
+            slug: true,
+            updatedAt: true,
+        },
+    })
+
+    const integrationRoutes = integrations.map(integration => ({
+        url: `${baseUrl}/integrations/${integration.slug}`,
+        lastModified: integration.updatedAt,
+        changeFrequency: "weekly" as const,
+        priority: 0.75,
+    }))
+
     return [
         ...staticRoutes,
         ...blogRoutes,
         ...toolRoutes,
         ...categoryRoutes,
         ...alternativeRoutes,
+        ...comparisonRoutes,
+        ...integrationRoutes,
     ]
 }

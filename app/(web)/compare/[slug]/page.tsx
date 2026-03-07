@@ -9,8 +9,9 @@ import { ComparisonStickyHeader } from "~/components/web/compare/comparison-stic
 import { ComparisonToolCard } from "~/components/web/compare/comparison-tool-card"
 import { ExternalLink } from "~/components/web/external-link"
 import { FaviconImage } from "~/components/web/ui/favicon"
+import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
 import { metadataConfig } from "~/config/metadata"
-import { jsonLdScriptProps, wrapInGraph } from "~/lib/schemas"
+import { generateBreadcrumbSchema, jsonLdScriptProps, wrapInGraph } from "~/lib/schemas"
 import { findComparisonFaqs, findComparisonTools } from "~/server/web/comparisons/queries"
 
 export const revalidate = 86400
@@ -121,13 +122,26 @@ export default async function ComparisonPage({ params }: PageProps) {
   const [tool1, tool2] = await getTools(slug)
   const faqs = await findComparisonFaqs(tool1.id, tool2.id)
 
+  const breadcrumbItems = [
+    { name: "Compare", href: "/compare" },
+    { name: `${tool1.name} vs ${tool2.name}`, href: `/compare/${slug}` },
+  ]
+  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems)
+
   const comparisonSchema = generateComparisonSchema(tool1, tool2)
-  const jsonLd = wrapInGraph(comparisonSchema)
+  const jsonLd = wrapInGraph(comparisonSchema, breadcrumbSchema)
 
   return (
     <div className="flex flex-col gap-12">
       {/* Sticky header */}
       <ComparisonStickyHeader tool1={tool1} tool2={tool2} />
+
+      <Breadcrumbs
+        items={[
+          { href: "/compare", name: "Compare" },
+          { href: `/compare/${slug}`, name: `${tool1.name} vs ${tool2.name}` },
+        ]}
+      />
 
       {/* Page header — centered */}
       <div className="flex flex-col gap-3 items-center text-center">

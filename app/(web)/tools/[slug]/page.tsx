@@ -146,7 +146,7 @@ export default async function ToolPage(props: PageProps) {
   const toolFAQs = generateToolFAQs(tool.name, {
     pricing: tool.pricingStarting,
     category: tool.categories?.[0]?.name,
-    hasFreeTrial: true, // Most tools have free trials
+    hasFreeTrial: false,
   })
 
   return (
@@ -299,20 +299,6 @@ export default async function ToolPage(props: PageProps) {
             </Stack>
           )}
 
-          {/* Topics */}
-          {!!tool.topics.length && (
-            <Stack size="lg" direction="column" className="w-full max-md:order-9">
-              <H5 as="strong">Topics:</H5>
-
-              <Stack>
-                {tool.topics.map(({ slug }) => (
-                  <Tag key={slug} href={`/topics/${slug}`} prefix={<Icon name="lucide/hash" />}>
-                    {slug}
-                  </Tag>
-                ))}
-              </Stack>
-            </Stack>
-          )}
 
           {/* Integrations */}
           {!!tool.integrations.length && (

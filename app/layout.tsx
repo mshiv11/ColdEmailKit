@@ -12,7 +12,7 @@ import { fontDisplay, fontSans } from "~/lib/fonts"
 export const metadata: Metadata = {
   metadataBase: new URL(config.site.url),
   title: {
-    template: "%s",
+    template: `%s | ${config.site.name}`,
     default: `${config.site.tagline} – ${config.site.name}`,
   },
   description: config.site.description,

@@ -22,7 +22,7 @@ export default function AboutPage() {
       </Intro>
 
       <Prose>
-        <h3 id="our-story">Our Story</h3>
+        <h2 id="our-story">Our Story</h2>
 
         <p>
           Cold Email Kit started as a side project in August 2025, born from a simple frustration:
@@ -40,7 +40,7 @@ export default function AboutPage() {
           best," but no honest, comprehensive resource to help me choose.
         </p>
 
-        <h3 id="from-idea-to-reality">From Idea to Reality</h3>
+        <h2 id="from-idea-to-reality">From Idea to Reality</h2>
 
         <p>
           Before building anything, I validated the concept with cold email experts and the Reddit
@@ -58,7 +58,7 @@ export default function AboutPage() {
           industry.
         </p>
 
-        <h3 id="our-mission">Our Mission</h3>
+        <h2 id="our-mission">Our Mission</h2>
 
         <p>
           Cold Email Kit exists to eliminate tool fatigue in the cold email space. We provide
