@@ -176,7 +176,8 @@ model Tool {
   pricingStarting String?
   bestFor         String?
   hasFreeTrial    Boolean    @default(false)
-  customTitle     String?
+  customTitle           String?
+  comparisonDescription String?
   
   // Specifications & Features (JSON fields for flexibility and comparison)
   specifications          Json?    @default("{}")  // Core capabilities (0-5 ratings)
@@ -208,18 +209,20 @@ model Tool {
   updatedAt       DateTime   @updatedAt
 
   // Relations
-  alternatives Alternative[]
-  categories   Category[]
-  topics       Topic[]
-  integrations Integration[]
-  compliances  Compliance[]
-  reviews      Review[]
-  license      License?      @relation(fields: [licenseId], references: [id])
-  licenseId    String?
-  likes        Like[]
-  reports      Report[]
-  owner        User?         @relation(fields: [ownerId], references: [id])
-  ownerId      String?
+  alternatives        Alternative[]
+  categories          Category[]
+  topics              Topic[]
+  integrations        Integration[]
+  compliances         Compliance[]
+  reviews             Review[]
+  license             License?      @relation(fields: [licenseId], references: [id])
+  licenseId           String?
+  likes               Like[]
+  reports             Report[]
+  owner               User?         @relation(fields: [ownerId], references: [id])
+  ownerId             String?
+  comparisonFaqsTool1 ComparisonFaq[] @relation("ComparisonFaqTool1")
+  comparisonFaqsTool2 ComparisonFaq[] @relation("ComparisonFaqTool2")
 
   @@index([id, slug])
   @@index([name])
@@ -383,4 +386,22 @@ model Like {
   @@unique([userId, toolId])
   @@index([userId])
   @@index([toolId])
+}
+
+model ComparisonFaq {
+  id        String   @id @default(cuid())
+  tool1Id   String
+  tool2Id   String
+  question  String
+  answer    String   @db.Text
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tool1 Tool @relation("ComparisonFaqTool1", fields: [tool1Id], references: [id], onDelete: Cascade)
+  tool2 Tool @relation("ComparisonFaqTool2", fields: [tool2Id], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([tool1Id, tool2Id])
 }

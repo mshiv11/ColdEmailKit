@@ -53,6 +53,11 @@ export const Sidebar = () => {
           prefix: <Icon name="lucide/gem" />,
         },
         {
+          title: "Comparisons",
+          href: "/admin/compare",
+          prefix: <Icon name="lucide/columns-2" />,
+        },
+        {
           title: "Alternatives",
           href: "/admin/alternatives",
           prefix: <Icon name="lucide/replace" />,

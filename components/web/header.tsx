@@ -102,6 +102,13 @@ const Header = ({ children, className, ...props }: HeaderProps) => {
                     Integrations
                   </NavLink>
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <NavLink href="/compare">
+                    <Icon name="lucide/columns-2" className="shrink-0 size-4 opacity-75" />{" "}
+                    Compare
+                  </NavLink>
+                </DropdownMenuItem>
                 {/* Temporarily hidden - Topics and Licenses sections
                 <DropdownMenuItem asChild>
                   <NavLink href="/topics">
@@ -164,6 +171,9 @@ const Header = ({ children, className, ...props }: HeaderProps) => {
           </NavLink>
           <NavLink href="/integrations" className="text-base">
             Integrations
+          </NavLink>
+          <NavLink href="/compare" className="text-base">
+            Compare
           </NavLink>
           {/* Temporarily hidden - Topics section
           <NavLink href="/topics" className="text-base">
