@@ -24,9 +24,9 @@ const nextConfig: NextConfig = {
   images: {
     ...(process.env.NODE_ENV === "production"
       ? {
-        loader: "custom",
-        loaderFile: "./lib/image-loader.ts",
-      }
+          loader: "custom",
+          loaderFile: "./lib/image-loader.ts",
+        }
       : {}),
     minimumCacheTTL: 31536000,
     deviceSizes: [640, 768, 1024],
@@ -59,19 +59,19 @@ const nextConfig: NextConfig = {
       // PostHog proxy rewrites (only when NEXT_PUBLIC_POSTHOG_HOST is set)
       ...(posthogUrl
         ? [
-          {
-            source: "/_proxy/posthog/ingest/static/:path*",
-            destination: `${posthogUrl.replace("us", "us-assets")}/static/:path*`,
-          },
-          {
-            source: "/_proxy/posthog/ingest/:path*",
-            destination: `${posthogUrl}/:path*`,
-          },
-          {
-            source: "/_proxy/posthog/ingest/decide",
-            destination: `${posthogUrl}/decide`,
-          },
-        ]
+            {
+              source: "/_proxy/posthog/ingest/static/:path*",
+              destination: `${posthogUrl.replace("us", "us-assets")}/static/:path*`,
+            },
+            {
+              source: "/_proxy/posthog/ingest/:path*",
+              destination: `${posthogUrl}/:path*`,
+            },
+            {
+              source: "/_proxy/posthog/ingest/decide",
+              destination: `${posthogUrl}/decide`,
+            },
+          ]
         : []),
     ]
   },

@@ -1,4 +1,3 @@
-
 import Script from "next/script"
 import { type PropsWithChildren, Suspense } from "react"
 import type { Graph } from "schema-dts"
@@ -62,8 +61,6 @@ export default async function RootLayout({ children }: PropsWithChildren) {
     ],
   }
 
-
-
   return (
     <Providers>
       <div className="flex flex-col min-h-dvh overflow-clip pt-(--header-offset)">
@@ -91,8 +88,6 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-
-
     </Providers>
   )
 }

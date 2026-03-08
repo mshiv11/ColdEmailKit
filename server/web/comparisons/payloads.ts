@@ -50,4 +50,6 @@ export const comparisonFaqPayload = Prisma.validator<Prisma.ComparisonFaqSelect>
 })
 
 export type ComparisonTool = Prisma.ToolGetPayload<{ select: typeof comparisonToolPayload }>
-export type ComparisonFaqItem = Prisma.ComparisonFaqGetPayload<{ select: typeof comparisonFaqPayload }>
+export type ComparisonFaqItem = Prisma.ComparisonFaqGetPayload<{
+  select: typeof comparisonFaqPayload
+}>

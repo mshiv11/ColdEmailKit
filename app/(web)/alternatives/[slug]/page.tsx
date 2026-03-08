@@ -65,7 +65,9 @@ const getMetadata = (alternative: AlternativeOne): Metadata => {
   const displayCount = count > 10 ? "10+" : count > 1 ? count : ""
 
   return {
-    title: alternative.customTitle || `${displayCount ? `${displayCount} ` : ""}Top ${alternative.name} Alternatives & Competitors (2026)`,
+    title:
+      alternative.customTitle ||
+      `${displayCount ? `${displayCount} ` : ""}Top ${alternative.name} Alternatives & Competitors (2026)`,
     description: `A curated collection of the best alternatives to ${alternative.name}. Each listing includes a website screenshot along with a detailed review of its features, pricing & more.`,
   }
 }
@@ -105,7 +107,14 @@ export const generateMetadata = async (props: PageProps): Promise<Metadata> => {
       url,
       type: "website",
       images: firstToolScreenshot
-        ? [{ url: firstToolScreenshot, width: 1280, height: 720, alt: `${alternative.name} alternatives` }]
+        ? [
+            {
+              url: firstToolScreenshot,
+              width: 1280,
+              height: 720,
+              alt: `${alternative.name} alternatives`,
+            },
+          ]
         : undefined,
     },
   }
@@ -144,7 +153,7 @@ export default async function AlternativePage(props: PageProps) {
       url: `/alternatives/${alternative.slug}`,
       itemType: "SoftwareApplication",
       maxItems: 10,
-    }
+    },
   )
 
   const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems)

@@ -24,10 +24,7 @@ export async function GET(req: Request) {
   // Verify the request is from Vercel Cron
   if (!(await verifyCronSecret(req))) {
     console.error("Unauthorized cron request attempted")
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    )
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   try {

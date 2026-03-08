@@ -19,9 +19,7 @@ const executeHogQLQuery = async (hogql: string, retries = 2): Promise<HogQLRespo
   }
 
   for (let attempt = 0; attempt <= retries; attempt++) {
-    const { data, error } = await tryCatch(
-      getPostHogQueryApi().post(payload).json<HogQLResponse>(),
-    )
+    const { data, error } = await tryCatch(getPostHogQueryApi().post(payload).json<HogQLResponse>())
 
     if (!error) {
       return data

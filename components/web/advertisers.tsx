@@ -53,9 +53,7 @@ export const Advertisers = async ({ className, ...props }: ComponentProps<"div">
                     alt={ad.name}
                     className={cx(
                       "w-auto",
-                      isColorLogo
-                        ? "h-6"
-                        : "h-5.5 brightness-25 grayscale dark:brightness-200"
+                      isColorLogo ? "h-6" : "h-5.5 brightness-25 grayscale dark:brightness-200",
                     )}
                   />
                 )}
@@ -69,4 +67,3 @@ export const Advertisers = async ({ className, ...props }: ComponentProps<"div">
     </div>
   )
 }
-

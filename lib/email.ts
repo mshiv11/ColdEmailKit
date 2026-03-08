@@ -44,7 +44,6 @@ export const sendEmail = async (email: EmailParams) => {
     return
   }
 
-
   const result = await resend.emails.send(preparedEmail)
 
   if (result.error) {

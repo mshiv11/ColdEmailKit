@@ -102,7 +102,7 @@ export const updateBlogPost = adminProcedure
       const oldFilePath = path.join(POSTS_DIR, `${input.oldSlug}.mdx`)
 
       // Delete old file (ignore errors if file doesn't exist)
-      await fs.unlink(oldFilePath).catch(() => { })
+      await fs.unlink(oldFilePath).catch(() => {})
 
       // Add redirect to JSON file
       try {

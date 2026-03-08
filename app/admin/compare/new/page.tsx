@@ -12,7 +12,10 @@ const NewComparisonPage = async () => {
   return (
     <Wrapper>
       <div className="flex items-center gap-3">
-        <Link href="/admin/compare" className="text-muted-foreground hover:text-foreground transition-colors">
+        <Link
+          href="/admin/compare"
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
           <Icon name="lucide/arrow-left" className="size-4" />
         </Link>
         <H1>New Comparison</H1>

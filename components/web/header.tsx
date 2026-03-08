@@ -105,8 +105,7 @@ const Header = ({ children, className, ...props }: HeaderProps) => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <NavLink href="/compare">
-                    <Icon name="lucide/columns-2" className="shrink-0 size-4 opacity-75" />{" "}
-                    Compare
+                    <Icon name="lucide/columns-2" className="shrink-0 size-4 opacity-75" /> Compare
                   </NavLink>
                 </DropdownMenuItem>
                 {/* Temporarily hidden - Topics and Licenses sections

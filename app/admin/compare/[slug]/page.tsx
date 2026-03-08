@@ -7,7 +7,7 @@ import { Icon } from "~/components/common/icon"
 import { Link } from "~/components/common/link"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import { ComparisonForm } from "../_components/comparison-form"
-import { findPairFaqs } from "~/server/admin/comparisons/queries"
+import { findPairFaqs, findComparisonData } from "~/server/admin/comparisons/queries"
 import { db } from "~/services/db"
 
 type PageProps = {
@@ -36,30 +36,20 @@ const ComparisonEditPage = async ({ params }: PageProps) => {
 
   if (!tool1Full || !tool2Full) notFound()
 
-  const existingFaqs = await findPairFaqs(tool1Full.id, tool2Full.id)
+  const [existingFaqs, existingComparisonData] = await Promise.all([
+    findPairFaqs(tool1Full.id, tool2Full.id),
+    findComparisonData(tool1Full.id, tool2Full.id),
+  ])
 
   return (
-    <Wrapper>
-      <div className="flex items-center gap-3">
-        <Link
-          href="/admin/compare"
-          className="text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Icon name="lucide/arrow-left" className="size-4" />
-        </Link>
-        <div className="flex items-center gap-3">
-          <FaviconImage src={tool1Full.faviconUrl} title={tool1Full.name} className="size-5" />
-          <H1 as="h1" className="text-xl">
-            {tool1Full.name} vs {tool2Full.name}
-          </H1>
-          <FaviconImage src={tool2Full.faviconUrl} title={tool2Full.name} className="size-5" />
-        </div>
-      </div>
-
+    <Wrapper size="md">
       <ComparisonForm
         tool1={tool1Full}
         tool2={tool2Full}
-        existingFaqs={existingFaqs.map(f => ({
+        existingVerdict={existingComparisonData.verdict}
+        existingCustomTitle={existingComparisonData.customTitle}
+        existingCustomDescription={existingComparisonData.customDescription}
+        existingFaqs={existingFaqs.map((f: any) => ({
           id: f.id,
           question: f.question,
           answer: f.answer,

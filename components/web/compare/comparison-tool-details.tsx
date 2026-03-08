@@ -11,7 +11,11 @@ type ComparisonToolDetailsProps = ComponentProps<"div"> & {
   tool: ComparisonTool
 }
 
-export const ComparisonToolDetails = ({ className, tool, ...props }: ComparisonToolDetailsProps) => {
+export const ComparisonToolDetails = ({
+  className,
+  tool,
+  ...props
+}: ComparisonToolDetailsProps) => {
   const insights = [
     {
       label: "Overall rating",

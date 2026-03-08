@@ -143,9 +143,9 @@ export function BlogForm({
       oldSlug: post?.slug, // Pass original slug for redirect handling
       tools: data.tools
         ? data.tools
-          .split(",")
-          .map(t => t.trim())
-          .filter(Boolean)
+            .split(",")
+            .map(t => t.trim())
+            .filter(Boolean)
         : [],
     }
 

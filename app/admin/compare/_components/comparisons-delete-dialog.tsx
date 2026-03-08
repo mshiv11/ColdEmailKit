@@ -16,7 +16,10 @@ import {
 import { Icon } from "~/components/common/icon"
 import { useRouter } from "next/navigation"
 import { useTransition } from "react"
-import { deleteAllComparisonFaqs, updateToolComparisonDescription } from "~/server/admin/comparisons/actions"
+import {
+  deleteAllComparisonFaqs,
+  updateToolComparisonDescription,
+} from "~/server/admin/comparisons/actions"
 import type { ComparisonPair } from "~/server/admin/comparisons/queries"
 
 type ComparisonsDeleteDialogProps = ComponentProps<typeof Dialog> & {
@@ -46,8 +49,14 @@ export const ComparisonsDeleteDialog = ({
       }
       // Clear comparison descriptions
       await Promise.all([
-        updateToolComparisonDescription({ toolId: comparison.tool1Id, comparisonDescription: null }),
-        updateToolComparisonDescription({ toolId: comparison.tool2Id, comparisonDescription: null }),
+        updateToolComparisonDescription({
+          toolId: comparison.tool1Id,
+          comparisonDescription: null,
+        }),
+        updateToolComparisonDescription({
+          toolId: comparison.tool2Id,
+          comparisonDescription: null,
+        }),
       ])
       toast.success("Comparison deleted")
       props.onOpenChange?.(false)
@@ -72,7 +81,8 @@ export const ComparisonsDeleteDialog = ({
           <DialogDescription>
             This action cannot be undone. This will permanently delete the comparison between{" "}
             <span className="font-medium">{comparison.tool1.name}</span> and{" "}
-            <span className="font-medium">{comparison.tool2.name}</span>, including all FAQs and descriptions.
+            <span className="font-medium">{comparison.tool2.name}</span>, including all FAQs and
+            descriptions.
           </DialogDescription>
         </DialogHeader>
 

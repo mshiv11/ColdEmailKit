@@ -8,11 +8,7 @@ import { ToolQuery } from "~/components/web/tools/tool-query"
 import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
 import { Intro, IntroDescription, IntroTitle } from "~/components/web/ui/intro"
 import { metadataConfig } from "~/config/metadata"
-import {
-  generateCollectionPageSchema,
-  jsonLdScriptProps,
-  wrapInGraph,
-} from "~/lib/schemas"
+import { generateCollectionPageSchema, jsonLdScriptProps, wrapInGraph } from "~/lib/schemas"
 import type { IntegrationOne } from "~/server/web/integrations/payloads"
 import { findIntegrationBySlug, findIntegrationSlugs } from "~/server/web/integrations/queries"
 

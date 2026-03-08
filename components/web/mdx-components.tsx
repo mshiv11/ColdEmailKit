@@ -58,7 +58,13 @@ const ToolEntryRSC = async ({ tool: toolSlug, screenshotUrl, ...props }: ToolEnt
   }
 
   // Use prop screenshotUrl if provided, otherwise use database value
-  return <ToolEntryPrimitive id={tool.slug} tool={{ ...tool, screenshotUrl: screenshotUrl ?? tool.screenshotUrl }} {...props} />
+  return (
+    <ToolEntryPrimitive
+      id={tool.slug}
+      tool={{ ...tool, screenshotUrl: screenshotUrl ?? tool.screenshotUrl }}
+      {...props}
+    />
+  )
 }
 
 const ToolEntry = ({ ...props }: ToolEntryProps) => {

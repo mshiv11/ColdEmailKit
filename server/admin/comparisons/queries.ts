@@ -58,7 +58,14 @@ export const findAllComparisonPairs = async (): Promise<ComparisonPair[]> => {
     where: {
       comparisonDescription: { not: null },
     },
-    select: { id: true, name: true, slug: true, faviconUrl: true, comparisonDescription: true, updatedAt: true },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      faviconUrl: true,
+      comparisonDescription: true,
+      updatedAt: true,
+    },
   })
 
   // For each tool with a description, check if it's part of any FAQ pair we already know about
@@ -91,6 +98,22 @@ export const findToolComparisonDescription = async (toolId: string) => {
     where: { id: toolId },
     select: { id: true, name: true, comparisonDescription: true },
   })
+}
+
+/**
+ * Get the dedicated comparison data (verdict, custom SEO) for a comparison pair
+ */
+export const findComparisonData = async (tool1Id: string, tool2Id: string) => {
+  const comparison = await db.comparison.findFirst({
+    where: {
+      OR: [
+        { tool1Id, tool2Id },
+        { tool1Id: tool2Id, tool2Id: tool1Id },
+      ],
+    },
+    select: { verdict: true, customTitle: true, customDescription: true },
+  })
+  return comparison || { verdict: null, customTitle: null, customDescription: null }
 }
 
 /**

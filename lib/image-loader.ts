@@ -6,7 +6,7 @@ type ImageLoaderProps = {
 
 /**
  * Custom image loader for Next.js
- * 
+ *
  * In production on Vercel, we use wsrv.nl (free image proxy) for optimization
  * In development or preview, we just pass through the original URL
  */

@@ -259,7 +259,10 @@ export function ToolForm({
       enrichmentFeatures: parseFeatures(tool?.enrichmentFeatures, defaultEnrichmentFeatures),
       copywritingFeatures: parseFeatures(tool?.copywritingFeatures, defaultCopywritingFeatures),
       outreachFeatures: parseFeatures(tool?.outreachFeatures, defaultOutreachFeatures),
-      deliverabilityFeatures: parseFeatures(tool?.deliverabilityFeatures, defaultDeliverabilityFeatures),
+      deliverabilityFeatures: parseFeatures(
+        tool?.deliverabilityFeatures,
+        defaultDeliverabilityFeatures,
+      ),
       linkedinFeatures: parseFeatures(tool?.linkedinFeatures, defaultLinkedInFeatures),
     },
   })
@@ -880,53 +883,53 @@ export function ToolForm({
 
           <SpecificationsSection
             value={form.watch("specifications") as ToolSpecifications}
-            onChange={(val) => form.setValue("specifications", val)}
+            onChange={val => form.setValue("specifications", val)}
             defaultOpen={true}
           />
 
           <PricingSection
             value={form.watch("pricingSpecs") as PricingSpecs}
-            onChange={(val) => form.setValue("pricingSpecs", val)}
+            onChange={val => form.setValue("pricingSpecs", val)}
           />
 
           <InboxSection
             value={form.watch("inboxFeatures") as InboxFeatures}
-            onChange={(val) => form.setValue("inboxFeatures", val)}
+            onChange={val => form.setValue("inboxFeatures", val)}
           />
 
           <WarmupSection
             value={form.watch("warmupFeatures") as WarmupFeatures}
-            onChange={(val) => form.setValue("warmupFeatures", val)}
+            onChange={val => form.setValue("warmupFeatures", val)}
           />
 
           <LeadsSection
             value={form.watch("leadsFeatures") as LeadsFeatures}
-            onChange={(val) => form.setValue("leadsFeatures", val)}
+            onChange={val => form.setValue("leadsFeatures", val)}
           />
 
           <EnrichmentSection
             value={form.watch("enrichmentFeatures") as EnrichmentFeatures}
-            onChange={(val) => form.setValue("enrichmentFeatures", val)}
+            onChange={val => form.setValue("enrichmentFeatures", val)}
           />
 
           <CopywritingSection
             value={form.watch("copywritingFeatures") as CopywritingFeatures}
-            onChange={(val) => form.setValue("copywritingFeatures", val)}
+            onChange={val => form.setValue("copywritingFeatures", val)}
           />
 
           <OutreachSection
             value={form.watch("outreachFeatures") as OutreachFeatures}
-            onChange={(val) => form.setValue("outreachFeatures", val)}
+            onChange={val => form.setValue("outreachFeatures", val)}
           />
 
           <DeliverabilitySection
             value={form.watch("deliverabilityFeatures") as DeliverabilityFeatures}
-            onChange={(val) => form.setValue("deliverabilityFeatures", val)}
+            onChange={val => form.setValue("deliverabilityFeatures", val)}
           />
 
           <LinkedInSection
             value={form.watch("linkedinFeatures") as LinkedInFeatures}
-            onChange={(val) => form.setValue("linkedinFeatures", val)}
+            onChange={val => form.setValue("linkedinFeatures", val)}
           />
         </div>
 

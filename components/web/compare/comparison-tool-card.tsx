@@ -6,26 +6,27 @@ import { Link } from "~/components/common/link"
 import { ExternalLink } from "~/components/web/external-link"
 import { ComparisonToolDetails } from "~/components/web/compare/comparison-tool-details"
 import { StarRating } from "~/components/web/tools/star-rating"
-import { ToolFeaturesDisplay } from "~/components/web/tools/tool-features-display"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import { VerifiedBadge } from "~/components/web/verified-badge"
+import { Tooltip } from "~/components/common/tooltip"
 import type { ComparisonTool } from "~/server/web/comparisons/payloads"
 
 type ComparisonToolCardProps = {
   tool: ComparisonTool
+  isFeatured?: boolean
 }
 
 /**
  * Single-tool column for the comparison page.
  * Uses CSS subgrid rows so sections align across the two columns.
- * Row order: header | description | CTA | screenshot | details | features
+ * Row order: header | description | CTA | screenshot | details
  */
-export function ComparisonToolCard({ tool }: ComparisonToolCardProps) {
+export function ComparisonToolCard({ tool, isFeatured }: ComparisonToolCardProps) {
   const href = tool.affiliateUrl || tool.websiteUrl
   const description = tool.comparisonDescription || tool.description
 
   return (
-    <div className="grid grid-rows-subgrid row-span-6 gap-6">
+    <div className="grid grid-rows-subgrid row-span-5 gap-6">
       {/* Row 1 — Header: favicon + name + rating */}
       <div className="flex items-start gap-3">
         <FaviconImage src={tool.faviconUrl} title={tool.name} className="size-8 shrink-0 mt-1" />
@@ -35,6 +36,15 @@ export function ComparisonToolCard({ tool }: ComparisonToolCardProps) {
             <H2 as="h2" className="text-xl">
               {tool.name}
             </H2>
+            {isFeatured && (
+              <Tooltip tooltip="Featured Tool">
+                <Icon
+                  name="lucide/crown"
+                  className="size-4 text-orange-500 fill-current shrink-0"
+                  aria-label="Featured Tool"
+                />
+              </Tooltip>
+            )}
             {tool.ownerId && <VerifiedBadge size="md" />}
           </div>
 
@@ -49,7 +59,9 @@ export function ComparisonToolCard({ tool }: ComparisonToolCardProps) {
 
       {/* Row 2 — Description */}
       <div className="min-h-0">
-        {description && <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>}
+        {description && (
+          <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+        )}
       </div>
 
       {/* Row 3 — CTA buttons */}
@@ -77,9 +89,7 @@ export function ComparisonToolCard({ tool }: ComparisonToolCardProps) {
           className="w-full sm:w-auto"
           asChild
         >
-          <Link href={`/tools/${tool.slug}`}>
-            Read more
-          </Link>
+          <Link href={`/tools/${tool.slug}`}>Read more</Link>
         </Button>
       </div>
 
@@ -90,7 +100,11 @@ export function ComparisonToolCard({ tool }: ComparisonToolCardProps) {
             href={href}
             doFollow={tool.isFeatured}
             eventName="click_website"
-            eventProps={{ url: tool.websiteUrl, isFeatured: tool.isFeatured, source: "comparison_screenshot" }}
+            eventProps={{
+              url: tool.websiteUrl,
+              isFeatured: tool.isFeatured,
+              source: "comparison_screenshot",
+            }}
             className="block rounded-md overflow-hidden border hover:opacity-90 transition-opacity"
           >
             <Image
@@ -107,20 +121,6 @@ export function ComparisonToolCard({ tool }: ComparisonToolCardProps) {
 
       {/* Row 5 — Details card (rating, reviews, trust score, pricing) */}
       <ComparisonToolDetails tool={tool} />
-
-      {/* Row 6 — Features display */}
-      <ToolFeaturesDisplay
-        specifications={tool.specifications as Parameters<typeof ToolFeaturesDisplay>[0]["specifications"]}
-        pricingSpecs={tool.pricingSpecs as Parameters<typeof ToolFeaturesDisplay>[0]["pricingSpecs"]}
-        inboxFeatures={tool.inboxFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["inboxFeatures"]}
-        warmupFeatures={tool.warmupFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["warmupFeatures"]}
-        leadsFeatures={tool.leadsFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["leadsFeatures"]}
-        enrichmentFeatures={tool.enrichmentFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["enrichmentFeatures"]}
-        copywritingFeatures={tool.copywritingFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["copywritingFeatures"]}
-        outreachFeatures={tool.outreachFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["outreachFeatures"]}
-        deliverabilityFeatures={tool.deliverabilityFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["deliverabilityFeatures"]}
-        linkedinFeatures={tool.linkedinFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["linkedinFeatures"]}
-      />
     </div>
   )
 }

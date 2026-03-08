@@ -7,11 +7,7 @@ import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
 import { Intro, IntroDescription, IntroTitle } from "~/components/web/ui/intro"
 import { config } from "~/config"
 import { metadataConfig } from "~/config/metadata"
-import {
-  generateCollectionPageSchema,
-  jsonLdScriptProps,
-  wrapInGraph,
-} from "~/lib/schemas"
+import { generateCollectionPageSchema, jsonLdScriptProps, wrapInGraph } from "~/lib/schemas"
 
 export const metadata: Metadata = {
   title: "All Cold Email Tools",

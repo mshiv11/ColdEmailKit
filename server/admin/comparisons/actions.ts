@@ -75,14 +75,56 @@ export const updateToolComparisonDescription = adminProcedure
     return tool
   })
 
+export const upsertComparisonData = adminProcedure
+  .createServerAction()
+  .input(
+    z.object({
+      tool1Id: z.string(),
+      tool2Id: z.string(),
+      verdict: z.string().nullable(),
+      customTitle: z.string().nullable().optional(),
+      customDescription: z.string().nullable().optional(),
+    }),
+  )
+  .handler(async ({ input: { tool1Id, tool2Id, verdict, customTitle, customDescription } }) => {
+    // We enforce alphabetical ordering of IDs for the unique constraint
+    const [id1, id2] = [tool1Id, tool2Id].sort()
+
+    const comparison = await db.comparison.upsert({
+      where: {
+        tool1Id_tool2Id: {
+          tool1Id: id1,
+          tool2Id: id2,
+        },
+      },
+      create: {
+        tool1Id: id1,
+        tool2Id: id2,
+        verdict,
+        customTitle,
+        customDescription,
+      },
+      update: {
+        verdict,
+        customTitle,
+        customDescription,
+      },
+      select: { id: true },
+    })
+
+    revalidateTag(`comparison-data-${tool1Id}-${tool2Id}`)
+    revalidateTag(`comparison-data-${tool2Id}-${tool1Id}`)
+    revalidatePath("/admin/compare")
+
+    return comparison
+  })
+
 export const reorderComparisonFaqs = adminProcedure
   .createServerAction()
   .input(z.object({ orders: z.array(z.object({ id: z.string(), order: z.number().int() })) }))
   .handler(async ({ input: { orders } }) => {
     await db.$transaction(
-      orders.map(({ id, order }) =>
-        db.comparisonFaq.update({ where: { id }, data: { order } }),
-      ),
+      orders.map(({ id, order }) => db.comparisonFaq.update({ where: { id }, data: { order } })),
     )
 
     revalidatePath("/admin/compare")
@@ -123,5 +165,3 @@ export const revalidateComparison = adminProcedure
 
     return { success: true }
   })
-
-

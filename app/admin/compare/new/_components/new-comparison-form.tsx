@@ -47,7 +47,11 @@ export function NewComparisonForm({ tools }: { tools: Tool[] }) {
           </select>
           {selectedTool1 && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <FaviconImage src={selectedTool1.faviconUrl} title={selectedTool1.name} className="size-4" />
+              <FaviconImage
+                src={selectedTool1.faviconUrl}
+                title={selectedTool1.name}
+                className="size-4"
+              />
               {selectedTool1.name}
             </div>
           )}
@@ -71,7 +75,11 @@ export function NewComparisonForm({ tools }: { tools: Tool[] }) {
           </select>
           {selectedTool2 && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <FaviconImage src={selectedTool2.faviconUrl} title={selectedTool2.name} className="size-4" />
+              <FaviconImage
+                src={selectedTool2.faviconUrl}
+                title={selectedTool2.name}
+                className="size-4"
+              />
               {selectedTool2.name}
             </div>
           )}

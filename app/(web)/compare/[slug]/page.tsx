@@ -5,8 +5,9 @@ import { Button } from "~/components/common/button"
 import { H2 } from "~/components/common/heading"
 import { Icon } from "~/components/common/icon"
 import { ComparisonFaqs } from "~/components/web/compare/comparison-faqs"
-import { ComparisonStickyHeader } from "~/components/web/compare/comparison-sticky-header"
+
 import { ComparisonToolCard } from "~/components/web/compare/comparison-tool-card"
+import { ComparisonTable } from "~/components/web/compare/comparison-table"
 import { ExternalLink } from "~/components/web/external-link"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
@@ -56,9 +57,16 @@ export const generateMetadata = async ({ params }: PageProps): Promise<Metadata>
   if (!tools) return {}
 
   const [tool1, tool2] = tools
+  const comparisonData = await import("~/server/admin/comparisons/queries").then(m =>
+    m.findComparisonData(tool1.id, tool2.id),
+  )
+
   const url = `/compare/${slug}`
-  const title = `${tool1.name} vs ${tool2.name}: Full Comparison (2026) | Features, Pricing & Reviews`
-  const description = `Compare ${tool1.name} and ${tool2.name} side-by-side. Evaluate features, pricing, deliverability, and more to find the right cold email tool for your outreach.`
+  const defaultTitle = `${tool1.name} vs ${tool2.name}: Full Comparison (2026) | Features, Pricing & Reviews`
+  const defaultDescription = `Compare ${tool1.name} and ${tool2.name} side-by-side. Evaluate features, pricing, deliverability, and more to find the right cold email tool for your outreach.`
+
+  const title = comparisonData?.customTitle || defaultTitle
+  const description = comparisonData?.customDescription || defaultDescription
 
   const keywords = [
     `${tool1.name} vs ${tool2.name}`,
@@ -92,7 +100,22 @@ export const generateMetadata = async ({ params }: PageProps): Promise<Metadata>
 /**
  * Generate JSON-LD structured data for the comparison page
  */
-function generateComparisonSchema(tool1: { name: string; slug: string; overallRating: number | null; totalReviews: number | null; pricingStarting: string | null }, tool2: { name: string; slug: string; overallRating: number | null; totalReviews: number | null; pricingStarting: string | null }) {
+function generateComparisonSchema(
+  tool1: {
+    name: string
+    slug: string
+    overallRating: number | null
+    totalReviews: number | null
+    pricingStarting: string | null
+  },
+  tool2: {
+    name: string
+    slug: string
+    overallRating: number | null
+    totalReviews: number | null
+    pricingStarting: string | null
+  },
+) {
   return {
     "@type": "WebPage" as const,
     name: `${tool1.name} vs ${tool2.name}: Full Comparison`,
@@ -120,7 +143,19 @@ function generateComparisonSchema(tool1: { name: string; slug: string; overallRa
 export default async function ComparisonPage({ params }: PageProps) {
   const { slug } = await params
   const [tool1, tool2] = await getTools(slug)
-  const faqs = await findComparisonFaqs(tool1.id, tool2.id)
+  const [faqs, comparisonData] = await Promise.all([
+    findComparisonFaqs(tool1.id, tool2.id),
+    import("~/server/admin/comparisons/queries").then(m =>
+      m.findComparisonData(tool1.id, tool2.id),
+    ),
+  ])
+
+  const verdict = comparisonData?.verdict
+  const customTitle =
+    comparisonData?.customTitle || `${tool1.name} vs ${tool2.name}: Full Comparison (2026)`
+  const customDescription =
+    comparisonData?.customDescription ||
+    `Compare ${tool1.name} and ${tool2.name} side-by-side across features, pricing, deliverability, and more. Find the best cold email tool for your outreach needs.`
 
   const breadcrumbItems = [
     { name: "Compare", href: "/compare" },
@@ -133,9 +168,6 @@ export default async function ComparisonPage({ params }: PageProps) {
 
   return (
     <div className="flex flex-col gap-12">
-      {/* Sticky header */}
-      <ComparisonStickyHeader tool1={tool1} tool2={tool2} />
-
       <Breadcrumbs
         items={[
           { href: "/compare", name: "Compare" },
@@ -144,82 +176,67 @@ export default async function ComparisonPage({ params }: PageProps) {
       />
 
       {/* Page header — centered */}
-      <div className="flex flex-col gap-3 items-center text-center">
-        <div className="flex items-center gap-3 flex-wrap justify-center">
-          <FaviconImage src={tool1.faviconUrl} title={tool1.name} className="size-6" />
-          <span className="font-semibold text-lg">{tool1.name}</span>
-          <span className="text-muted-foreground text-sm font-medium">vs</span>
-          <FaviconImage src={tool2.faviconUrl} title={tool2.name} className="size-6" />
-          <span className="font-semibold text-lg">{tool2.name}</span>
-        </div>
-
-        <H2 as="h1" className="text-2xl md:text-3xl">
-          {tool1.name} vs {tool2.name}: Full Comparison (2026)
-        </H2>
-
-        <p className="text-muted-foreground text-sm max-w-2xl">
-          Compare {tool1.name} and {tool2.name} side-by-side across features, pricing,
-          deliverability, and more. Find the best cold email tool for your outreach needs.
-        </p>
-      </div>
-
-      {/* Two-column comparison — subgrid for cross-column alignment */}
-      <div 
-        id="comparison-scroll-container"
-        className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent"
-      >
-        <div className="min-w-[700px] grid grid-cols-2 gap-8 items-start md:grid-rows-[auto_auto_auto_auto_auto_auto]">
-          <ComparisonToolCard tool={tool1} />
-          <ComparisonToolCard tool={tool2} />
-        </div>
-      </div>
-
-      {/* VS divider banner — centered with CTA buttons */}
-      <div className="flex flex-col items-center gap-4 py-4">
-        <div className="flex items-center gap-4 w-full">
-          <div className="flex-1 border-t" />
-          <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-muted text-sm font-medium text-muted-foreground">
-            <Icon name="lucide/columns-2" className="size-4" />
-            <span>{tool1.name}</span>
-            <span className="text-xs font-bold">vs</span>
-            <span>{tool2.name}</span>
+      <div className="flex flex-col gap-6 items-center text-center">
+        <div className="flex flex-col gap-3 items-center">
+          <div className="flex items-center gap-3 flex-wrap justify-center">
+            <FaviconImage src={tool1.faviconUrl} title={tool1.name} className="size-6" />
+            <span className="font-semibold text-lg">{tool1.name}</span>
+            <span className="text-muted-foreground text-sm font-medium">vs</span>
+            <FaviconImage src={tool2.faviconUrl} title={tool2.name} className="size-6" />
+            <span className="font-semibold text-lg">{tool2.name}</span>
           </div>
-          <div className="flex-1 border-t" />
-        </div>
-        <div className="flex items-center gap-3 flex-wrap justify-center">
-          <Button
-            variant="cta"
-            size="sm"
-            suffix={<Icon name="lucide/arrow-up-right" className="size-3.5" />}
-            asChild
-          >
-            <ExternalLink
-              href={tool1.affiliateUrl || tool1.websiteUrl}
-              doFollow={tool1.isFeatured}
-              eventName="click_website"
-              eventProps={{ url: tool1.websiteUrl, source: "comparison_vs_banner" }}
-            >
-              Visit {tool1.name}
-            </ExternalLink>
-          </Button>
 
-          <Button
-            variant="cta"
-            size="sm"
-            suffix={<Icon name="lucide/arrow-up-right" className="size-3.5" />}
-            asChild
-          >
-            <ExternalLink
-              href={tool2.affiliateUrl || tool2.websiteUrl}
-              doFollow={tool2.isFeatured}
-              eventName="click_website"
-              eventProps={{ url: tool2.websiteUrl, source: "comparison_vs_banner" }}
-            >
-              Visit {tool2.name}
-            </ExternalLink>
-          </Button>
+          <H2 as="h1" className="text-2xl md:text-3xl">
+            {customTitle}
+          </H2>
+
+          <p className="text-muted-foreground text-sm max-w-2xl">{customDescription}</p>
+        </div>
+
+        {/* Quick-Jump Anchor Links */}
+        <div className="flex items-center justify-center gap-4 md:gap-8 flex-wrap border-y w-full py-4 text-sm font-medium text-muted-foreground">
+          <a href="#comparison-overview" className="hover:text-foreground transition-colors">
+            Overview
+          </a>
+          <a href="#comparison-table" className="hover:text-foreground transition-colors">
+            Features
+          </a>
+          {verdict && (
+            <a href="#comparison-verdict" className="hover:text-foreground transition-colors">
+              Verdict
+            </a>
+          )}
+          {faqs.length > 0 && (
+            <a href="#comparison-faqs" className="hover:text-foreground transition-colors">
+              FAQs
+            </a>
+          )}
         </div>
       </div>
+
+      <div className="flex flex-col gap-12" id="comparison-overview">
+        {/* Responsive overview — Stacked on mobile, side-by-side on desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start lg:grid-rows-[auto_auto_auto_auto_auto]">
+          <ComparisonToolCard tool={tool1} isFeatured={tool1.isFeatured} />
+          <ComparisonToolCard tool={tool2} isFeatured={tool2.isFeatured} />
+        </div>
+
+        {/* Unified Interactive Features Table */}
+        <ComparisonTable tool1={tool1} tool2={tool2} />
+      </div>
+
+      {/* Final Verdict Section */}
+      {verdict && (
+        <div
+          id="comparison-verdict"
+          className="flex flex-col gap-4 rounded-xl border bg-card p-6 md:p-8 shadow-sm scroll-mt-24"
+        >
+          <H2 className="text-xl md:text-2xl m-0">ColdEmailKit's Verdict</H2>
+          <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap">
+            {verdict}
+          </div>
+        </div>
+      )}
 
       {/* FAQs */}
       {faqs.length > 0 && (

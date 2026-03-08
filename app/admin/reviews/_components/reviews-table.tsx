@@ -16,51 +16,51 @@ import { getColumns } from "./reviews-table-columns"
 import { ReviewsTableToolbarActions } from "./reviews-table-toolbar-actions"
 
 type ReviewsTableProps = {
-    reviewsPromise: ReturnType<typeof findReviews>
+  reviewsPromise: ReturnType<typeof findReviews>
 }
 
 export function ReviewsTable({ reviewsPromise }: ReviewsTableProps) {
-    const { reviews, reviewsTotal, pageCount } = use(reviewsPromise)
-    const [{ perPage, sort }] = useQueryStates(reviewsTableParamsSchema)
+  const { reviews, reviewsTotal, pageCount } = use(reviewsPromise)
+  const [{ perPage, sort }] = useQueryStates(reviewsTableParamsSchema)
 
-    // Memoize the columns so they don't re-render on every render
-    const columns = useMemo(() => getColumns(), [])
+  // Memoize the columns so they don't re-render on every render
+  const columns = useMemo(() => getColumns(), [])
 
-    // Search filters
-    const filterFields: DataTableFilterField<Review>[] = [
-        {
-            id: "comment",
-            label: "Comment",
-            placeholder: "Search by comment...",
-        },
-    ]
+  // Search filters
+  const filterFields: DataTableFilterField<Review>[] = [
+    {
+      id: "comment",
+      label: "Comment",
+      placeholder: "Search by comment...",
+    },
+  ]
 
-    const { table } = useDataTable({
-        data: reviews,
-        columns,
-        pageCount,
-        filterFields,
-        shallow: false,
-        clearOnDefault: true,
-        initialState: {
-            pagination: { pageIndex: 0, pageSize: perPage },
-            sorting: sort,
-            columnPinning: { right: ["actions"] },
-        },
-        getRowId: (originalRow, index) => `${originalRow.id}-${index}`,
-    })
+  const { table } = useDataTable({
+    data: reviews,
+    columns,
+    pageCount,
+    filterFields,
+    shallow: false,
+    clearOnDefault: true,
+    initialState: {
+      pagination: { pageIndex: 0, pageSize: perPage },
+      sorting: sort,
+      columnPinning: { right: ["actions"] },
+    },
+    getRowId: (originalRow, index) => `${originalRow.id}-${index}`,
+  })
 
-    return (
-        <>
-            <DataTable table={table}>
-                <DataTableHeader title="Reviews" total={reviewsTotal}>
-                    <DataTableToolbar table={table} filterFields={filterFields}>
-                        <ReviewsTableToolbarActions table={table} />
-                        <DateRangePicker align="end" />
-                        <DataTableViewOptions table={table} />
-                    </DataTableToolbar>
-                </DataTableHeader>
-            </DataTable>
-        </>
-    )
+  return (
+    <>
+      <DataTable table={table}>
+        <DataTableHeader title="Reviews" total={reviewsTotal}>
+          <DataTableToolbar table={table} filterFields={filterFields}>
+            <ReviewsTableToolbarActions table={table} />
+            <DateRangePicker align="end" />
+            <DataTableViewOptions table={table} />
+          </DataTableToolbar>
+        </DataTableHeader>
+      </DataTable>
+    </>
+  )
 }

@@ -156,11 +156,11 @@ export default async function ToolPage(props: PageProps) {
           { name: "Tools", href: "/tools" },
           ...(tool.categories?.[0]
             ? [
-              {
-                name: tool.categories[0].name,
-                href: `/categories/${tool.categories[0].fullPath}`,
-              },
-            ]
+                {
+                  name: tool.categories[0].name,
+                  href: `/categories/${tool.categories[0].fullPath}`,
+                },
+              ]
             : []),
           { name: tool.name, href: `/tools/${tool.slug}` },
         ]}
@@ -268,16 +268,42 @@ export default async function ToolPage(props: PageProps) {
 
           {/* Features & Specifications */}
           <ToolFeaturesDisplay
-            specifications={tool.specifications as Parameters<typeof ToolFeaturesDisplay>[0]["specifications"]}
-            pricingSpecs={tool.pricingSpecs as Parameters<typeof ToolFeaturesDisplay>[0]["pricingSpecs"]}
-            inboxFeatures={tool.inboxFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["inboxFeatures"]}
-            warmupFeatures={tool.warmupFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["warmupFeatures"]}
-            leadsFeatures={tool.leadsFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["leadsFeatures"]}
-            enrichmentFeatures={tool.enrichmentFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["enrichmentFeatures"]}
-            copywritingFeatures={tool.copywritingFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["copywritingFeatures"]}
-            outreachFeatures={tool.outreachFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["outreachFeatures"]}
-            deliverabilityFeatures={tool.deliverabilityFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["deliverabilityFeatures"]}
-            linkedinFeatures={tool.linkedinFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["linkedinFeatures"]}
+            specifications={
+              tool.specifications as Parameters<typeof ToolFeaturesDisplay>[0]["specifications"]
+            }
+            pricingSpecs={
+              tool.pricingSpecs as Parameters<typeof ToolFeaturesDisplay>[0]["pricingSpecs"]
+            }
+            inboxFeatures={
+              tool.inboxFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["inboxFeatures"]
+            }
+            warmupFeatures={
+              tool.warmupFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["warmupFeatures"]
+            }
+            leadsFeatures={
+              tool.leadsFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["leadsFeatures"]
+            }
+            enrichmentFeatures={
+              tool.enrichmentFeatures as Parameters<
+                typeof ToolFeaturesDisplay
+              >[0]["enrichmentFeatures"]
+            }
+            copywritingFeatures={
+              tool.copywritingFeatures as Parameters<
+                typeof ToolFeaturesDisplay
+              >[0]["copywritingFeatures"]
+            }
+            outreachFeatures={
+              tool.outreachFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["outreachFeatures"]
+            }
+            deliverabilityFeatures={
+              tool.deliverabilityFeatures as Parameters<
+                typeof ToolFeaturesDisplay
+              >[0]["deliverabilityFeatures"]
+            }
+            linkedinFeatures={
+              tool.linkedinFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["linkedinFeatures"]
+            }
             className="max-md:order-6"
           />
 
@@ -298,7 +324,6 @@ export default async function ToolPage(props: PageProps) {
               </Stack>
             </Stack>
           )}
-
 
           {/* Integrations */}
           {!!tool.integrations.length && (

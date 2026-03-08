@@ -43,4 +43,3 @@ export const Author = ({ name, image, title, ...props }: AuthorProps) => {
     </Stack>
   )
 }
-

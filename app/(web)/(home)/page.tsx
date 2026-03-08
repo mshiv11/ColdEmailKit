@@ -33,7 +33,7 @@ export default function Home(props: PageProps) {
   const jsonLd = wrapInGraph(
     generateOrganizationSchema(),
     generateWebsiteSchema(),
-    generateFAQPageSchema(homepageFAQs)
+    generateFAQPageSchema(homepageFAQs),
   )
 
   return (

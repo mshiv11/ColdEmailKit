@@ -20,7 +20,7 @@ export function ComparisonFaqs({ faqs, tool1Name, tool2Name }: ComparisonFaqsPro
   if (!faqs.length) return null
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 scroll-mt-24" id="comparison-faqs">
       <H2 className="text-xl">
         {tool1Name} vs {tool2Name}: Frequently Asked Questions
       </H2>

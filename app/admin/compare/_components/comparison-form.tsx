@@ -4,15 +4,28 @@ import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { toast } from "sonner"
 import { Button } from "~/components/common/button"
-import { H2, H3 } from "~/components/common/heading"
+import { H3, H5, H6 } from "~/components/common/heading"
 import { Icon } from "~/components/common/icon"
 import { CollapsibleSection } from "~/components/admin/collapsible-section"
+import { Stack } from "~/components/common/stack"
+import { Note } from "~/components/common/note"
+import { TextArea } from "~/components/common/textarea"
+import { Input } from "~/components/common/input"
+import { ExternalLink } from "~/components/web/external-link"
+import { siteConfig } from "~/config/site"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/common/dropdown-menu"
 import {
   upsertComparisonFaq,
   deleteComparisonFaq,
   updateToolComparisonDescription,
   deleteAllComparisonFaqs,
   revalidateComparison,
+  upsertComparisonData,
 } from "~/server/admin/comparisons/actions"
 
 type Tool = {
@@ -33,29 +46,49 @@ type FaqEntry = {
 type ComparisonFormProps = {
   tool1: Tool
   tool2: Tool
+  existingVerdict: string | null
+  existingCustomTitle: string | null
+  existingCustomDescription: string | null
   existingFaqs: FaqEntry[]
 }
 
-export function ComparisonForm({ tool1, tool2, existingFaqs }: ComparisonFormProps) {
+export function ComparisonForm({
+  tool1,
+  tool2,
+  existingVerdict,
+  existingCustomTitle,
+  existingCustomDescription,
+  existingFaqs,
+}: ComparisonFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
   const [desc1, setDesc1] = useState(tool1.comparisonDescription ?? "")
   const [desc2, setDesc2] = useState(tool2.comparisonDescription ?? "")
+  const [verdict, setVerdict] = useState(existingVerdict ?? "")
+  const [customTitle, setCustomTitle] = useState(existingCustomTitle ?? "")
+  const [customDescription, setCustomDescription] = useState(existingCustomDescription ?? "")
   const [faqs, setFaqs] = useState<FaqEntry[]>(existingFaqs)
   const [newQ, setNewQ] = useState("")
   const [newA, setNewA] = useState("")
 
   const handleSaveDescriptions = () => {
     startTransition(async () => {
-      const [r1, r2] = await Promise.all([
+      const [r1, r2, vRes] = await Promise.all([
         updateToolComparisonDescription({ toolId: tool1.id, comparisonDescription: desc1 || null }),
         updateToolComparisonDescription({ toolId: tool2.id, comparisonDescription: desc2 || null }),
+        upsertComparisonData({
+          tool1Id: tool1.id,
+          tool2Id: tool2.id,
+          verdict: verdict || null,
+          customTitle: customTitle || null,
+          customDescription: customDescription || null,
+        }),
       ])
-      if (r1[1] || r2[1]) {
-        toast.error("Failed to save descriptions")
+      if (r1[1] || r2[1] || vRes[1]) {
+        toast.error("Failed to save descriptions and verdict")
       } else {
-        toast.success("Descriptions saved")
+        toast.success("Content saved successfully")
         router.refresh()
       }
     })
@@ -80,7 +113,10 @@ export function ComparisonForm({ tool1, tool2, existingFaqs }: ComparisonFormPro
         toast.success("FAQ added")
         setNewQ("")
         setNewA("")
-        setFaqs(prev => [...prev, { id: result?.id, question: newQ.trim(), answer: newA.trim(), order: faqs.length }])
+        setFaqs(prev => [
+          ...prev,
+          { id: result?.id, question: newQ.trim(), answer: newA.trim(), order: faqs.length },
+        ])
         router.refresh()
       }
     })
@@ -100,7 +136,11 @@ export function ComparisonForm({ tool1, tool2, existingFaqs }: ComparisonFormPro
   }
 
   const handleDeleteComparison = () => {
-    if (!confirm(`Are you sure you want to delete the entire ${tool1.name} vs ${tool2.name} comparison? This will remove all FAQs and descriptions.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete the entire ${tool1.name} vs ${tool2.name} comparison? This will remove all FAQs and descriptions.`,
+      )
+    ) {
       return
     }
     startTransition(async () => {
@@ -114,6 +154,13 @@ export function ComparisonForm({ tool1, tool2, existingFaqs }: ComparisonFormPro
       await Promise.all([
         updateToolComparisonDescription({ toolId: tool1.id, comparisonDescription: null }),
         updateToolComparisonDescription({ toolId: tool2.id, comparisonDescription: null }),
+        upsertComparisonData({
+          tool1Id: tool1.id,
+          tool2Id: tool2.id,
+          verdict: null,
+          customTitle: null,
+          customDescription: null,
+        }),
       ])
       toast.success("Comparison deleted")
       router.push("/admin/compare")
@@ -127,50 +174,69 @@ export function ComparisonForm({ tool1, tool2, existingFaqs }: ComparisonFormPro
       if (error) {
         toast.error("Failed to revalidate")
       } else {
-        toast.success("Comparison page revalidated — changes will appear shortly")
+        toast.success("Comparison revalidated")
         router.refresh()
       }
     })
   }
 
-  return (
-    <div className="flex flex-col gap-6">
-      {/* Preview Link + Revalidate */}
-      <div className="rounded-lg border bg-muted/30 p-4 flex items-center gap-3">
-        <Icon name="lucide/globe" className="size-4 text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">Preview:</span>
-        <a
-          href={`/compare/${tool1.slug}-vs-${tool2.slug}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-primary hover:underline"
-        >
-          /compare/{tool1.slug}-vs-{tool2.slug}
-        </a>
-        <Icon
-          name="lucide/arrow-up-right"
-          className="size-3.5 text-muted-foreground"
-        />
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handleRevalidate}
-          disabled={isPending}
-          className="ml-auto"
-        >
-          {isPending ? <Icon name="lucide/loader" className="animate-spin size-4" /> : <Icon name="lucide/refresh-cw" className="size-4" />}
-          Revalidate
-        </Button>
-      </div>
+  const comparisonUrl = `/compare/${tool1.slug}-vs-${tool2.slug}`
 
-      {/* Comparison Descriptions — Collapsible */}
-      <CollapsibleSection title="Comparison Descriptions" description="Optional comparison-specific overrides for each tool's description on the comparison page. Leave blank to use the tool's main description." defaultOpen={true}>
+  return (
+    <Stack className="flex-col gap-6" items="stretch">
+      <Stack className="justify-between">
+        <H3 className="flex-1 truncate">
+          Edit {tool1.name} vs {tool2.name}
+        </H3>
+
+        <Stack size="sm" className="-my-0.5">
+          <Button
+            onClick={handleSaveDescriptions}
+            disabled={isPending}
+            isPending={isPending}
+            variant="primary"
+          >
+            Save Content
+          </Button>
+
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" size="sm" prefix={<Icon name="lucide/ellipsis" />} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <a href={comparisonUrl} target="_blank" rel="noopener noreferrer">
+                  View Comparison
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={handleRevalidate}>Revalidate Page</DropdownMenuItem>
+              <DropdownMenuItem onSelect={handleDeleteComparison} className="text-red-500">
+                Delete Comparison
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </Stack>
+
+        <Note className="w-full">
+          Preview:{" "}
+          <ExternalLink href={comparisonUrl} className="text-primary underline">
+            {siteConfig.url}
+            {comparisonUrl}
+          </ExternalLink>
+        </Note>
+      </Stack>
+
+      <CollapsibleSection
+        title="Comparison Data (Descriptions & Verdict)"
+        description="Optional comparison-specific overrides and final verdict. Leave descriptions blank to use the tool's main description."
+        defaultOpen={true}
+      >
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">{tool1.name} description</label>
-              <textarea
-                className="min-h-24 w-full rounded-md border bg-background px-3 py-2 text-sm resize-y"
+              <TextArea
+                className="min-h-32"
                 placeholder={`Custom description for ${tool1.name} on the comparison page…`}
                 value={desc1}
                 onChange={e => setDesc1(e.target.value)}
@@ -179,8 +245,8 @@ export function ComparisonForm({ tool1, tool2, existingFaqs }: ComparisonFormPro
 
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">{tool2.name} description</label>
-              <textarea
-                className="min-h-24 w-full rounded-md border bg-background px-3 py-2 text-sm resize-y"
+              <TextArea
+                className="min-h-32"
                 placeholder={`Custom description for ${tool2.name} on the comparison page…`}
                 value={desc2}
                 onChange={e => setDesc2(e.target.value)}
@@ -188,23 +254,48 @@ export function ComparisonForm({ tool1, tool2, existingFaqs }: ComparisonFormPro
             </div>
           </div>
 
-          <Button onClick={handleSaveDescriptions} disabled={isPending} className="self-start">
-            {isPending ? <Icon name="lucide/loader" className="animate-spin size-4" /> : null}
-            Save Descriptions
-          </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Custom SEO Title</label>
+              <Input
+                placeholder={`Overrides default "Tool A vs Tool B: Full Comparison"`}
+                value={customTitle}
+                onChange={e => setCustomTitle(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Custom SEO Description</label>
+              <Input
+                placeholder={`Overrides default meta description...`}
+                value={customDescription}
+                onChange={e => setCustomDescription(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 pt-4 border-t">
+            <label className="text-sm font-medium">Final Verdict (Bottom of page)</label>
+            <TextArea
+              className="min-h-32"
+              placeholder={`Write the final verdict comparing ${tool1.name} and ${tool2.name}...`}
+              value={verdict}
+              onChange={e => setVerdict(e.target.value)}
+            />
+          </div>
         </div>
       </CollapsibleSection>
 
-      {/* FAQs — Collapsible */}
       <CollapsibleSection title="FAQs" fieldCount={faqs.length} defaultOpen={true}>
         <div className="flex flex-col gap-6">
-          {/* Existing FAQs */}
           {faqs.length > 0 && (
             <div className="flex flex-col gap-3">
               {faqs.map((faq, idx) => (
-                <div key={faq.id ?? idx} className="rounded-lg border bg-card p-4 flex flex-col gap-2">
+                <div
+                  key={faq.id ?? idx}
+                  className="rounded-lg border bg-card p-4 flex flex-col gap-2"
+                >
                   <div className="flex items-start justify-between gap-4">
-                    <H3 className="text-sm font-medium">{faq.question}</H3>
+                    <H6 className="text-sm font-medium">{faq.question}</H6>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -221,55 +312,38 @@ export function ComparisonForm({ tool1, tool2, existingFaqs }: ComparisonFormPro
             </div>
           )}
 
-          {/* Add new FAQ */}
-          <div className="rounded-lg border border-dashed p-4 flex flex-col gap-3">
-            <H3 className="text-sm font-medium">Add a new FAQ</H3>
+          <div className="rounded-lg border bg-muted/20 p-4 flex flex-col gap-4">
+            <H6 className="text-sm font-medium">Add a new FAQ</H6>
             <div className="flex flex-col gap-2">
-              <label className="text-xs text-muted-foreground font-medium">Question</label>
-              <input
-                type="text"
-                className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              <label className="text-sm font-medium">Question</label>
+              <Input
                 placeholder="e.g. Which tool has better deliverability?"
                 value={newQ}
                 onChange={e => setNewQ(e.target.value)}
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-xs text-muted-foreground font-medium">Answer</label>
-              <textarea
-                className="min-h-20 w-full rounded-md border bg-background px-3 py-2 text-sm resize-y"
+              <label className="text-sm font-medium">Answer</label>
+              <TextArea
+                className="min-h-24"
                 placeholder="Write a detailed answer…"
                 value={newA}
                 onChange={e => setNewA(e.target.value)}
               />
             </div>
-            <Button onClick={handleAddFaq} disabled={isPending} className="self-start">
-              {isPending ? <Icon name="lucide/loader" className="animate-spin size-4" /> : null}
+            <Button
+              onClick={handleAddFaq}
+              disabled={isPending}
+              isPending={isPending}
+              variant="secondary"
+              className="self-start"
+            >
               <Icon name="lucide/plus" className="size-4" />
               Add FAQ
             </Button>
           </div>
         </div>
       </CollapsibleSection>
-
-      {/* Danger Zone */}
-      <div className="flex flex-col gap-4 rounded-lg border border-destructive/30 p-4">
-        <H2 className="text-lg text-destructive">Danger Zone</H2>
-        <p className="text-sm text-muted-foreground">
-          Deleting this comparison will remove all FAQs and comparison descriptions for{" "}
-          <strong>{tool1.name}</strong> vs <strong>{tool2.name}</strong>. The individual tool pages will not be affected.
-        </p>
-        <Button
-          variant="destructive"
-          onClick={handleDeleteComparison}
-          disabled={isPending}
-          className="self-start"
-        >
-          {isPending ? <Icon name="lucide/loader" className="animate-spin size-4" /> : null}
-          <Icon name="lucide/trash" className="size-4" />
-          Delete Comparison
-        </Button>
-      </div>
-    </div>
+    </Stack>
   )
 }

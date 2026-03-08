@@ -6,11 +6,7 @@ import { AlternativeQuery } from "~/components/web/alternatives/alternative-quer
 import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
 import { Intro, IntroDescription, IntroTitle } from "~/components/web/ui/intro"
 import { metadataConfig } from "~/config/metadata"
-import {
-  generateCollectionPageSchema,
-  jsonLdScriptProps,
-  wrapInGraph,
-} from "~/lib/schemas"
+import { generateCollectionPageSchema, jsonLdScriptProps, wrapInGraph } from "~/lib/schemas"
 
 type PageProps = {
   searchParams: Promise<SearchParams>
@@ -18,7 +14,8 @@ type PageProps = {
 
 export const metadata: Metadata = {
   title: "Cold Email Tool Alternatives",
-  description: "Discover top alternatives to popular cold email tools. Compare features, pricing, and reviews to find the best replacement.",
+  description:
+    "Discover top alternatives to popular cold email tools. Compare features, pricing, and reviews to find the best replacement.",
   keywords: [
     "cold email alternatives",
     "email tool alternatives",
@@ -34,7 +31,8 @@ export default function Alternatives(props: PageProps) {
   // Generate CollectionPage JSON-LD schema for SEO
   const collectionPageSchema = generateCollectionPageSchema({
     name: "Cold Email Tool Alternatives",
-    description: "Discover top alternatives to popular cold email tools. Compare features, pricing, and reviews to find the best replacement.",
+    description:
+      "Discover top alternatives to popular cold email tools. Compare features, pricing, and reviews to find the best replacement.",
     url: "/alternatives",
   })
 

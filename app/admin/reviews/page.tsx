@@ -7,18 +7,18 @@ import { reviewsTableParamsCache } from "~/server/admin/reviews/schema"
 import { ReviewsTable } from "./_components/reviews-table"
 
 type ReviewsPageProps = {
-    searchParams: Promise<SearchParams>
+  searchParams: Promise<SearchParams>
 }
 
 const ReviewsPage = async ({ searchParams }: ReviewsPageProps) => {
-    const search = reviewsTableParamsCache.parse(await searchParams)
-    const reviewsPromise = findReviews(search)
+  const search = reviewsTableParamsCache.parse(await searchParams)
+  const reviewsPromise = findReviews(search)
 
-    return (
-        <Suspense fallback={<DataTableSkeleton title="Reviews" />}>
-            <ReviewsTable reviewsPromise={reviewsPromise} />
-        </Suspense>
-    )
+  return (
+    <Suspense fallback={<DataTableSkeleton title="Reviews" />}>
+      <ReviewsTable reviewsPromise={reviewsPromise} />
+    </Suspense>
+  )
 }
 
 export default withAdminPage(ReviewsPage)

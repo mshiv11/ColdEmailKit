@@ -211,7 +211,9 @@ export function IntegrationForm({
                   variant="secondary"
                   disabled={!isValidUrl(website)}
                   isPending={faviconAction.isPending}
-                  onClick={() => faviconAction.execute({ url: website, path: `integrations/${slug}` })}
+                  onClick={() =>
+                    faviconAction.execute({ url: website, path: `integrations/${slug}` })
+                  }
                 >
                   <Icon name="lucide/globe" />
                   Fetch Icon
