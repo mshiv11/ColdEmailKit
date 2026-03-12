@@ -44,6 +44,7 @@ export function DeliverabilitySection({
       }
       isNotApplicable={features._notApplicable}
       onNotApplicableChange={val => updateField("_notApplicable", val)}
+      showNotApplicableToggle={true}
     >
       <div className="space-y-0">
         <RatingInput
