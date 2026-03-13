@@ -63,7 +63,7 @@ export function StarRating({
       </div>
 
       {showTrustScore && trustScore !== undefined && (
-        <div className="flex items-center gap-1 text-sm font-medium text-green-600 ml-2">
+        <div className="flex items-center gap-1 text-sm font-medium text-green-600 ml-2 decoration-green-600/30 underline decoration-dashed underline-offset-4 cursor-help">
           <span>Trust Score: {trustScore}%</span>
         </div>
       )}

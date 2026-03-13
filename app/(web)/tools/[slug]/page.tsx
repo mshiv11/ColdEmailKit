@@ -29,6 +29,7 @@ import { ToolActions } from "~/components/web/tools/tool-actions"
 import { ToolAlternatives } from "~/components/web/tools/tool-alternatives"
 import { ToolIntegrations } from "~/components/web/tools/tool-integrations"
 import { StickyToolHeader } from "~/components/web/tools/sticky-tool-header"
+import { TrustBreakdownHover } from "~/components/web/tools/trust-breakdown-hover"
 import { ToolListSkeleton } from "~/components/web/tools/tool-list"
 import { ToolReviews } from "~/components/web/tools/tool-reviews"
 import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
@@ -194,12 +195,14 @@ export default async function ToolPage(props: PageProps) {
                     {tool.ownerId && <VerifiedBadge size="lg" />}
                   </div>
 
-                  <StarRating
-                    rating={tool.overallRating || 0}
-                    totalReviews={tool.totalReviews ?? undefined}
-                    trustScore={tool.trustScore || undefined}
-                    showTrustScore={!!tool.trustScore}
-                  />
+                  <TrustBreakdownHover tool={tool}>
+                    <StarRating
+                      rating={tool.overallRating || 0}
+                      totalReviews={tool.totalReviews ?? undefined}
+                      trustScore={tool.trustScore || undefined}
+                      showTrustScore={!!tool.trustScore}
+                    />
+                  </TrustBreakdownHover>
                 </Stack>
 
                 <ToolActions tool={tool} />

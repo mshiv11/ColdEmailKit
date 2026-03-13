@@ -6,6 +6,7 @@ import { Link } from "~/components/common/link"
 import { ExternalLink } from "~/components/web/external-link"
 import { ComparisonToolDetails } from "~/components/web/compare/comparison-tool-details"
 import { StarRating } from "~/components/web/tools/star-rating"
+import { TrustBreakdownHover } from "~/components/web/tools/trust-breakdown-hover"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import { VerifiedBadge } from "~/components/web/verified-badge"
 import { Tooltip } from "~/components/common/tooltip"
@@ -48,12 +49,14 @@ export function ComparisonToolCard({ tool, isFeatured }: ComparisonToolCardProps
             {tool.ownerId && <VerifiedBadge size="md" />}
           </div>
 
-          <StarRating
-            rating={tool.overallRating || 0}
-            totalReviews={tool.totalReviews ?? undefined}
-            trustScore={tool.trustScore || undefined}
-            showTrustScore={!!tool.trustScore}
-          />
+          <TrustBreakdownHover tool={tool}>
+            <StarRating
+              rating={tool.overallRating || 0}
+              totalReviews={tool.totalReviews ?? undefined}
+              trustScore={tool.trustScore || undefined}
+              showTrustScore={!!tool.trustScore}
+            />
+          </TrustBreakdownHover>
         </div>
       </div>
 
