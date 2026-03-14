@@ -30,7 +30,7 @@ import {
 } from "~/server/web/categories/queries"
 import { findTools } from "~/server/web/tools/queries"
 
-export const revalidate = 604800 // Cache for 7 days
+export const revalidate = 604800 // Cache for 7 days (on-demand revalidation via revalidateTag handles freshness)
 
 type PageProps = {
   params: Promise<{ slug: string[] }>
@@ -62,8 +62,8 @@ const getMetadata = (category: CategoryOne): Metadata => {
     : `${category.name.toLowerCase()} automation, outreach, and email campaigns`
 
   return {
-    title: `${name}`,
-    description: `A curated collection of the best cold email tools for ${descriptionText}. Compare features, pricing, and reviews.`,
+    title: `Best ${name} for Cold Email Outreach (2026)`,
+    description: `Discover the top ${category.name.toLowerCase()} tools for cold email outreach in 2026. Compare features, pricing, and verified reviews to find the best ${descriptionText} tools.`,
   }
 }
 

@@ -7,9 +7,9 @@ import { Intro, IntroDescription, IntroTitle } from "~/components/web/ui/intro"
 import { metadataConfig } from "~/config/metadata"
 
 export const metadata: Metadata = {
-  title: "Integrations used in Cold Email Tools",
+  title: "Cold Email Tool Integrations — CRM, Automation & More (2026)",
   description:
-    "Discover top integrations powering popular cold email tools. Learn which technologies are trending and widely used. Perfect for finding the right tools to enhance your outreach strategy.",
+    "Browse cold email tools by integration: Zapier, HubSpot, Salesforce, Gmail, and more. Find tools that connect with your existing tech stack.",
   openGraph: { ...metadataConfig.openGraph, url: "/integrations" },
   alternates: { ...metadataConfig.alternates, canonical: "/integrations" },
 }

@@ -51,3 +51,62 @@ export const findComparisonFaqs = async (toolId1: string, toolId2: string) => {
     orderBy: { order: "asc" },
   })
 }
+
+/**
+ * Finds all other comparison pairs where either tool1 or tool2 appears,
+ * excluding the current comparison. Used for "Related Comparisons" section.
+ */
+export const findRelatedComparisons = async (
+  tool1Id: string,
+  tool2Id: string,
+  currentSlug: string,
+) => {
+  "use cache"
+
+  cacheTag(`related-comparisons-${tool1Id}-${tool2Id}`)
+  cacheLife("max")
+
+  const faqs = await db.comparisonFaq.findMany({
+    where: {
+      OR: [
+        { tool1Id: { in: [tool1Id, tool2Id] } },
+        { tool2Id: { in: [tool1Id, tool2Id] } },
+      ],
+    },
+    select: {
+      tool1Id: true,
+      tool2Id: true,
+      tool1: { select: { name: true, slug: true, faviconUrl: true } },
+      tool2: { select: { name: true, slug: true, faviconUrl: true } },
+    },
+  })
+
+  // Group by pair and deduplicate
+  const pairs = new Map<
+    string,
+    {
+      slug: string
+      tool1: { name: string; slug: string; faviconUrl: string | null }
+      tool2: { name: string; slug: string; faviconUrl: string | null }
+    }
+  >()
+
+  for (const faq of faqs) {
+    const key = [faq.tool1Id, faq.tool2Id].sort().join("-")
+    const slug = `${faq.tool1.slug}-vs-${faq.tool2.slug}`
+
+    // Skip the current comparison
+    if (slug === currentSlug) continue
+
+    if (!pairs.has(key)) {
+      pairs.set(key, {
+        slug,
+        tool1: faq.tool1,
+        tool2: faq.tool2,
+      })
+    }
+  }
+
+  return Array.from(pairs.values())
+}
+

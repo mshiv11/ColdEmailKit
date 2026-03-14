@@ -30,8 +30,8 @@ const getIntegration = cache(async ({ params }: PageProps) => {
 
 const getMetadata = (integration: IntegrationOne): Metadata => {
   return {
-    title: `Top Cold Email Tools with ${integration.name} Integration`,
-    description: `A curated collection of the ${integration._count.tools} best cold email tools with ${integration.name} Integration. Find the most popular and trending tools to learn from, contribute to, or use in your own projects.`,
+    title: `Cold Email Tools that Integrate with ${integration.name} (2026)`,
+    description: `Discover the best cold email tools that integrate with ${integration.name}. ${integration._count.tools} tools compared with features, pricing, and reviews for seamless ${integration.name} integration.`,
   }
 }
 

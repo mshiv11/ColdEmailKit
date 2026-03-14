@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { cache } from "react"
+import { Suspense, cache } from "react"
 import { Button } from "~/components/common/button"
 import { H2 } from "~/components/common/heading"
 import { Icon } from "~/components/common/icon"
@@ -8,6 +8,7 @@ import { ComparisonFaqs } from "~/components/web/compare/comparison-faqs"
 
 import { ComparisonToolCard } from "~/components/web/compare/comparison-tool-card"
 import { ComparisonTable } from "~/components/web/compare/comparison-table"
+import { RelatedComparisons } from "~/components/web/compare/related-comparisons"
 import { ExternalLink } from "~/components/web/external-link"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
@@ -15,7 +16,7 @@ import { metadataConfig } from "~/config/metadata"
 import { generateBreadcrumbSchema, jsonLdScriptProps, wrapInGraph } from "~/lib/schemas"
 import { findComparisonFaqs, findComparisonTools } from "~/server/web/comparisons/queries"
 
-export const revalidate = 604800
+export const revalidate = 604800 // Cache for 7 days (on-demand revalidation via revalidateTag handles freshness)
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -242,6 +243,11 @@ export default async function ComparisonPage({ params }: PageProps) {
       {faqs.length > 0 && (
         <ComparisonFaqs faqs={faqs} tool1Name={tool1.name} tool2Name={tool2.name} />
       )}
+
+      {/* Related Comparisons */}
+      <Suspense>
+        <RelatedComparisons tool1Id={tool1.id} tool2Id={tool2.id} currentSlug={slug} />
+      </Suspense>
 
       {/* JSON-LD structured data */}
       <script {...jsonLdScriptProps(jsonLd)} />

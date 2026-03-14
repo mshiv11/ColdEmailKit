@@ -111,19 +111,10 @@ export const findFeaturedAlternatives = async ({
   cacheTag("featured-alternatives")
   cacheLife("max")
 
-  const list = [
-    "monday",
-    "notion",
-    "airtable",
-    "typeform",
-    "teamwork",
-    "todoist",
-    "kissmetrics",
-    "fathom-analytics",
-  ]
-
   return await findAlternatives({
-    where: { slug: { in: list }, ...where },
+    where,
+    orderBy: { tools: { _count: "desc" } },
+    take: 6,
     ...args,
   })
 }

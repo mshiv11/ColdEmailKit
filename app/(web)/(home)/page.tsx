@@ -1,8 +1,11 @@
+import type { Metadata } from "next"
 import type { SearchParams } from "nuqs/server"
 import { Suspense } from "react"
 import { CountBadge, CountBadgeSkeleton } from "~/app/(web)/(home)/count-badge"
 import { AlternativePreviewSkeleton } from "~/components/web/alternatives/alternative-preview"
 import { AlternativePreview } from "~/components/web/alternatives/alternative-preview"
+import { CategoryPreview, CategoryPreviewSkeleton } from "~/components/web/categories/category-preview"
+import { ComparisonPreview, ComparisonPreviewSkeleton } from "~/components/web/compare/comparison-preview"
 import { BuiltWith } from "~/components/web/built-with"
 import { ContributionGraph } from "~/components/web/contribution-graph"
 import { NewsletterForm } from "~/components/web/newsletter-form"
@@ -12,6 +15,7 @@ import { ToolListingSkeleton } from "~/components/web/tools/tool-listing"
 import { ToolQuery } from "~/components/web/tools/tool-query"
 import { Intro, IntroDescription, IntroTitle } from "~/components/web/ui/intro"
 import { config } from "~/config"
+import { metadataConfig } from "~/config/metadata"
 import {
   generateOrganizationSchema,
   generateWebsiteSchema,
@@ -20,11 +24,19 @@ import {
   wrapInGraph,
 } from "~/lib/schemas"
 
+export const metadata: Metadata = {
+  title: "Best Cold Email Tools & Software Database (2026)",
+  description:
+    "Compare 50+ cold email tools with verified reviews, detailed features, and transparent pricing — from inbox rotation to deliverability audits. Find the perfect tool for your outreach.",
+  openGraph: { ...metadataConfig.openGraph, url: "/" },
+  alternates: { ...metadataConfig.alternates, canonical: "/" },
+}
+
 type PageProps = {
   searchParams: Promise<SearchParams>
 }
 
-export const revalidate = 604800 // Cache for 7 days
+export const revalidate = 604800 // Cache for 7 days (on-demand revalidation via revalidateTag handles freshness)
 
 export default function Home(props: PageProps) {
   const homepageFAQs = generateHomepageFAQs()
@@ -72,8 +84,16 @@ export default function Home(props: PageProps) {
         <ToolQuery searchParams={props.searchParams} options={{ enableFilters: true }} />
       </Suspense>
 
+      <Suspense fallback={<CategoryPreviewSkeleton />}>
+        <CategoryPreview />
+      </Suspense>
+
       <Suspense fallback={<AlternativePreviewSkeleton />}>
         <AlternativePreview />
+      </Suspense>
+
+      <Suspense fallback={<ComparisonPreviewSkeleton />}>
+        <ComparisonPreview />
       </Suspense>
 
       {/* JSON-LD for SEO: Organization, WebSite with SearchAction, FAQPage */}
