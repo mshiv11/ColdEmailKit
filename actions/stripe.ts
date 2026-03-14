@@ -1,6 +1,7 @@
 "use server"
 
 import { AdType } from "@prisma/client"
+import { updateTag } from "next/cache"
 import { z } from "zod"
 import { userProcedure } from "~/lib/safe-actions"
 import { env } from "~/env"
@@ -149,7 +150,7 @@ export const createAdFromCheckout = userProcedure
 
     if (existingAd) {
       // Update existing ad
-      return await db.ad.update({
+      const ad = await db.ad.update({
         where: { id: existingAd.id },
         data: {
           name: input.name,
@@ -158,10 +159,13 @@ export const createAdFromCheckout = userProcedure
           buttonLabel: input.buttonLabel || null,
         },
       })
+
+      updateTag("ads")
+      return ad
     }
 
     // Create new ad
-    return await db.ad.create({
+    const ad = await db.ad.create({
       data: {
         sessionId: input.sessionId,
         name: input.name,
@@ -174,6 +178,9 @@ export const createAdFromCheckout = userProcedure
         endsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days default
       },
     })
+
+    updateTag("ads")
+    return ad
   })
 
 // Legacy exports for backward compatibility - these now use Dodo

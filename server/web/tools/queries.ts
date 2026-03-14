@@ -70,7 +70,7 @@ export const findRelatedToolIds = async ({ id, ...params }: SearchSimilarDocumen
   "use cache"
 
   cacheTag(`related-tool-ids-${id}`)
-  cacheLife("hours")
+  cacheLife("days")
 
   const { data, error } = await tryCatch(
     getMeiliIndex("tools").searchSimilarDocuments<{ id: string }>({
@@ -96,7 +96,7 @@ export const findRelatedTools = async ({ id, ...params }: SearchSimilarDocuments
   "use cache"
 
   cacheTag(`related-tools-${id}`)
-  cacheLife("hours")
+  cacheLife("days")
 
   // Find related tool ids in MeiliSearch
   const ids = await findRelatedToolIds({ id, ...params })

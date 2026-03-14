@@ -66,7 +66,7 @@ export const findRelatedAlternativeIds = async ({
   "use cache"
 
   cacheTag(`related-alternative-ids-${id}`)
-  cacheLife("hours")
+  cacheLife("days")
 
   const { data, error } = await tryCatch(
     getMeiliIndex("alternatives").searchSimilarDocuments<{ id: string }>({
@@ -91,7 +91,7 @@ export const findRelatedAlternatives = async ({ id, ...params }: SearchSimilarDo
   "use cache"
 
   cacheTag(`related-alternatives-${id}`)
-  cacheLife("hours")
+  cacheLife("days")
 
   // Find related alternative ids in MeiliSearch
   const ids = await findRelatedAlternativeIds({ id, ...params })

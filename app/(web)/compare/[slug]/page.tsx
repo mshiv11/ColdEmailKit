@@ -15,7 +15,7 @@ import { metadataConfig } from "~/config/metadata"
 import { generateBreadcrumbSchema, jsonLdScriptProps, wrapInGraph } from "~/lib/schemas"
 import { findComparisonFaqs, findComparisonTools } from "~/server/web/comparisons/queries"
 
-export const revalidate = 86400
+export const revalidate = 604800
 
 type PageProps = {
   params: Promise<{ slug: string }>

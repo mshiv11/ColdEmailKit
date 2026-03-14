@@ -30,7 +30,7 @@ import {
 } from "~/server/web/categories/queries"
 import { findTools } from "~/server/web/tools/queries"
 
-export const revalidate = 86400 // Cache for 24 hours
+export const revalidate = 604800 // Cache for 7 days
 
 type PageProps = {
   params: Promise<{ slug: string[] }>

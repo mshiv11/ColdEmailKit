@@ -5,7 +5,7 @@ import { Icon } from "~/components/common/icon"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import { findAllComparisonPairs } from "~/server/admin/comparisons/queries"
 
-export const revalidate = 86400
+export const revalidate = 604800
 
 export const metadata: Metadata = {
   title: "Compare Cold Email Tools (2026): Side-by-Side Feature & Pricing Comparison",

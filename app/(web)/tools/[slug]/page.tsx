@@ -50,7 +50,7 @@ import { FAQSchema, generateToolFAQs } from "~/components/web/seo/faq-schema"
 import type { ToolOne } from "~/server/web/tools/payloads"
 import { findTool, findToolSlugs } from "~/server/web/tools/queries"
 
-export const revalidate = 86400 // Cache for 24 hours
+export const revalidate = 604800 // Cache for 7 days
 
 type PageProps = {
   params: Promise<{ slug: string }>
