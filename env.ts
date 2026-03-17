@@ -88,9 +88,12 @@ export const env = createEnv({
 
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
-   * This is especially useful for Docker builds.
+   * This is especially useful for Docker builds and CI/CD pipelines.
+   * Also skip during Next.js build phase since server env vars are runtime-only.
    */
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  skipValidation:
+    !!process.env.SKIP_ENV_VALIDATION ||
+    process.env.NEXT_PHASE === "phase-production-build",
 
   /**
    * Makes it so that empty strings are treated as undefined.
