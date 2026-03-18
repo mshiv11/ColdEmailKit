@@ -77,7 +77,7 @@ const Header = ({ children, className, ...props }: HeaderProps) => {
 
               <DropdownMenuContent align="start">
                 <DropdownMenuItem asChild>
-                  <NavLink href="/latest">
+                  <NavLink href="/?sort=publishedAt.desc">
                     <Icon name="lucide/calendar-days" className="shrink-0 size-4 opacity-75" />{" "}
                     Latest
                   </NavLink>
@@ -153,7 +153,7 @@ const Header = ({ children, className, ...props }: HeaderProps) => {
             isNavOpen ? "opacity-100" : "opacity-0 pointer-events-none",
           )}
         >
-          <NavLink href="/latest" className="text-base">
+          <NavLink href="/?sort=publishedAt.desc" className="text-base">
             Latest
           </NavLink>
 

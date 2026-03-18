@@ -135,6 +135,27 @@ const nextConfig: NextConfig = {
         destination: "/categories/:slug/integrations/:integration",
         permanent: true,
       },
+      // Fix GSC 404s
+      {
+        source: "/tools/puzzly-ai",
+        destination: "/tools",
+        permanent: true,
+      },
+      {
+        source: "/tools/coldflow",
+        destination: "/tools",
+        permanent: true,
+      },
+      {
+        source: "/tools/emailchaser",
+        destination: "/tools/email-chaser",
+        permanent: true,
+      },
+      {
+        source: "/submit-tool",
+        destination: "/submit",
+        permanent: true,
+      },
     ]
   },
 }
