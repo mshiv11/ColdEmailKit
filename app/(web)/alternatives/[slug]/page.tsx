@@ -34,7 +34,7 @@ import { findAlternative, findAlternativeSlugs } from "~/server/web/alternatives
 import type { CategoryMany } from "~/server/web/categories/payloads"
 import { findTool, findToolsWithCategories } from "~/server/web/tools/queries"
 
-export const revalidate = 604800 // Cache for 7 days
+export const revalidate = 604800 // Cache for 7 days (on-demand revalidation via revalidateTag handles freshness)
 
 type PageProps = {
   params: Promise<{ slug: string }>

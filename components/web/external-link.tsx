@@ -27,7 +27,8 @@ export const ExternalLink = ({
   const finalHref = addTracking ? addSearchParams(href!, { utm_source: hostname }) : href
   const isExternal = isExternalUrl(finalHref)
 
-  const isAffiliate = finalHref?.includes("go.coldemailkit.com") || finalHref?.includes("coldemailkit.com/go")
+  const isAffiliate =
+    finalHref?.includes("go.coldemailkit.com") || finalHref?.includes("coldemailkit.com/go")
   const rel = [`noopener`]
   if (isAffiliate) {
     rel.push("nofollow", "sponsored")

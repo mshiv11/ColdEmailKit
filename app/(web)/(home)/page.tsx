@@ -4,8 +4,14 @@ import { Suspense } from "react"
 import { CountBadge, CountBadgeSkeleton } from "~/app/(web)/(home)/count-badge"
 import { AlternativePreviewSkeleton } from "~/components/web/alternatives/alternative-preview"
 import { AlternativePreview } from "~/components/web/alternatives/alternative-preview"
-import { CategoryPreview, CategoryPreviewSkeleton } from "~/components/web/categories/category-preview"
-import { ComparisonPreview, ComparisonPreviewSkeleton } from "~/components/web/compare/comparison-preview"
+import {
+  CategoryPreview,
+  CategoryPreviewSkeleton,
+} from "~/components/web/categories/category-preview"
+import {
+  ComparisonPreview,
+  ComparisonPreviewSkeleton,
+} from "~/components/web/compare/comparison-preview"
 import { BuiltWith } from "~/components/web/built-with"
 import { ContributionGraph } from "~/components/web/contribution-graph"
 import { NewsletterForm } from "~/components/web/newsletter-form"

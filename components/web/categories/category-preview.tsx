@@ -26,7 +26,6 @@ const CategoryPreview = async () => {
           <Card key={category.slug} asChild>
             <Link href={`/categories/${category.fullPath}`}>
               <CardHeader wrap={false}>
-
                 <H4 as="h3" className="truncate">
                   {category.label || category.name}
                 </H4>
@@ -50,7 +49,6 @@ const CategoryPreviewSkeleton = () => {
         {[...Array(6)].map((_, index) => (
           <Card key={index} hover={false} className="items-stretch select-none">
             <CardHeader>
-
               <H4 className="w-2/3">
                 <Skeleton>&nbsp;</Skeleton>
               </H4>

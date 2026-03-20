@@ -19,7 +19,7 @@ import { AdCard, AdCardSkeleton } from "~/components/web/ads/ad-card"
 import { Discount } from "~/components/web/discount"
 import { ExternalLink } from "~/components/web/external-link"
 import { Listing } from "~/components/web/listing"
-import { Markdown } from "~/components/web/markdown"
+import { MarkdownWithFAQ } from "~/components/web/markdown-with-faq"
 import { OverlayImage } from "~/components/web/overlay-image"
 import { RepositoryDetails } from "~/components/web/repository-details"
 import { ShareButtons } from "~/components/web/share-buttons"
@@ -32,6 +32,7 @@ import { StickyToolHeader } from "~/components/web/tools/sticky-tool-header"
 import { TrustBreakdownHover } from "~/components/web/tools/trust-breakdown-hover"
 import { ToolListSkeleton } from "~/components/web/tools/tool-list"
 import { ToolReviews } from "~/components/web/tools/tool-reviews"
+import { MobileBottomCTA } from "~/components/web/tools/mobile-bottom-cta"
 import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import { IntroDescription } from "~/components/web/ui/intro"
@@ -47,10 +48,12 @@ import {
   wrapInGraph,
 } from "~/lib/schemas"
 import { FAQSchema, generateToolFAQs } from "~/components/web/seo/faq-schema"
+import { ToolComparisons } from "~/components/web/tools/tool-comparisons"
 import type { ToolOne } from "~/server/web/tools/payloads"
 import { findTool, findToolSlugs } from "~/server/web/tools/queries"
+import { findComparisonsForTool } from "~/server/web/comparisons/queries"
 
-export const revalidate = 604800 // Cache for 7 days
+export const revalidate = 604800 // Cache for 7 days (on-demand revalidation via revalidateTag handles freshness)
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -150,6 +153,9 @@ export default async function ToolPage(props: PageProps) {
     hasFreeTrial: false,
   })
 
+  // Fetch comparisons for this tool
+  const comparisons = await findComparisonsForTool(tool.id)
+
   return (
     <div className="flex flex-col gap-6 md:gap-12">
       <Breadcrumbs
@@ -209,6 +215,22 @@ export default async function ToolPage(props: PageProps) {
               </Stack>
 
               {tool.description && <IntroDescription>{tool.description}</IntroDescription>}
+
+              {/* Trust signal badges — above the fold for immediate credibility */}
+              <div className="flex flex-wrap items-center gap-2">
+                {tool.bestFor && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                    <Icon name="lucide/briefcase" className="size-3.5" />
+                    Best for: {tool.bestFor.replaceAll(",", ", ")}
+                  </span>
+                )}
+                {tool.pricingStarting && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                    <Icon name="lucide/dollar-sign" className="size-3.5" />
+                    From {tool.pricingStarting}
+                  </span>
+                )}
+              </div>
             </div>
 
             {!!tool.alternatives.length && (
@@ -267,7 +289,7 @@ export default async function ToolPage(props: PageProps) {
             </OverlayImage>
           )}
 
-          {tool.content && <Markdown code={tool.content} className="max-md:order-4" />}
+          {tool.content && <MarkdownWithFAQ code={tool.content} className="max-md:order-4" />}
 
           {/* Features & Specifications */}
           <ToolFeaturesDisplay
@@ -307,8 +329,16 @@ export default async function ToolPage(props: PageProps) {
             linkedinFeatures={
               tool.linkedinFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["linkedinFeatures"]
             }
-            className="max-md:order-6"
           />
+
+          {/* Compare VS Alternatives — recovery section */}
+          {comparisons.length > 0 && (
+            <ToolComparisons
+              toolName={tool.name}
+              comparisons={comparisons}
+              className="max-md:order-[9]"
+            />
+          )}
 
           {/* User Reviews */}
           <ToolReviews tool={tool} className="max-md:order-[11]" />
@@ -390,6 +420,9 @@ export default async function ToolPage(props: PageProps) {
 
       {/* FAQ Schema for SEO */}
       <FAQSchema faqs={toolFAQs} />
+
+      {/* Mobile bottom CTA */}
+      <MobileBottomCTA tool={tool} />
     </div>
   )
 }

@@ -8,7 +8,8 @@ import { metadataConfig } from "~/config/metadata"
 
 export const metadata: Metadata = {
   title: "Cold Email Tool Categories — Find the Best Tools by Type (2026)",
-  description: "Browse cold email tools by category: leads, inboxes, warm-up, enrichment, outreach, and more. Find the best tools for your cold email stack in 2026.",
+  description:
+    "Browse cold email tools by category: leads, inboxes, warm-up, enrichment, outreach, and more. Find the best tools for your cold email stack in 2026.",
   openGraph: { ...metadataConfig.openGraph, url: "/categories" },
   alternates: { ...metadataConfig.alternates, canonical: "/categories" },
 }

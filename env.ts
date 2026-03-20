@@ -92,8 +92,7 @@ export const env = createEnv({
    * Also skip during Next.js build phase since server env vars are runtime-only.
    */
   skipValidation:
-    !!process.env.SKIP_ENV_VALIDATION ||
-    process.env.NEXT_PHASE === "phase-production-build",
+    !!process.env.SKIP_ENV_VALIDATION || process.env.NEXT_PHASE === "phase-production-build",
 
   /**
    * Makes it so that empty strings are treated as undefined.

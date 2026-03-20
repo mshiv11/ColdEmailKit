@@ -3,10 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export const config = {
   matcher: ["/admin/:path*", "/dashboard/:path*", "/auth/:path*"],
-  unstable_allowDynamic: [
-    "**/node_modules/better-call/**",
-    "**/node_modules/better-auth/**"
-  ]
+  unstable_allowDynamic: ["**/node_modules/better-call/**", "**/node_modules/better-auth/**"],
 }
 
 export default async function (req: NextRequest) {

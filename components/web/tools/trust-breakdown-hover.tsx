@@ -3,11 +3,7 @@
 import { ReactNode, useState, useRef, useEffect } from "react"
 import { Icon } from "~/components/common/icon"
 import { Link } from "~/components/common/link"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/common/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/common/popover"
 import { type ToolOne } from "~/server/web/tools/payloads"
 import { formatNumber } from "@primoui/utils"
 
@@ -87,8 +83,16 @@ export function TrustBreakdownHover({ children, tool }: TrustBreakdownHoverProps
     { key: "g2", rating: tool.g2Rating ?? 0, reviews: tool.g2Reviews ?? 0 },
     { key: "trustpilot", rating: tool.trustpilotRating ?? 0, reviews: tool.trustpilotReviews ?? 0 },
     { key: "capterra", rating: tool.capterraRating ?? 0, reviews: tool.capterraReviews ?? 0 },
-    { key: "trustradius", rating: tool.trustradiusRating ?? 0, reviews: tool.trustradiusReviews ?? 0 },
-    { key: "coldEmailKit", rating: tool.coldEmailKitRating ?? 0, reviews: tool.coldEmailKitReviews ?? 0 },
+    {
+      key: "trustradius",
+      rating: tool.trustradiusRating ?? 0,
+      reviews: tool.trustradiusReviews ?? 0,
+    },
+    {
+      key: "coldEmailKit",
+      rating: tool.coldEmailKitRating ?? 0,
+      reviews: tool.coldEmailKitReviews ?? 0,
+    },
   ]
 
   const activePlatforms = platformsData.filter(p => p.rating > 0 && p.reviews > 0)
@@ -119,7 +123,7 @@ export function TrustBreakdownHover({ children, tool }: TrustBreakdownHoverProps
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <div 
+        <div
           className="inline-flex cursor-pointer"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
@@ -127,10 +131,10 @@ export function TrustBreakdownHover({ children, tool }: TrustBreakdownHoverProps
           {children}
         </div>
       </PopoverTrigger>
-      
-      <PopoverContent 
-        side="bottom" 
-        align="start" 
+
+      <PopoverContent
+        side="bottom"
+        align="start"
         className="w-[320px] p-0 overflow-hidden"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -138,10 +142,11 @@ export function TrustBreakdownHover({ children, tool }: TrustBreakdownHoverProps
         <div className="p-4 flex flex-col gap-1 border-b bg-muted/30">
           <p className="text-sm font-semibold">Trust Score Breakdown</p>
           <p className="text-xs text-muted-foreground">
-             Weighted average prioritizing ColdEmailKit reviews (40%) and aggregating external verified sources (60%).
+            Weighted average prioritizing ColdEmailKit reviews (40%) and aggregating external
+            verified sources (60%).
           </p>
         </div>
-        
+
         <div className="flex flex-col p-2">
           {activePlatforms.map(p => (
             <PlatformRow key={p.key} platformKey={p.key} rating={p.rating} reviews={p.reviews} />

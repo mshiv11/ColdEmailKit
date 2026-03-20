@@ -1,3 +1,4 @@
 {
-  "workbench.externalBrowser": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+  "workbench.externalBrowser": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "chatgpt.openOnStartup": false
 }

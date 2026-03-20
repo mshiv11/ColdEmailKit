@@ -56,6 +56,35 @@ export const findComparisonFaqs = async (toolId1: string, toolId2: string) => {
  * Finds all other comparison pairs where either tool1 or tool2 appears,
  * excluding the current comparison. Used for "Related Comparisons" section.
  */
+/**
+ * Finds all comparisons where a specific tool appears as tool1 or tool2.
+ * Used to render the "Compare [Tool]" section on individual tool pages.
+ */
+export const findComparisonsForTool = async (toolId: string) => {
+  "use cache"
+
+  cacheTag(`tool-comparisons-${toolId}`)
+  cacheLife("max")
+
+  const comparisons = await db.comparison.findMany({
+    where: {
+      OR: [{ tool1Id: toolId }, { tool2Id: toolId }],
+    },
+    select: {
+      id: true,
+      tool1: { select: { name: true, slug: true, faviconUrl: true } },
+      tool2: { select: { name: true, slug: true, faviconUrl: true } },
+    },
+    take: 6,
+  })
+
+  return comparisons.map(c => ({
+    slug: `${c.tool1.slug}-vs-${c.tool2.slug}`,
+    tool1: c.tool1,
+    tool2: c.tool2,
+  }))
+}
+
 export const findRelatedComparisons = async (
   tool1Id: string,
   tool2Id: string,
@@ -68,10 +97,7 @@ export const findRelatedComparisons = async (
 
   const faqs = await db.comparisonFaq.findMany({
     where: {
-      OR: [
-        { tool1Id: { in: [tool1Id, tool2Id] } },
-        { tool2Id: { in: [tool1Id, tool2Id] } },
-      ],
+      OR: [{ tool1Id: { in: [tool1Id, tool2Id] } }, { tool2Id: { in: [tool1Id, tool2Id] } }],
     },
     select: {
       tool1Id: true,
@@ -109,4 +135,3 @@ export const findRelatedComparisons = async (
 
   return Array.from(pairs.values())
 }
-
