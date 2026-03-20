@@ -24,6 +24,16 @@ type CategorySearchResult = {
   fullPath: string
 }
 
+type ComparisonSearchResult = {
+  slug: string
+  name: string
+}
+
+type BlogSearchResult = {
+  slug: string
+  name: string
+}
+
 export const searchItems = createServerAction()
   .input(z.object({ query: z.string().trim() }))
   .handler(async ({ input: { query } }) => {
@@ -46,6 +56,16 @@ export const searchItems = createServerAction()
 
         getMeiliIndex("categories").search<CategorySearchResult>(query, {
           attributesToRetrieve: ["slug", "name", "fullPath"],
+          limit: 10,
+        }),
+
+        getMeiliIndex("comparisons").search<ComparisonSearchResult>(query, {
+          attributesToRetrieve: ["slug", "name"],
+          limit: 10,
+        }),
+
+        getMeiliIndex("blog").search<BlogSearchResult>(query, {
+          attributesToRetrieve: ["slug", "name"],
           limit: 10,
         }),
       ]),

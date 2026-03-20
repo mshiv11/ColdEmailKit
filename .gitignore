@@ -14,12 +14,14 @@
 .env.vercel
 
 # Catch-all for any .env variant (except .env.example)
+*.env
 .env.*
 !.env.example
 
 # Secret/credential text files (Dodo, Stripe, etc.)
 env_*.txt
 scripts/env_dump*
+*.txt
 
 # Typecheck output
 typecheck_output.txt

@@ -4,6 +4,7 @@ import {
   toolCategoriesPayload,
   toolTopicsPayload,
 } from "~/server/web/tools/payloads"
+import { allPosts } from "content-collections"
 import { db } from "~/services/db"
 import { getMeiliIndex } from "~/services/meilisearch"
 
@@ -82,6 +83,47 @@ export const indexCategories = async ({ where }: { where?: Prisma.CategoryWhereI
       slug: category.slug,
       description: category.description,
       fullPath: category.fullPath,
+    })),
+  )
+}
+
+/**
+ * Index comparisons in MeiliSearch
+ * @returns Enqueued task
+ */
+export const indexComparisons = async () => {
+  const comparisons = await db.comparison.findMany({
+    include: {
+      tool1: true,
+      tool2: true,
+    },
+  })
+
+  if (!comparisons.length) return
+
+  return await getMeiliIndex("comparisons").addDocuments(
+    comparisons.map(comparison => ({
+      id: comparison.id,
+      slug: `${comparison.tool1.slug}-vs-${comparison.tool2.slug}`,
+      name: `${comparison.tool1.name} vs ${comparison.tool2.name}`,
+      description: comparison.customDescription || comparison.verdict || `Compare ${comparison.tool1.name} vs ${comparison.tool2.name}`,
+    })),
+  )
+}
+
+/**
+ * Index blog posts in MeiliSearch
+ * @returns Enqueued task
+ */
+export const indexBlogPosts = async () => {
+  if (!allPosts.length) return
+
+  return await getMeiliIndex("blog").addDocuments(
+    allPosts.map(post => ({
+      id: post._meta.path,
+      slug: post._meta.path,
+      name: post.title,
+      description: post.description,
     })),
   )
 }

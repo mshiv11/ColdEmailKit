@@ -1,5 +1,5 @@
 import { config } from "~/config"
-import { indexAlternatives, indexCategories, indexTools } from "~/lib/indexing"
+import { indexAlternatives, indexBlogPosts, indexCategories, indexComparisons, indexTools } from "~/lib/indexing"
 import { meili } from "~/services/meilisearch"
 
 const siteSlug = config.site.slug
@@ -86,6 +86,28 @@ const indexes = [
       rankingRules: ["words", "typo", "proximity", "attribute", "sort", "exactness"],
     },
   },
+  {
+    name: "comparisons",
+    primaryKey: "id",
+    settings: {
+      searchableAttributes: ["name", "description"],
+      displayedAttributes: ["id", "name", "slug", "description"],
+      filterableAttributes: ["id", "name"],
+      sortableAttributes: [],
+      rankingRules: ["words", "typo", "proximity", "attribute", "sort", "exactness"],
+    },
+  },
+  {
+    name: "blog",
+    primaryKey: "id",
+    settings: {
+      searchableAttributes: ["name", "description", "slug"],
+      displayedAttributes: ["id", "name", "slug", "description"],
+      filterableAttributes: ["slug"],
+      sortableAttributes: [],
+      rankingRules: ["words", "typo", "proximity", "attribute", "sort", "exactness"],
+    },
+  },
 ]
 
 async function cleanupIndexes() {
@@ -114,7 +136,7 @@ async function setupIndexes() {
 }
 
 async function reindexAll() {
-  await Promise.all([indexTools({}), indexAlternatives({}), indexCategories({})])
+  await Promise.all([indexTools({}), indexAlternatives({}), indexCategories({}), indexComparisons(), indexBlogPosts()])
   console.log("Reindexing complete.")
 }
 

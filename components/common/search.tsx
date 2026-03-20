@@ -74,7 +74,7 @@ export const Search = () => {
   const [query, setQuery] = useDebouncedState("", 500)
   const listRef = useRef<HTMLDivElement>(null)
 
-  const [tools, alternatives, categories] = results || []
+  const [tools, alternatives, categories, comparisons, blog] = results || []
   const isAdmin = session?.user.role === "admin"
   const isAdminPath = pathname.startsWith("/admin")
   const hasQuery = !!query.length
@@ -268,6 +268,22 @@ export const Search = () => {
             isAdminPath ? `/admin/categories/${slug}` : `/categories/${fullPath}`
           }
           renderItemDisplay={({ name }) => name}
+        />
+
+        <SearchResults
+          name="Comparisons"
+          items={comparisons?.hits}
+          onItemSelect={navigateTo}
+          getHref={({ slug }) => `/compare/${slug}`}
+          renderItemDisplay={({ name }) => <span className="flex-1 truncate">{name}</span>}
+        />
+
+        <SearchResults
+          name="Blog Posts"
+          items={blog?.hits}
+          onItemSelect={navigateTo}
+          getHref={({ slug }) => `/blog/${slug}`}
+          renderItemDisplay={({ name }) => <span className="flex-1 truncate">{name}</span>}
         />
       </CommandList>
 
