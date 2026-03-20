@@ -41,7 +41,7 @@ export function StickyToolHeader({ tool }: StickyToolHeaderProps) {
   }, [])
 
   return (
-    <div className="sticky top-(--header-offset) z-40 h-0 overflow-visible">
+    <div className="sticky top-(--header-offset) z-40 h-0 overflow-visible max-md:hidden">
       <div
         className={cx(
           "absolute top-0 inset-x-0 flex items-center justify-between py-1.5 bg-background transition-all duration-300",

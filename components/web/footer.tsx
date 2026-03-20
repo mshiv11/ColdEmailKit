@@ -122,12 +122,9 @@ export const Footer = ({ children, className, hideNewsletter, ...props }: Footer
 
           <NavLink href="/alternatives">Alternatives</NavLink>
           <NavLink href="/categories">Categories</NavLink>
+          <NavLink href="/compare">Compare</NavLink>
 
           <NavLink href="/integrations">Integrations</NavLink>
-          {/* Temporarily hidden - Topics and Licenses sections
-          <NavLink href="/topics">Topics</NavLink>
-          <NavLink href="/licenses">Licenses</NavLink>
-          */}
         </Stack>
 
         <Stack direction="column" className="text-sm md:col-span-3">

@@ -289,59 +289,85 @@ export default async function ToolPage(props: PageProps) {
             </OverlayImage>
           )}
 
-          {tool.content && <MarkdownWithFAQ code={tool.content} className="max-md:order-4" />}
+          {/* Quick-Jump Anchor Links (TOC) */}
+          <div className="flex items-center justify-center gap-4 md:gap-8 flex-wrap border-y w-full py-4 text-sm font-medium text-muted-foreground max-md:order-4">
+            <a href="#overview" className="hover:text-foreground transition-colors">
+              Overview
+            </a>
+            <a href="#features" className="hover:text-foreground transition-colors">
+              Features
+            </a>
+            {comparisons.length > 0 && (
+              <a href="#alternatives" className="hover:text-foreground transition-colors">
+                Alternatives
+              </a>
+            )}
+            <a href="#reviews" className="hover:text-foreground transition-colors">
+              Reviews
+            </a>
+          </div>
+
+          <div id="overview" className="scroll-mt-24 w-full max-md:order-5">
+            {tool.content && <MarkdownWithFAQ code={tool.content} />}
+          </div>
 
           {/* Features & Specifications */}
-          <ToolFeaturesDisplay
-            specifications={
-              tool.specifications as Parameters<typeof ToolFeaturesDisplay>[0]["specifications"]
-            }
-            pricingSpecs={
-              tool.pricingSpecs as Parameters<typeof ToolFeaturesDisplay>[0]["pricingSpecs"]
-            }
-            inboxFeatures={
-              tool.inboxFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["inboxFeatures"]
-            }
-            warmupFeatures={
-              tool.warmupFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["warmupFeatures"]
-            }
-            leadsFeatures={
-              tool.leadsFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["leadsFeatures"]
-            }
-            enrichmentFeatures={
-              tool.enrichmentFeatures as Parameters<
-                typeof ToolFeaturesDisplay
-              >[0]["enrichmentFeatures"]
-            }
-            copywritingFeatures={
-              tool.copywritingFeatures as Parameters<
-                typeof ToolFeaturesDisplay
-              >[0]["copywritingFeatures"]
-            }
-            outreachFeatures={
-              tool.outreachFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["outreachFeatures"]
-            }
-            deliverabilityFeatures={
-              tool.deliverabilityFeatures as Parameters<
-                typeof ToolFeaturesDisplay
-              >[0]["deliverabilityFeatures"]
-            }
-            linkedinFeatures={
-              tool.linkedinFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["linkedinFeatures"]
-            }
-          />
+          <div id="features" className="scroll-mt-24 w-full max-md:order-6">
+            <ToolFeaturesDisplay
+              specifications={
+                tool.specifications as Parameters<typeof ToolFeaturesDisplay>[0]["specifications"]
+              }
+              pricingSpecs={
+                tool.pricingSpecs as Parameters<typeof ToolFeaturesDisplay>[0]["pricingSpecs"]
+              }
+              inboxFeatures={
+                tool.inboxFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["inboxFeatures"]
+              }
+              warmupFeatures={
+                tool.warmupFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["warmupFeatures"]
+              }
+              leadsFeatures={
+                tool.leadsFeatures as Parameters<typeof ToolFeaturesDisplay>[0]["leadsFeatures"]
+              }
+              enrichmentFeatures={
+                tool.enrichmentFeatures as Parameters<
+                  typeof ToolFeaturesDisplay
+                >[0]["enrichmentFeatures"]
+              }
+              copywritingFeatures={
+                tool.copywritingFeatures as Parameters<
+                  typeof ToolFeaturesDisplay
+                >[0]["copywritingFeatures"]
+              }
+              outreachFeatures={
+                tool.outreachFeatures as Parameters<
+                  typeof ToolFeaturesDisplay
+                >[0]["outreachFeatures"]
+              }
+              deliverabilityFeatures={
+                tool.deliverabilityFeatures as Parameters<
+                  typeof ToolFeaturesDisplay
+                >[0]["deliverabilityFeatures"]
+              }
+              linkedinFeatures={
+                tool.linkedinFeatures as Parameters<
+                  typeof ToolFeaturesDisplay
+                >[0]["linkedinFeatures"]
+              }
+            />
+          </div>
 
           {/* Compare VS Alternatives — recovery section */}
           {comparisons.length > 0 && (
-            <ToolComparisons
-              toolName={tool.name}
-              comparisons={comparisons}
-              className="max-md:order-[9]"
-            />
+            <div id="alternatives" className="scroll-mt-24 w-full max-md:order-[9]">
+              <ToolComparisons toolName={tool.name} comparisons={comparisons} />
+            </div>
           )}
 
           {/* User Reviews */}
-          <ToolReviews tool={tool} className="max-md:order-[11]" />
+          <div id="reviews" className="scroll-mt-24 w-full max-md:order-[11]">
+            <ToolReviews tool={tool} />
+          </div>
 
           {/* Categories */}
           {!!tool.categories.length && (

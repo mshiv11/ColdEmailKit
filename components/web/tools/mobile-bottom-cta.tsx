@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Button } from "~/components/common/button"
 import { Icon } from "~/components/common/icon"
 import { ExternalLink } from "~/components/web/external-link"
+import { FaviconImage } from "~/components/web/ui/favicon"
 import type { ToolOne } from "~/server/web/tools/payloads"
 
 type MobileBottomCTAProps = {
@@ -45,6 +46,11 @@ export function MobileBottomCTA({ tool }: MobileBottomCTAProps) {
     >
       <div className="flex items-center justify-between gap-3 px-4 py-3 bg-background/95 backdrop-blur-sm border-t border-border shadow-lg">
         <div className="flex items-center gap-2 min-w-0 flex-1">
+          <FaviconImage
+            src={tool.faviconUrl}
+            title={tool.name}
+            className="size-5 rounded-sm shrink-0"
+          />
           <span className="text-sm font-semibold truncate">{tool.name}</span>
           {tool.overallRating ? (
             <span className="text-xs text-muted-foreground shrink-0">

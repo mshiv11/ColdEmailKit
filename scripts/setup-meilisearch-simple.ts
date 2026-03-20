@@ -1,5 +1,11 @@
 import { config } from "~/config"
-import { indexAlternatives, indexBlogPosts, indexCategories, indexComparisons, indexTools } from "~/lib/indexing"
+import {
+  indexAlternatives,
+  indexBlogPosts,
+  indexCategories,
+  indexComparisons,
+  indexTools,
+} from "~/lib/indexing"
 import { meili } from "~/services/meilisearch"
 
 const siteSlug = config.site.slug
@@ -136,7 +142,13 @@ async function setupIndexes() {
 }
 
 async function reindexAll() {
-  await Promise.all([indexTools({}), indexAlternatives({}), indexCategories({}), indexComparisons(), indexBlogPosts()])
+  await Promise.all([
+    indexTools({}),
+    indexAlternatives({}),
+    indexCategories({}),
+    indexComparisons(),
+    indexBlogPosts(),
+  ])
   console.log("Reindexing complete.")
 }
 

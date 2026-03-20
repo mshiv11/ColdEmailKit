@@ -106,7 +106,10 @@ export const indexComparisons = async () => {
       id: comparison.id,
       slug: `${comparison.tool1.slug}-vs-${comparison.tool2.slug}`,
       name: `${comparison.tool1.name} vs ${comparison.tool2.name}`,
-      description: comparison.customDescription || comparison.verdict || `Compare ${comparison.tool1.name} vs ${comparison.tool2.name}`,
+      description:
+        comparison.customDescription ||
+        comparison.verdict ||
+        `Compare ${comparison.tool1.name} vs ${comparison.tool2.name}`,
     })),
   )
 }
