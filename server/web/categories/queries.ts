@@ -77,7 +77,7 @@ export const findCategoryByPath = async (fullPath: string) => {
   cacheLife("max")
 
   return db.category.findFirst({
-    where: { fullPath, ...categoryWithTools },
+    where: { fullPath },
     select: categoryOnePayload,
   })
 }

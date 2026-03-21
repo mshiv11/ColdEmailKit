@@ -89,22 +89,28 @@ export function CategoryForm({
 
   // Group available categories by parent
   const groupedCategories = useMemo(() => {
-    return parents.reduce(
-      (acc, category) => {
-        // Skip categories with no parent or with path that's too deep
-        if (!category.parentId || category.fullPath.split("/").length >= 3) {
-          return acc
-        }
+    const acc: Record<string, typeof parents> = {}
+    
+    // First, initialize all top-level categories as keys
+    for (const c of parents) {
+      if (!c.parentId) {
+        acc[c.id] = []
+      }
+    }
 
-        if (!acc[category.parentId]) {
-          acc[category.parentId] = []
-        }
+    // Then, add children to their respective parents
+    for (const c of parents) {
+      // Skip top level categories here, and categories that are too deep
+      if (!c.parentId || c.fullPath.split("/").length >= 3) {
+        continue
+      }
+      
+      if (acc[c.parentId]) {
+        acc[c.parentId].push(c)
+      }
+    }
 
-        acc[category.parentId].push(category)
-        return acc
-      },
-      {} as Record<string, typeof parents>,
-    )
+    return acc
   }, [parents])
 
   // Upsert category
@@ -180,6 +186,7 @@ export function CategoryForm({
               <FormControl>
                 <Input {...field} />
               </FormControl>
+              <p className="text-sm text-muted-foreground">Used as the display name (e.g. &apos;Email Warmup Tools&apos;). Defaults to &apos;{form.getValues("name")} Tools&apos;.</p>
               <FormMessage />
             </FormItem>
           )}
@@ -194,6 +201,7 @@ export function CategoryForm({
               <FormControl>
                 <Input {...field} />
               </FormControl>
+              <p className="text-sm text-muted-foreground">Used for SEO and introductory text on the category page.</p>
               <FormMessage />
             </FormItem>
           )}

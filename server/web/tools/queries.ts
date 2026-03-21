@@ -27,7 +27,7 @@ export const searchTools = async (search: FilterSchema, where?: Prisma.ToolWhere
 
   if (sort !== "default") {
     const [sortBy, sortOrder] = sort.split(".") as [keyof typeof orderBy, Prisma.SortOrder]
-    orderBy = { [sortBy]: sortOrder }
+    orderBy = [{ [sortBy]: sortOrder }, { isFeatured: "desc" }, { score: "desc" }] as Prisma.ToolFindManyArgs["orderBy"]
   }
 
   const whereQuery: Prisma.ToolWhereInput = {
