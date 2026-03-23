@@ -94,5 +94,9 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.8.3"
   },
-  "packageManager": "bun@1.2.2"
+  "packageManager": "bun@1.2.2",
+  "supportedArchitectures": {
+    "os": ["windows", "linux", "darwin"],
+    "cpu": ["x64", "arm64"]
+  }
 }
