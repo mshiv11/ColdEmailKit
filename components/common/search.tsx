@@ -1,7 +1,7 @@
 "use client"
 
 import { type HotkeyItem, useDebouncedState, useHotkeys } from "@mantine/hooks"
-import { getUrlHostname } from "@primoui/utils"
+import { getUrlHostname } from "~/utils/helpers"
 import { usePathname, useRouter } from "next/navigation"
 import { posthog } from "posthog-js"
 import { type ReactNode, useEffect, useRef, useState } from "react"

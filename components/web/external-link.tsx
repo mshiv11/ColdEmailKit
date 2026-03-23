@@ -1,6 +1,7 @@
 "use client"
 
-import { getUrlHostname, isExternalUrl } from "@primoui/utils"
+import { isExternalUrl } from "@primoui/utils"
+import { getUrlHostname } from "~/utils/helpers"
 import { type Properties, posthog } from "posthog-js"
 import type { ComponentProps } from "react"
 import { siteConfig } from "~/config/site"

@@ -79,3 +79,17 @@ export const getElementPosition = (id?: string) => {
 
   return { id, top }
 }
+
+/**
+ * Extracts the hostname from a URL string
+ * @param url - The URL to extract the hostname from
+ * @returns The hostname without www. prefix, or the original string if parsing fails
+ */
+export const getUrlHostname = (url: string) => {
+  try {
+    const { hostname } = new URL(url)
+    return hostname.replace(/^www\./, "")
+  } catch {
+    return url
+  }
+}

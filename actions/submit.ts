@@ -1,6 +1,7 @@
 "use server"
 
-import { getUrlHostname, slugify } from "@primoui/utils"
+import { slugify } from "@primoui/utils"
+import { getUrlHostname } from "~/utils/helpers"
 import { headers } from "next/headers"
 import { after } from "next/server"
 import { createServerAction } from "zsa"

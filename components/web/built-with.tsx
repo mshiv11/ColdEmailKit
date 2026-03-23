@@ -1,4 +1,4 @@
-import { getUrlHostname } from "@primoui/utils"
+import { getUrlHostname } from "~/utils/helpers"
 import type { ComponentProps } from "react"
 import { Stack } from "~/components/common/stack"
 import { ExternalLink } from "~/components/web/external-link"

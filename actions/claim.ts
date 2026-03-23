@@ -1,6 +1,6 @@
 "use server"
 
-import { getUrlHostname } from "@primoui/utils"
+import { getUrlHostname } from "~/utils/helpers"
 import { revalidateTag } from "next/cache"
 import { headers } from "next/headers"
 import { after } from "next/server"

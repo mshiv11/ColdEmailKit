@@ -1,4 +1,4 @@
-import { getUrlHostname } from "@primoui/utils"
+import { getUrlHostname } from "~/utils/helpers"
 import { Link, Text } from "@react-email/components"
 import { config } from "~/config"
 import { EmailWrapper, type EmailWrapperProps } from "~/emails/components/wrapper"

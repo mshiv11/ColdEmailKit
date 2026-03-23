@@ -1,4 +1,4 @@
-import { getUrlHostname } from "@primoui/utils"
+import { getUrlHostname } from "~/utils/helpers"
 import { Button, type ButtonProps, Section } from "@react-email/components"
 import { siteConfig } from "~/config/site"
 import { addSearchParams } from "~/utils/search-params"
