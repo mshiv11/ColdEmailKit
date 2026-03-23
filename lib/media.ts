@@ -1,10 +1,10 @@
 import { DeleteObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3"
 import { Upload } from "@aws-sdk/lib-storage"
-import { stripURLSubpath } from "@primoui/utils"
 import wretch from "wretch"
 import QueryStringAddon from "wretch/addons/queryString"
 import { env, isProd } from "~/env"
 import { s3Client } from "~/services/s3"
+import { getUrlHostname } from "~/utils/helpers"
 import { tryCatch } from "~/utils/helpers"
 
 /**
@@ -137,7 +137,7 @@ export const uploadMedia = async ({ endpointUrl, s3Key, options = {} }: MediaUpl
  */
 export const uploadFavicon = async (url: string, s3Key: string) => {
   const options = {
-    domain_url: stripURLSubpath(url),
+    domain_url: getUrlHostname(url),
     sz: "128",
   }
 

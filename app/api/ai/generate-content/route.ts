@@ -153,7 +153,8 @@ Based on the above data, generate:
     return result.toTextStreamResponse()
   } catch (error) {
     console.error("Generate content API error:", error)
-    return new Response(JSON.stringify({ error: "Content generation failed. Please try again." }), {
+    const errorMessage = error instanceof Error ? error.message : "Content generation failed. Please try again."
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     })

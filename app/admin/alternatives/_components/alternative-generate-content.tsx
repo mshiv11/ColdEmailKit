@@ -21,11 +21,11 @@ export const AlternativeGenerateDescription = () => {
     schema: descriptionSchema,
 
     onFinish: ({ error }) => {
-      error ? toast.error(errorMessage) : toast.success(successMessage)
+      error ? toast.error(error.message || errorMessage) : toast.success(successMessage)
     },
 
-    onError: () => {
-      toast.error(errorMessage)
+    onError: (error) => {
+      toast.error(error.message || errorMessage)
     },
   })
 
