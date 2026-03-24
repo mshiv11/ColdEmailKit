@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 import { useTransition } from "react"
 import {
   deleteAllComparisonFaqs,
-  updateToolComparisonDescription,
+  deleteComparisonData,
 } from "~/server/admin/comparisons/actions"
 import type { ComparisonPair } from "~/server/admin/comparisons/queries"
 
@@ -48,16 +48,14 @@ export const ComparisonsDeleteDialog = ({
         return
       }
       // Clear comparison descriptions
-      await Promise.all([
-        updateToolComparisonDescription({
-          toolId: comparison.tool1Id,
-          comparisonDescription: null,
-        }),
-        updateToolComparisonDescription({
-          toolId: comparison.tool2Id,
-          comparisonDescription: null,
-        }),
-      ])
+      const [, dataError] = await deleteComparisonData({
+        tool1Id: comparison.tool1Id,
+        tool2Id: comparison.tool2Id,
+      })
+      if (dataError) {
+        toast.error("Failed to delete comparison data")
+        return
+      }
       toast.success("Comparison deleted")
       props.onOpenChange?.(false)
       onSuccess?.()

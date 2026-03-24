@@ -55,6 +55,26 @@ export const deleteComparisonFaq = adminProcedure
 
 // Removed updateToolComparisonDescription Action
 
+export const deleteComparisonData = adminProcedure
+  .createServerAction()
+  .input(z.object({ tool1Id: z.string(), tool2Id: z.string() }))
+  .handler(async ({ input: { tool1Id, tool2Id } }) => {
+    const [id1, id2] = [tool1Id, tool2Id].sort()
+    
+    await db.comparison.deleteMany({
+      where: {
+        tool1Id: id1,
+        tool2Id: id2,
+      },
+    })
+    
+    revalidateTag(`comparison-data-${tool1Id}-${tool2Id}`)
+    revalidateTag(`comparison-data-${tool2Id}-${tool1Id}`)
+    revalidatePath("/admin/compare")
+
+    return { success: true }
+  })
+
 export const upsertComparisonData = adminProcedure
   .createServerAction()
   .input(
