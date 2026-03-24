@@ -197,7 +197,9 @@ export default async function ComparisonPage({ params }: PageProps) {
             {customTitle}
           </H2>
 
-          <p className="text-muted-foreground text-sm max-w-2xl">{customDescription}</p>
+          <p className="text-muted-foreground text-sm max-w-2xl text-balance">
+            Compare {tool1.name} and {tool2.name} side-by-side across features, pricing, deliverability, and more. Find the best cold email tool for your outreach needs.
+          </p>
 
           {author && (
             <div className="mt-4 flex flex-wrap justify-center items-center gap-4 text-sm text-muted-foreground">
@@ -229,6 +231,13 @@ export default async function ComparisonPage({ params }: PageProps) {
         </div>
       </div>
 
+      {/* Custom Comparison Overview Section */}
+      {comparisonData?.customDescription && (
+        <div className="flex flex-col gap-4 rounded-xl border bg-card p-6 md:p-8 shadow-sm">
+          <ComparisonMarkdown code={comparisonData.customDescription} className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground" />
+        </div>
+      )}
+
       <div className="flex flex-col gap-12" id="comparison-overview">
         {/* Responsive overview — Stacked on mobile, side-by-side on desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start lg:grid-rows-[auto_auto_auto_auto_auto]">
@@ -247,7 +256,7 @@ export default async function ComparisonPage({ params }: PageProps) {
           className="flex flex-col gap-4 rounded-xl border bg-card p-6 md:p-8 shadow-sm scroll-mt-24"
         >
           <H2 className="text-xl md:text-2xl m-0">ColdEmailKit's Verdict</H2>
-          <ComparisonMarkdown code={verdict} className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap" />
+          <ComparisonMarkdown code={verdict} className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground" />
         </div>
       )}
 
