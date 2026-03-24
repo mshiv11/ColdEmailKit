@@ -64,7 +64,7 @@ const ToolEntry = ({
                     {tool.name}
                   </H2>
 
-                  {tool.ownerId && <VerifiedBadge size="lg" />}
+                  {tool.ownerId && tool.owner?.role !== "admin" && <VerifiedBadge size="lg" />}
                 </div>
 
                 <StarRating
@@ -85,7 +85,7 @@ const ToolEntry = ({
                     {tool.name}
                   </H2>
 
-                  {tool.ownerId && <VerifiedBadge size="lg" />}
+                  {tool.ownerId && tool.owner?.role !== "admin" && <VerifiedBadge size="lg" />}
                 </div>
 
                 <StarRating
@@ -109,14 +109,14 @@ const ToolEntry = ({
 
       {tool.screenshotUrl && (
         <OverlayImage
-          href={internalHref}
-          target="_self"
-          doFollow={true}
+          href={linkToAffiliate ? externalHref : internalHref}
+          target={linkToAffiliate ? "_blank" : "_self"}
+          doFollow={isFeatured}
           src={tool.screenshotUrl}
           alt={`Screenshot of ${tool.name} website`}
           className="not-prose"
         >
-          Read more
+          {linkToAffiliate ? "Visit website" : "Read more"}
         </OverlayImage>
       )}
 
@@ -131,9 +131,38 @@ const ToolEntry = ({
         )
       )}
 
-      <Button suffix={<Icon name="lucide/arrow-right" />} className="not-prose self-start" asChild>
-        <Link href={internalHref}>Read more</Link>
-      </Button>
+      {linkToAffiliate ? (
+        <div className="flex flex-col sm:flex-row items-start gap-3 mt-2">
+          <Button
+            variant="cta"
+            suffix={<Icon name="lucide/arrow-up-right" />}
+            className="w-full sm:w-auto"
+            asChild
+          >
+            <ExternalLink
+              href={externalHref}
+              doFollow={isFeatured}
+              eventName="click_website"
+              eventProps={{ url: tool.websiteUrl, isFeatured, source: "alternative_cta", toolSlug: tool.slug }}
+            >
+              Visit {tool.name}
+            </ExternalLink>
+          </Button>
+
+          <Button
+            variant="secondary"
+            suffix={<Icon name="lucide/arrow-right" />}
+            className="w-full sm:w-auto not-prose"
+            asChild
+          >
+            <Link href={internalHref}>Read more</Link>
+          </Button>
+        </div>
+      ) : (
+        <Button suffix={<Icon name="lucide/arrow-right" />} className="not-prose self-start" asChild>
+          <Link href={internalHref}>Read more</Link>
+        </Button>
+      )}
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { Button } from "~/components/common/button"
 import { H2 } from "~/components/common/heading"
 import { Icon } from "~/components/common/icon"
 import { ComparisonFaqs } from "~/components/web/compare/comparison-faqs"
+import { ComparisonMarkdown } from "~/components/web/comparison-markdown"
 
 import { ComparisonToolCard } from "~/components/web/compare/comparison-tool-card"
 import { ComparisonTable } from "~/components/web/compare/comparison-table"
@@ -12,6 +13,9 @@ import { RelatedComparisons } from "~/components/web/compare/related-comparisons
 import { ExternalLink } from "~/components/web/external-link"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
+import { Author } from "~/components/web/ui/author"
+import { Link } from "~/components/common/link"
+import { db } from "~/services/db"
 import { metadataConfig } from "~/config/metadata"
 import { generateBreadcrumbSchema, jsonLdScriptProps, wrapInGraph } from "~/lib/schemas"
 import { findComparisonFaqs, findComparisonTools } from "~/server/web/comparisons/queries"
@@ -151,6 +155,8 @@ export default async function ComparisonPage({ params }: PageProps) {
     ),
   ])
 
+  const author = tool1.ownerId ? await db.user.findUnique({ where: { id: tool1.ownerId } }) : null
+
   const verdict = comparisonData?.verdict
   const customTitle =
     comparisonData?.customTitle || `${tool1.name} vs ${tool2.name}: Full Comparison (2026)`
@@ -192,6 +198,14 @@ export default async function ComparisonPage({ params }: PageProps) {
           </H2>
 
           <p className="text-muted-foreground text-sm max-w-2xl">{customDescription}</p>
+
+          {author && (
+            <div className="mt-4 flex flex-wrap justify-center items-center gap-4 text-sm text-muted-foreground">
+              Written by <Link href={`/authors/${(author as any).slug || author.id}`}><Author name={author.name || "Unknown"} image={author.image} /></Link>
+              <span className="hidden sm:inline-block border-l h-4" />
+              <span>Updated on {new Date((comparisonData as any)?.updatedAt || (comparisonData as any)?.createdAt || Date.now()).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+            </div>
+          )}
         </div>
 
         {/* Quick-Jump Anchor Links */}
@@ -218,8 +232,8 @@ export default async function ComparisonPage({ params }: PageProps) {
       <div className="flex flex-col gap-12" id="comparison-overview">
         {/* Responsive overview — Stacked on mobile, side-by-side on desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start lg:grid-rows-[auto_auto_auto_auto_auto]">
-          <ComparisonToolCard tool={tool1} isFeatured={tool1.isFeatured} />
-          <ComparisonToolCard tool={tool2} isFeatured={tool2.isFeatured} />
+          <ComparisonToolCard tool={tool1} isFeatured={tool1.isFeatured} customDescription={comparisonData?.tool1Description} />
+          <ComparisonToolCard tool={tool2} isFeatured={tool2.isFeatured} customDescription={comparisonData?.tool2Description} />
         </div>
 
         {/* Unified Interactive Features Table */}
@@ -233,9 +247,7 @@ export default async function ComparisonPage({ params }: PageProps) {
           className="flex flex-col gap-4 rounded-xl border bg-card p-6 md:p-8 shadow-sm scroll-mt-24"
         >
           <H2 className="text-xl md:text-2xl m-0">ColdEmailKit's Verdict</H2>
-          <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap">
-            {verdict}
-          </div>
+          <ComparisonMarkdown code={verdict} className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground whitespace-pre-wrap" />
         </div>
       )}
 

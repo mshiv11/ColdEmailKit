@@ -66,6 +66,14 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Author Profile fields
+  slug          String?   @unique
+  headline      String?
+  shortBio      String?
+  bio           String?   @db.Text
+  twitterUrl    String?
+  websiteUrl    String?
+
   // Relations
   accounts Account[]
   sessions Session[]
@@ -179,7 +187,6 @@ model Tool {
   bestFor         String?
   hasFreeTrial    Boolean    @default(false)
   customTitle           String?
-  comparisonDescription String?
   
   // Specifications & Features (JSON fields for flexibility and comparison)
   specifications          Json?    @default("{}")  // Core capabilities (0-5 ratings)
@@ -417,6 +424,8 @@ model Comparison {
   verdict           String?  @db.Text
   customTitle       String?
   customDescription String?  @db.Text
+  tool1Description  String?  @db.Text
+  tool2Description  String?  @db.Text
   createdAt         DateTime @default(now())
   updatedAt DateTime @updatedAt
 

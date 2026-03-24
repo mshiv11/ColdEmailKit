@@ -12,7 +12,6 @@ export const comparisonToolPayload = Prisma.validator<Prisma.ToolSelect>()({
   faviconUrl: true,
   screenshotUrl: true,
   description: true,
-  comparisonDescription: true,
   overallRating: true,
   totalReviews: true,
   trustScore: true,

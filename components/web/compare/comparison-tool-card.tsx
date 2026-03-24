@@ -15,6 +15,7 @@ import type { ComparisonTool } from "~/server/web/comparisons/payloads"
 type ComparisonToolCardProps = {
   tool: ComparisonTool
   isFeatured?: boolean
+  customDescription?: string | null
 }
 
 /**
@@ -22,9 +23,9 @@ type ComparisonToolCardProps = {
  * Uses CSS subgrid rows so sections align across the two columns.
  * Row order: header | description | CTA | screenshot | details
  */
-export function ComparisonToolCard({ tool, isFeatured }: ComparisonToolCardProps) {
+export function ComparisonToolCard({ tool, isFeatured, customDescription }: ComparisonToolCardProps) {
   const href = tool.affiliateUrl || tool.websiteUrl
-  const description = tool.comparisonDescription || tool.description
+  const description = customDescription || tool.description
 
   return (
     <div className="grid grid-rows-subgrid row-span-5 gap-6">
@@ -46,7 +47,7 @@ export function ComparisonToolCard({ tool, isFeatured }: ComparisonToolCardProps
                 />
               </Tooltip>
             )}
-            {tool.ownerId && <VerifiedBadge size="md" />}
+            {tool.ownerId && tool.owner?.role !== "admin" && <VerifiedBadge size="md" />}
           </div>
 
           <TrustBreakdownHover tool={tool}>

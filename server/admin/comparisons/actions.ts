@@ -53,27 +53,7 @@ export const deleteComparisonFaq = adminProcedure
     return faq
   })
 
-export const updateToolComparisonDescription = adminProcedure
-  .createServerAction()
-  .input(
-    z.object({
-      toolId: z.string(),
-      comparisonDescription: z.string().nullable(),
-    }),
-  )
-  .handler(async ({ input: { toolId, comparisonDescription } }) => {
-    const tool = await db.tool.update({
-      where: { id: toolId },
-      data: { comparisonDescription },
-      select: { id: true, slug: true },
-    })
-
-    revalidateTag(`tool-${tool.slug}`)
-    revalidateTag(`comparison-${tool.slug}`)
-    revalidatePath("/admin/compare")
-
-    return tool
-  })
+// Removed updateToolComparisonDescription Action
 
 export const upsertComparisonData = adminProcedure
   .createServerAction()
@@ -84,33 +64,54 @@ export const upsertComparisonData = adminProcedure
       verdict: z.string().nullable(),
       customTitle: z.string().nullable().optional(),
       customDescription: z.string().nullable().optional(),
+      tool1Description: z.string().nullable().optional(),
+      tool2Description: z.string().nullable().optional(),
     }),
   )
-  .handler(async ({ input: { tool1Id, tool2Id, verdict, customTitle, customDescription } }) => {
-    // We enforce alphabetical ordering of IDs for the unique constraint
-    const [id1, id2] = [tool1Id, tool2Id].sort()
+  .handler(
+    async ({
+      input: {
+        tool1Id,
+        tool2Id,
+        verdict,
+        customTitle,
+        customDescription,
+        tool1Description,
+        tool2Description,
+      },
+    }) => {
+      // We enforce alphabetical ordering of IDs for the unique constraint
+      const [id1, id2] = [tool1Id, tool2Id].sort()
+      
+      // Determine which description maps to which tool based on the sort
+      const finalTool1Desc = id1 === tool1Id ? tool1Description : tool2Description;
+      const finalTool2Desc = id1 === tool1Id ? tool2Description : tool1Description;
 
-    const comparison = await db.comparison.upsert({
-      where: {
-        tool1Id_tool2Id: {
+      const comparison = await db.comparison.upsert({
+        where: {
+          tool1Id_tool2Id: {
+            tool1Id: id1,
+            tool2Id: id2,
+          },
+        },
+        create: {
           tool1Id: id1,
           tool2Id: id2,
+          verdict,
+          customTitle,
+          customDescription,
+          tool1Description: finalTool1Desc,
+          tool2Description: finalTool2Desc,
         },
-      },
-      create: {
-        tool1Id: id1,
-        tool2Id: id2,
-        verdict,
-        customTitle,
-        customDescription,
-      },
-      update: {
-        verdict,
-        customTitle,
-        customDescription,
-      },
-      select: { id: true },
-    })
+        update: {
+          verdict,
+          customTitle,
+          customDescription,
+          tool1Description: finalTool1Desc,
+          tool2Description: finalTool2Desc,
+        },
+        select: { id: true },
+      })
 
     revalidateTag(`comparison-data-${tool1Id}-${tool2Id}`)
     revalidateTag(`comparison-data-${tool2Id}-${tool1Id}`)

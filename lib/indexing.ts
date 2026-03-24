@@ -7,6 +7,7 @@ import {
 import { allPosts } from "content-collections"
 import { db } from "~/services/db"
 import { getMeiliIndex } from "~/services/meilisearch"
+import { stripMarkdown } from "~/utils/markdown"
 
 /**
  * Index tools in MeiliSearch
@@ -108,7 +109,7 @@ export const indexComparisons = async () => {
       name: `${comparison.tool1.name} vs ${comparison.tool2.name}`,
       description:
         comparison.customDescription ||
-        comparison.verdict ||
+        (comparison.verdict ? stripMarkdown(comparison.verdict) : null) ||
         `Compare ${comparison.tool1.name} vs ${comparison.tool2.name}`,
     })),
   )

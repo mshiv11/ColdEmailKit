@@ -22,18 +22,17 @@ import {
 import {
   upsertComparisonFaq,
   deleteComparisonFaq,
-  updateToolComparisonDescription,
   deleteAllComparisonFaqs,
   revalidateComparison,
   upsertComparisonData,
 } from "~/server/admin/comparisons/actions"
+import { ComparisonMarkdown } from "~/components/web/comparison-markdown"
 
 type Tool = {
   id: string
   name: string
   slug: string
   faviconUrl: string | null
-  comparisonDescription?: string | null
 }
 
 type FaqEntry = {
@@ -49,6 +48,8 @@ type ComparisonFormProps = {
   existingVerdict: string | null
   existingCustomTitle: string | null
   existingCustomDescription: string | null
+  existingTool1Description: string | null
+  existingTool2Description: string | null
   existingFaqs: FaqEntry[]
 }
 
@@ -58,13 +59,15 @@ export function ComparisonForm({
   existingVerdict,
   existingCustomTitle,
   existingCustomDescription,
+  existingTool1Description,
+  existingTool2Description,
   existingFaqs,
 }: ComparisonFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
-  const [desc1, setDesc1] = useState(tool1.comparisonDescription ?? "")
-  const [desc2, setDesc2] = useState(tool2.comparisonDescription ?? "")
+  const [desc1, setDesc1] = useState(existingTool1Description ?? "")
+  const [desc2, setDesc2] = useState(existingTool2Description ?? "")
   const [verdict, setVerdict] = useState(existingVerdict ?? "")
   const [customTitle, setCustomTitle] = useState(existingCustomTitle ?? "")
   const [customDescription, setCustomDescription] = useState(existingCustomDescription ?? "")
@@ -74,18 +77,16 @@ export function ComparisonForm({
 
   const handleSaveDescriptions = () => {
     startTransition(async () => {
-      const [r1, r2, vRes] = await Promise.all([
-        updateToolComparisonDescription({ toolId: tool1.id, comparisonDescription: desc1 || null }),
-        updateToolComparisonDescription({ toolId: tool2.id, comparisonDescription: desc2 || null }),
-        upsertComparisonData({
-          tool1Id: tool1.id,
-          tool2Id: tool2.id,
-          verdict: verdict || null,
-          customTitle: customTitle || null,
-          customDescription: customDescription || null,
-        }),
-      ])
-      if (r1[1] || r2[1] || vRes[1]) {
+      const [vRes, error] = await upsertComparisonData({
+        tool1Id: tool1.id,
+        tool2Id: tool2.id,
+        verdict: verdict || null,
+        customTitle: customTitle || null,
+        customDescription: customDescription || null,
+        tool1Description: desc1 || null,
+        tool2Description: desc2 || null,
+      })
+      if (error) {
         toast.error("Failed to save descriptions and verdict")
       } else {
         toast.success("Content saved successfully")
@@ -151,17 +152,19 @@ export function ComparisonForm({
         return
       }
       // Clear comparison descriptions
-      await Promise.all([
-        updateToolComparisonDescription({ toolId: tool1.id, comparisonDescription: null }),
-        updateToolComparisonDescription({ toolId: tool2.id, comparisonDescription: null }),
-        upsertComparisonData({
-          tool1Id: tool1.id,
-          tool2Id: tool2.id,
-          verdict: null,
-          customTitle: null,
-          customDescription: null,
-        }),
-      ])
+      const [, error] = await upsertComparisonData({
+        tool1Id: tool1.id,
+        tool2Id: tool2.id,
+        verdict: null,
+        customTitle: null,
+        customDescription: null,
+        tool1Description: null,
+        tool2Description: null,
+      })
+      if (error) {
+        toast.error("Failed to delete comparison data")
+        return
+      }
       toast.success("Comparison deleted")
       router.push("/admin/compare")
       router.refresh()
@@ -274,13 +277,19 @@ export function ComparisonForm({
           </div>
 
           <div className="flex flex-col gap-2 pt-4 border-t">
-            <label className="text-sm font-medium">Final Verdict (Bottom of page)</label>
+            <label className="text-sm font-medium">Final Verdict (Bottom of page - Markdown and URLs supported)</label>
             <TextArea
               className="min-h-32"
               placeholder={`Write the final verdict comparing ${tool1.name} and ${tool2.name}...`}
               value={verdict}
               onChange={e => setVerdict(e.target.value)}
             />
+            {verdict && (
+              <div className="mt-2 rounded-md border bg-muted/30 p-4">
+                <H6 className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Live Preview</H6>
+                <ComparisonMarkdown code={verdict} className="text-sm border-t pt-2" />
+              </div>
+            )}
           </div>
         </div>
       </CollapsibleSection>
@@ -323,13 +332,19 @@ export function ComparisonForm({
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium">Answer</label>
+              <label className="text-sm font-medium">Answer (Markdown and URLs supported)</label>
               <TextArea
                 className="min-h-24"
                 placeholder="Write a detailed answer…"
                 value={newA}
                 onChange={e => setNewA(e.target.value)}
               />
+              {newA && (
+                <div className="mt-2 rounded-md border bg-muted/30 p-4">
+                  <H6 className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Live Preview</H6>
+                  <ComparisonMarkdown code={newA} className="text-sm border-t pt-2" />
+                </div>
+              )}
             </div>
             <Button
               onClick={handleAddFaq}

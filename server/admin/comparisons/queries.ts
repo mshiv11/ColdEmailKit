@@ -11,10 +11,6 @@ export type ComparisonPair = {
   createdAt: Date
 }
 
-/**
- * Fetches all comparison FAQ pairs grouped by tool pair (for admin DataTable).
- * Also includes pairs where tools have comparisonDescription set (even without FAQs).
- */
 export const findAllComparisonPairs = async (): Promise<ComparisonPair[]> => {
   // 1. Get all FAQ-based pairs
   const faqs = await db.comparisonFaq.findMany({
@@ -30,49 +26,46 @@ export const findAllComparisonPairs = async (): Promise<ComparisonPair[]> => {
     orderBy: { createdAt: "desc" },
   })
 
+  // 2. Add pairs from Comparison table (might overlap)
+  const comparisons = await db.comparison.findMany({
+    select: {
+      id: true,
+      tool1Id: true,
+      tool2Id: true,
+      createdAt: true,
+      tool1: { select: { id: true, name: true, slug: true, faviconUrl: true } },
+      tool2: { select: { id: true, name: true, slug: true, faviconUrl: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  })
+
   // Group by tool pair
   const pairs = new Map<string, ComparisonPair>()
 
-  for (const faq of faqs) {
-    const key = [faq.tool1Id, faq.tool2Id].sort().join("-")
+  const checkAndSetPair = (item: any, isFaq: boolean) => {
+    const [id1, id2] = [item.tool1Id, item.tool2Id].sort()
+    const key = `${id1}-${id2}`
     if (pairs.has(key)) {
-      pairs.get(key)!.faqCount++
+      if (isFaq) pairs.get(key)!.faqCount++
     } else {
-      const slug = `${faq.tool1.slug}-vs-${faq.tool2.slug}`
+      const slug = `${item.tool1.slug}-vs-${item.tool2.slug}`
       pairs.set(key, {
         id: key,
         slug,
-        tool1Id: faq.tool1Id,
-        tool2Id: faq.tool2Id,
-        tool1: faq.tool1,
-        tool2: faq.tool2,
-        faqCount: 1,
-        createdAt: faq.createdAt,
+        tool1Id: item.tool1Id,
+        tool2Id: item.tool2Id,
+        tool1: item.tool1,
+        tool2: item.tool2,
+        faqCount: isFaq ? 1 : 0,
+        createdAt: item.createdAt,
       })
     }
   }
 
-  // 2. Also find tools that have comparisonDescription set but may not have FAQs yet
-  // These are "description-only" comparisons that should still show up
-  const toolsWithDesc = await db.tool.findMany({
-    where: {
-      comparisonDescription: { not: null },
-    },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      faviconUrl: true,
-      comparisonDescription: true,
-      updatedAt: true,
-    },
-  })
+  faqs.forEach(f => checkAndSetPair(f, true))
+  comparisons.forEach(f => checkAndSetPair(f, false))
 
-  // For each tool with a description, check if it's part of any FAQ pair we already know about
-  // If not, we can't determine the pair (no tool2 info), so we skip standalone descriptions
-  // This is expected — descriptions are set on the per-comparison edit page which requires both tools
-
-  return Array.from(pairs.values())
+  return Array.from(pairs.values()).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 }
 
 /**
@@ -91,16 +84,6 @@ export const findPairFaqs = async (tool1Id: string, tool2Id: string) => {
 }
 
 /**
- * Get tool comparison description for admin editing
- */
-export const findToolComparisonDescription = async (toolId: string) => {
-  return db.tool.findUnique({
-    where: { id: toolId },
-    select: { id: true, name: true, comparisonDescription: true },
-  })
-}
-
-/**
  * Get the dedicated comparison data (verdict, custom SEO) for a comparison pair
  */
 export const findComparisonData = async (tool1Id: string, tool2Id: string) => {
@@ -111,9 +94,47 @@ export const findComparisonData = async (tool1Id: string, tool2Id: string) => {
         { tool1Id: tool2Id, tool2Id: tool1Id },
       ],
     },
-    select: { verdict: true, customTitle: true, customDescription: true },
+    select: { 
+      verdict: true, 
+      customTitle: true, 
+      customDescription: true,
+      tool1Description: true,
+      tool2Description: true
+    },
   })
-  return comparison || { verdict: null, customTitle: null, customDescription: null }
+  
+  if (comparison) {
+    // If the DB returned them but they were inserted under swapped IDs, correct them
+    // However, our action `upsertComparisonData` now handles sorting, so it correctly saves
+    // we need to return the correct description for tool1Id and tool2Id.
+    // The query above can match either order. So we must map it back correctly.
+    const dbMatchedMatchedTool1IdFirst = (await db.comparison.findFirst({
+      where: { tool1Id: tool1Id, tool2Id: tool2Id },
+      select: { id: true }
+    })) != null;
+    
+    // Actually `upsertComparisonData` creates them with sorted IDs, 
+    // and correctly applies `tool1Description` to whichever ID was first in the sorted array.
+    // Let's just find the exact one we fetched. 
+    // Wait, the action `upsertComparisonData` uses `[id1, id2] = [tool1Id, tool2Id].sort()`.
+    // It assigned `tool1Description: finalTool1Desc = id1 === tool1Id ? tool1Description_arg : tool2Description_arg`.
+    // So `db-tool1Description` corresponds to `db-tool1Id` (which is `id1`).
+    // If our `tool1Id_arg` === `id1`, then `tool1Description_arg` is `db-tool1Description`.
+    // If our `tool1Id_arg` !== `id1`, then `tool1Description_arg` is `db-tool2Description`.
+    
+    // We don't have the `id1` here from the DB object since we didn't select it. Let's just assume the user sorts it here as well.
+    const [id1, id2] = [tool1Id, tool2Id].sort()
+    
+    return {
+      verdict: comparison.verdict,
+      customTitle: comparison.customTitle,
+      customDescription: comparison.customDescription,
+      tool1Description: id1 === tool1Id ? comparison.tool1Description : comparison.tool2Description,
+      tool2Description: id1 === tool1Id ? comparison.tool2Description : comparison.tool1Description,
+    }
+  }
+
+  return { verdict: null, customTitle: null, customDescription: null, tool1Description: null, tool2Description: null }
 }
 
 /**

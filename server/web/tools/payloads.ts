@@ -55,6 +55,7 @@ export const toolOnePayload = Prisma.validator<Prisma.ToolSelect>()({
   updatedAt: true,
   license: true,
   ownerId: true,
+  owner: { select: { role: true } },
   g2Rating: true,
   g2Reviews: true,
   trustpilotRating: true,
@@ -122,6 +123,7 @@ export const toolManyPayload = Prisma.validator<Prisma.ToolSelect>()({
   createdAt: true,
   updatedAt: true,
   ownerId: true,
+  owner: { select: { role: true } },
   alternatives: { ...toolAlternativesPayload, take: 1 },
 })
 
@@ -144,6 +146,7 @@ export const toolManyExtendedPayload = Prisma.validator<Prisma.ToolSelect>()({
   createdAt: true,
   updatedAt: true,
   ownerId: true,
+  owner: { select: { role: true } },
   categories: toolCategoriesPayload,
 })
 

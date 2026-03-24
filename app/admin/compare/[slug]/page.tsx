@@ -26,11 +26,11 @@ const ComparisonEditPage = async ({ params }: PageProps) => {
   const [tool1Full, tool2Full] = await Promise.all([
     db.tool.findFirst({
       where: { slug: slug1, status: ToolStatus.Published },
-      select: { id: true, name: true, slug: true, faviconUrl: true, comparisonDescription: true },
+      select: { id: true, name: true, slug: true, faviconUrl: true },
     }),
     db.tool.findFirst({
       where: { slug: slug2, status: ToolStatus.Published },
-      select: { id: true, name: true, slug: true, faviconUrl: true, comparisonDescription: true },
+      select: { id: true, name: true, slug: true, faviconUrl: true },
     }),
   ])
 
@@ -49,6 +49,8 @@ const ComparisonEditPage = async ({ params }: PageProps) => {
         existingVerdict={existingComparisonData.verdict}
         existingCustomTitle={existingComparisonData.customTitle}
         existingCustomDescription={existingComparisonData.customDescription}
+        existingTool1Description={existingComparisonData.tool1Description}
+        existingTool2Description={existingComparisonData.tool2Description}
         existingFaqs={existingFaqs.map((f: any) => ({
           id: f.id,
           question: f.question,

@@ -1,4 +1,5 @@
 import { config } from "~/config"
+import { stripMarkdown } from "~/utils/markdown"
 
 /**
  * Centralized JSON-LD Schema generation utilities for SEO
@@ -294,7 +295,7 @@ export function generateFAQPageSchema(faqs: FAQItem[]) {
       name: faq.question,
       acceptedAnswer: {
         "@type": "Answer",
-        text: faq.answer,
+        text: stripMarkdown(faq.answer),
       },
     })),
   }

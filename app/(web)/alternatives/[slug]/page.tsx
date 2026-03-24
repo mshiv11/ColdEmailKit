@@ -5,8 +5,10 @@ import type { SearchParams } from "nuqs/server"
 import { Fragment, Suspense, cache } from "react"
 import { RelatedAlternatives } from "~/app/(web)/alternatives/[slug]/related"
 import { Button } from "~/components/common/button"
-import { Card } from "~/components/common/card"
+import { Card, CardIcon } from "~/components/common/card"
 import { Icon } from "~/components/common/icon"
+import { LogoSymbol } from "~/components/web/ui/logo-symbol"
+import { db } from "~/services/db"
 import { Link } from "~/components/common/link"
 import { Prose } from "~/components/common/prose"
 import { AdCard } from "~/components/web/ads/ad-card"
@@ -16,9 +18,11 @@ import { InlineMenu } from "~/components/web/inline-menu"
 import { Listing } from "~/components/web/listing"
 import { ShareButtons } from "~/components/web/share-buttons"
 import { ToolEntry } from "~/components/web/tools/tool-entry"
+import { Author } from "~/components/web/ui/author"
 import { BackButton } from "~/components/web/ui/back-button"
 import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
 import { FaviconImage } from "~/components/web/ui/favicon"
+import { NewsletterForm } from "~/components/web/newsletter-form"
 import { Intro, IntroDescription, IntroTitle } from "~/components/web/ui/intro"
 import { Section } from "~/components/web/ui/section"
 import { config } from "~/config"
@@ -130,6 +134,13 @@ export default async function AlternativePage(props: PageProps) {
       orderBy: [{ isFeatured: "desc" }, { score: "desc" }],
     }),
   ])
+  
+  let author = mainTool?.ownerId ? await db.user.findUnique({ where: { id: mainTool.ownerId } }) : null
+  if (!author) {
+    author = await db.user.findFirst({ where: { role: "admin" } })
+  }
+  const altAny = alternative as any
+  const authorAny = author as any
 
   // Build breadcrumb items for schema
   const breadcrumbItems = [
@@ -157,7 +168,32 @@ export default async function AlternativePage(props: PageProps) {
   )
 
   const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems)
-  const jsonLd = wrapInGraph(itemListSchema, breadcrumbSchema)
+
+  const articleSchema = {
+    "@type": "Article",
+    "@id": `${config.site.url}/alternatives/${alternative.slug}#article`,
+    headline: getMetadata(alternative).title,
+    description: getMetadata(alternative).description,
+    url: `${config.site.url}/alternatives/${alternative.slug}`,
+    ...(tools[0] && tools[0].screenshotUrl && { image: tools[0].screenshotUrl }),
+    dateModified: new Date(altAny.updatedAt || Date.now()).toISOString(),
+    ...(author && {
+      author: {
+        "@type": "Person",
+        name: author.name,
+        ...(authorAny.twitterUrl && { url: authorAny.twitterUrl, sameAs: [authorAny.twitterUrl] }),
+        ...(author.image && { image: author.image })
+      }
+    }),
+    publisher: { "@id": `${config.site.url}/#organization` },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${config.site.url}/alternatives/${alternative.slug}`,
+    },
+    inLanguage: "en-US",
+  }
+
+  const jsonLd = wrapInGraph(itemListSchema, breadcrumbSchema, articleSchema)
 
   const medalColors = ["text-amber-500", "text-slate-400", "text-orange-700"]
   const { title } = getMetadata(alternative)
@@ -262,6 +298,31 @@ export default async function AlternativePage(props: PageProps) {
                   specific functionality of {alternative.name}.
                 </p>
               )}
+              
+              {author && (
+                <div className="mt-8 mb-8 not-prose">
+                  <div className="flex flex-col sm:flex-row items-start gap-5 bg-muted/30 p-5 rounded-xl border border-border/50">
+                    <Link href={`/authors/${authorAny.slug || author.id}`} className="shrink-0 sm:pt-0.5">
+                      {author.image ? (
+                        <img src={author.image} alt={author.name || "Author"} className="size-12 rounded-full border border-border/50 object-cover shadow-xs" />
+                      ) : (
+                        <div className="size-12 rounded-full border border-border/50 bg-background flex items-center justify-center text-muted-foreground font-semibold shadow-xs">
+                          {author.name?.slice(0, 1).toUpperCase() || "A"}
+                        </div>
+                      )}
+                    </Link>
+                    <div className="flex flex-col gap-1.5 text-sm">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold text-foreground">Written by {author.name}</span>
+                        <span className="text-muted-foreground/40 hidden sm:inline-block">|</span>
+                        <span className="text-muted-foreground">Updated on {new Date(altAny.updatedAt || Date.now()).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+                      </div>
+                      {authorAny.headline && <span className="text-foreground">{authorAny.headline}</span>}
+                      {authorAny.shortBio && <p className="text-muted-foreground leading-relaxed text-balance line-clamp-3 mt-0.5">{authorAny.shortBio}</p>}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <ShareButtons title={`${title}`} className="not-prose" />
             </Prose>
@@ -279,16 +340,24 @@ export default async function AlternativePage(props: PageProps) {
             {tools.map((tool, order) => (
               <Fragment key={tool.slug}>
                 {(order - 1) % 5 === 0 && (
-                  <Card hover={false} className="bg-yellow-500/10" asChild>
-                    <Prose>
-                      <p>
-                        Looking for alternatives to other popular services? Check out other posts in
-                        the <Link href="/alternatives">alternatives series</Link> and{" "}
-                        <Link href="/">{getUrlHostname(config.site.url)}</Link>, a directory of cold
-                        email tools with filters for tags and alternatives for easy browsing and
-                        discovery.
+                  <Card hover={false} className="p-6 md:p-8 w-full border-border/50 bg-background flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 shadow-sm not-prose relative overflow-hidden">
+                    <CardIcon className="opacity-5 pointer-events-none">
+                      <LogoSymbol />
+                    </CardIcon>
+                    <div className="flex-1 flex flex-col gap-3 relative z-10">
+                      <div className="flex items-center gap-3">
+                        <div className="size-10 rounded-xl border bg-muted/50 flex items-center justify-center shrink-0 shadow-xs">
+                          <LogoSymbol className="size-5 text-foreground" />
+                        </div>
+                        <span className="font-semibold text-lg text-foreground">Join our Newsletter</span>
+                      </div>
+                      <p className="text-muted-foreground text-sm leading-relaxed max-w-lg">
+                        Get the latest cold email tools, stack reviews, and new alternatives delivered weekly to your inbox.
                       </p>
-                    </Prose>
+                    </div>
+                    <div className="w-full xl:w-auto shrink-0 mt-2 xl:mt-0 relative z-10">
+                      <NewsletterForm className="w-full xl:w-[320px]" />
+                    </div>
                   </Card>
                 )}
 

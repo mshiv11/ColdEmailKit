@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/common/form"
+import { TextArea } from "~/components/common/textarea"
 import { H3 } from "~/components/common/heading"
 import { Input } from "~/components/common/input"
 import { Link } from "~/components/common/link"
@@ -37,6 +38,12 @@ export function UserForm({ children, className, title, user, ...props }: UserFor
       name: user?.name ?? "",
       email: user?.email ?? "",
       image: user?.image ?? "",
+      slug: (user as any)?.slug ?? "",
+      headline: (user as any)?.headline ?? "",
+      shortBio: (user as any)?.shortBio ?? "",
+      bio: (user as any)?.bio ?? "",
+      twitterUrl: (user as any)?.twitterUrl ?? "",
+      websiteUrl: (user as any)?.websiteUrl ?? "",
     },
   })
 
@@ -112,8 +119,92 @@ export function UserForm({ children, className, title, user, ...props }: UserFor
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="slug"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Slug</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="headline"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Headline</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="twitterUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Twitter URL</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="https://x.com/username" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="websiteUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Website URL</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="https://example.com" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
+        <FormField
+          control={form.control}
+          name="shortBio"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Short Bio</FormLabel>
+              <FormControl>
+                <TextArea {...field} className="min-h-16" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="bio"
+          render={({ field }) => (
+            <FormItem className="col-span-full">
+              <FormLabel>Full Bio (Markdown supported)</FormLabel>
+              <FormControl>
+                <TextArea {...field} className="min-h-32" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
         <FormField
           control={form.control}
           name="image"

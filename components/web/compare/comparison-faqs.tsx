@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Icon } from "~/components/common/icon"
 import { H2 } from "~/components/common/heading"
 import { FAQSchema } from "~/components/web/seo/faq-schema"
+import { ComparisonMarkdown } from "~/components/web/comparison-markdown"
 import type { ComparisonFaqItem } from "~/server/web/comparisons/payloads"
 
 type ComparisonFaqsProps = {
@@ -56,7 +57,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 
       {open && (
         <div className="px-4 py-4 text-sm text-muted-foreground leading-relaxed border-t">
-          {answer}
+          <ComparisonMarkdown code={answer} />
         </div>
       )}
     </div>

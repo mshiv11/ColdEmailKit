@@ -26,6 +26,12 @@ export const userSchema = z.object({
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   image: z.string().url().optional().or(z.literal("")),
   role: z.enum(["admin", "user"]).optional(),
+  slug: z.string().optional().or(z.literal("")),
+  headline: z.string().optional().or(z.literal("")),
+  shortBio: z.string().optional().or(z.literal("")),
+  bio: z.string().optional().or(z.literal("")),
+  twitterUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  websiteUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
 })
 
 export type UserSchema = z.infer<typeof userSchema>
