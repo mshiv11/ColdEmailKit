@@ -47,7 +47,7 @@ export function ComparisonToolCard({ tool, isFeatured, customDescription }: Comp
                 />
               </Tooltip>
             )}
-            {tool.ownerId && tool.owner?.role !== "admin" && <VerifiedBadge size="md" />}
+            {tool.owner?.role && tool.owner.role !== "admin" && <VerifiedBadge size="md" />}
           </div>
 
           <TrustBreakdownHover tool={tool}>

@@ -55,7 +55,7 @@ export function StickyToolHeader({ tool }: StickyToolHeaderProps) {
           <span className="font-semibold text-sm leading-none truncate max-w-[140px] sm:max-w-[200px] md:max-w-[280px]">
             {tool.name}
           </span>
-          {tool.ownerId && tool.owner?.role !== "admin" && <VerifiedBadge size="sm" />}
+          {tool.owner?.role && tool.owner.role !== "admin" && <VerifiedBadge size="sm" />}
         </div>
 
         <Button

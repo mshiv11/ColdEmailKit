@@ -64,7 +64,7 @@ const ToolEntry = ({
                     {tool.name}
                   </H2>
 
-                  {tool.ownerId && tool.owner?.role !== "admin" && <VerifiedBadge size="lg" />}
+                  {tool.owner?.role && tool.owner.role !== "admin" && <VerifiedBadge size="lg" />}
                 </div>
 
                 <StarRating
@@ -85,7 +85,7 @@ const ToolEntry = ({
                     {tool.name}
                   </H2>
 
-                  {tool.ownerId && tool.owner?.role !== "admin" && <VerifiedBadge size="lg" />}
+                  {tool.owner?.role && tool.owner.role !== "admin" && <VerifiedBadge size="lg" />}
                 </div>
 
                 <StarRating

@@ -198,7 +198,7 @@ export default async function ToolPage(props: PageProps) {
                       </Tooltip>
                     )}
 
-                    {tool.ownerId && tool.owner?.role !== "admin" && <VerifiedBadge size="lg" />}
+                    {tool.owner?.role && tool.owner.role !== "admin" && <VerifiedBadge size="lg" />}
                   </div>
 
                   <TrustBreakdownHover tool={tool}>

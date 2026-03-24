@@ -72,7 +72,7 @@ const ToolCard = ({ className, tool, isRelated, ...props }: ToolCardProps) => {
                   />
                 </Tooltip>
               )}
-              {tool.ownerId && tool.owner?.role !== "admin" && <VerifiedBadge size="md" />}
+              {tool.owner?.role && tool.owner.role !== "admin" && <VerifiedBadge size="md" />}
             </div>
 
             <StarRating rating={tool.overallRating || 0} className="gap-1.5" />
