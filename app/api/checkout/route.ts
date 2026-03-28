@@ -9,12 +9,13 @@ const checkoutSchema = z.object({
   email: z.string().email().optional(),
   returnUrl: z.string().url().optional(),
   isSubscription: z.boolean().default(true), // Most of our products are subscriptions
+  toolSlug: z.string().optional(),
 })
 
 export async function POST(req: Request) {
   try {
     const json = await req.json()
-    const { productId, quantity, email, returnUrl, isSubscription } = checkoutSchema.parse(json)
+    const { productId, quantity, email, returnUrl, isSubscription, toolSlug } = checkoutSchema.parse(json)
 
     const billingAddress = {
       city: "New York",
@@ -42,6 +43,7 @@ export async function POST(req: Request) {
         quantity,
         payment_link: true,
         return_url: successUrl,
+        metadata: toolSlug ? { tool_slug: toolSlug } : undefined,
       })
       paymentLink = subscription.payment_link
     } else {
@@ -57,6 +59,7 @@ export async function POST(req: Request) {
         ],
         payment_link: true,
         return_url: successUrl,
+        metadata: toolSlug ? { tool_slug: toolSlug } : undefined,
       })
       paymentLink = payment.payment_link
     }

@@ -213,6 +213,7 @@ model Tool {
   coldEmailKitReviews Int?     @default(0)
   
   status          ToolStatus @default(Draft)
+  paymentStatus   String     @default("Unpaid")
   publishedAt     DateTime?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt

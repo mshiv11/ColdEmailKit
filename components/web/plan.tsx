@@ -118,6 +118,7 @@ const Plan = ({
           productId: currentPrice.id,
           returnUrl: `${window.location.origin}/submit/${tool.slug}/success`,
           isSubscription: isSubscription,
+          toolSlug: tool.slug,
         }),
       })
 

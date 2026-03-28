@@ -83,6 +83,15 @@ export const getColumns = (): ColumnDef<Tool>[] => {
       ),
     },
     {
+      accessorKey: "paymentStatus",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Payment" />,
+      cell: ({ row }) => (
+        <Badge variant={row.original.paymentStatus === "Paid" ? "success" : "soft"}>
+          {row.original.paymentStatus}
+        </Badge>
+      ),
+    },
+    {
       accessorKey: "pageviews",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Pageviews" />,
       cell: ({ row }) => <Note>{row.getValue("pageviews")?.toLocaleString()}</Note>,

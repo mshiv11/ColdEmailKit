@@ -29,6 +29,13 @@ export async function POST(req: Request) {
         // Handle successful payment
         console.log("✅ Payment succeeded:", event.data.payment_id)
         // You can update database records, send emails, etc.
+        if (event.data.metadata?.tool_slug) {
+          await db.tool.updateMany({
+            where: { slug: event.data.metadata.tool_slug },
+            data: { paymentStatus: "Paid" },
+          })
+          console.log(`   Tool ${event.data.metadata.tool_slug} marked as paid (one-time payment)`)
+        }
         break
 
       case "subscription.active":
@@ -39,9 +46,9 @@ export async function POST(req: Request) {
         if (subscriptionData.metadata?.tool_slug) {
           await db.tool.updateMany({
             where: { slug: subscriptionData.metadata.tool_slug },
-            data: { isFeatured: true },
+            data: { isFeatured: true, paymentStatus: "Paid" },
           })
-          console.log(`   Tool ${subscriptionData.metadata.tool_slug} marked as featured`)
+          console.log(`   Tool ${subscriptionData.metadata.tool_slug} marked as featured and paid`)
         }
         break
 

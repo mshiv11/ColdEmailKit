@@ -37,6 +37,22 @@ export function ToolsTable({ toolsPromise }: ToolsTableProps) {
       placeholder: "Search by name...",
     },
     {
+      id: "paymentStatus",
+      label: "Payment Type",
+      options: [
+        {
+          label: "Paid",
+          value: "Paid",
+          icon: <Icon name="lucide/dollar-sign" className="text-green-500" />,
+        },
+        {
+          label: "Unpaid",
+          value: "Unpaid",
+          icon: <Icon name="lucide/circle-dashed" className="text-gray-500" />,
+        },
+      ],
+    },
+    {
       id: "status",
       label: "Status",
       options: [

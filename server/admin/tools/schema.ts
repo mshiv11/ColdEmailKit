@@ -18,6 +18,7 @@ export const toolsTableParamsSchema = {
   to: parseAsString.withDefault(""),
   operator: parseAsStringEnum(["and", "or"]).withDefault("and"),
   status: parseAsArrayOf(z.nativeEnum(ToolStatus)).withDefault([]),
+  paymentStatus: parseAsArrayOf(parseAsString).withDefault([]),
 }
 
 export const toolsTableParamsCache = createSearchParamsCache(toolsTableParamsSchema)
@@ -37,6 +38,7 @@ export const toolSchema = z.object({
   screenshotUrl: z.string().optional().or(z.literal("")),
   isFeatured: z.boolean().default(false),
   isSelfHosted: z.boolean().default(false),
+  paymentStatus: z.string().default("Unpaid"),
   submitterName: z.string().optional(),
   submitterEmail: z.string().email().optional().or(z.literal("")),
   submitterNote: z.string().optional(),

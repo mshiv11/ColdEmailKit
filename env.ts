@@ -37,6 +37,7 @@ export const env = createEnv({
     S3_SECRET_ACCESS_KEY: z.string().min(1),
     S3_PUBLIC_URL: z.string().optional(),
     DODO_PAYMENTS_API_KEY: z.string().min(1),
+    DODO_PAYMENTS_LIVE_API_KEY: z.string().optional(),
     DODO_PAYMENTS_WEBHOOK_KEY: z.string().min(1),
     GITHUB_TOKEN: z.string().optional(),
     SCREENSHOTONE_ACCESS_KEY: z.string().min(1),
