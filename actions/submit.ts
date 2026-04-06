@@ -79,8 +79,13 @@ export const submitTool = createServerAction()
     // Generate a unique slug
     const slug = await generateUniqueSlug(data.name)
 
-    // Check if the email domain matches the tool's website domain
-    const ownerId = session?.user.email.includes(getUrlHostname(data.websiteUrl))
+    // Auto-assign ownership only if:
+    // 1. The user is logged in and NOT an admin (admins add tools on behalf of others)
+    // 2. The user's email domain exactly matches the tool's website domain
+    const isAdmin = session?.user.role === "admin"
+    const emailDomain = session?.user.email.split("@")[1]
+    const toolDomain = getUrlHostname(data.websiteUrl)
+    const ownerId = !isAdmin && emailDomain === toolDomain
       ? session?.user.id
       : undefined
 

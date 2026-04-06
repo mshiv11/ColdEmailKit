@@ -18,9 +18,17 @@ export const DashboardToolListing = async ({ searchParams }: DashboardPageProps)
     throw redirect("/auth/login?next=/dashboard")
   }
 
+  // Admins manage tools via the admin panel, not the user dashboard.
+  // Only show tools they explicitly own (claimed via domain verification).
+  // Regular users see tools they submitted (by email) or own.
+  const isAdmin = session.user.role === "admin"
+  const whereFilter = isAdmin
+    ? { ownerId: session.user.id }
+    : { OR: [{ submitterEmail: session.user.email }, { ownerId: session.user.id }] }
+
   const toolsPromise = findTools(
     { ...parsedParams, status: status },
-    { OR: [{ submitterEmail: session.user.email }, { ownerId: session.user.id }] },
+    whereFilter,
   )
 
   return (

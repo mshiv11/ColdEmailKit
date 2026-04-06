@@ -108,18 +108,19 @@ export const DashboardTable = ({ toolsPromise }: DashboardTableProps) => {
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => {
-          const { slug, isFeatured, publishedAt } = row.original
+          const { slug, isFeatured, publishedAt, ownerId } = row.original
           const isLongQueue = !publishedAt || differenceInDays(publishedAt, new Date()) >= 7
+          const isOwner = !!ownerId // Only show actions for claimed/owned tools
 
           return (
             <Stack size="sm" className="float-right -my-1">
-              {isLongQueue && (
+              {isLongQueue && isOwner && (
                 <Button size="sm" variant="secondary" asChild>
                   <Link href={`/submit/${slug}`}>Expedite</Link>
                 </Button>
               )}
 
-              {!isFeatured && (
+              {!isFeatured && isOwner && (
                 <Button
                   size="sm"
                   variant="secondary"
