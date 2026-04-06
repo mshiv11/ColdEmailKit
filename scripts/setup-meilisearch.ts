@@ -13,8 +13,7 @@ const indexes = [
       source: "openAi",
       apiKey: env.OPENAI_API_KEY,
       model: "text-embedding-3-small",
-      documentTemplate:
-        'Tool: {{doc.name}}\nTagline: {{doc.tagline}}\nDescription: {{doc.description}}\nCategories: {{doc.categories | join: ", "}}\nAlternatives: {{doc.alternatives | join: ", "}}',
+      documentTemplate: "Tool: {{doc.name}}\nTagline: {{doc.tagline}}\nDescription: {{doc.description}}",
     },
     settings: {
       searchableAttributes: [
