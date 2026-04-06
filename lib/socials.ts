@@ -1,7 +1,7 @@
 import { formatNumber } from "@primoui/utils"
 import type { Tool as PrismaTool } from "@prisma/client"
 import { formatDistanceToNowStrict } from "date-fns"
-import type { Jsonify } from "inngest/helpers/jsonify"
+
 import { config } from "~/config"
 import { brandLinkApi } from "~/lib/apis"
 import type { ToolMany, ToolOne } from "~/server/web/tools/payloads"
@@ -35,7 +35,7 @@ const getSocialsFromUrl = async (url: string) => {
  * @param tool - Tool data to include in the post
  * @returns Promise resolving to array of post results
  */
-export const sendSocialPost = async (template: string, tool: Tool | Jsonify<Tool>) => {
+export const sendSocialPost = async (template: string, tool: Tool) => {
   const url = `${config.site.url}/${tool.slug}`
   const socials = await getSocialsFromUrl(tool.websiteUrl)
 
@@ -69,7 +69,7 @@ const updatePostTemplate = (template: string, handle: string | undefined, url: s
  * @param tool - Tool data to include in the post
  * @returns Post template with tool details
  */
-export const getPostLaunchTemplate = (tool: Tool | Jsonify<Tool>) => {
+export const getPostLaunchTemplate = (tool: Tool) => {
   return `🚀 Just published: ${tool.name} ${socialHandle} — ${tool.tagline}\n\n${tool.description}`
 }
 
@@ -78,7 +78,7 @@ export const getPostLaunchTemplate = (tool: Tool | Jsonify<Tool>) => {
  * @param tool - Tool data to include in the post
  * @returns Post template with tool stats and metrics
  */
-export const getPostTemplate = async (tool: Tool | Jsonify<Tool>) => {
+export const getPostTemplate = async (tool: Tool) => {
   const formatDate = (date: Date) => formatDistanceToNowStrict(date, { addSuffix: true })
 
   const insights = [
@@ -97,7 +97,7 @@ export const getPostTemplate = async (tool: Tool | Jsonify<Tool>) => {
  * @param milestone - Star count milestone reached
  * @returns Post template celebrating the milestone
  */
-export const getPostMilestoneTemplate = (tool: Tool | Jsonify<Tool>, milestone: number) => {
+export const getPostMilestoneTemplate = (tool: Tool, milestone: number) => {
   const templates = [
     `⭐ ${tool.name} has just reached ${milestone.toLocaleString()} stars on GitHub! Huge congrats to the ${socialHandle} team! 🎉`,
     `🎯 Another milestone hit! ${tool.name} now has ${milestone.toLocaleString()} stars! Amazing work by the ${socialHandle} team 🌟`,

@@ -69,35 +69,31 @@ export const upsertTool = adminProcedure
       create: {
         ...data,
         alternatives: {
-          connect: alternatives?.map(id => ({ id })),
+          connect: alternatives?.map((id: string) => ({ id })),
         },
         categories: {
-          connect: categories?.map(id => ({ id })),
+          connect: categories?.map((id: string) => ({ id })),
         },
         integrations: {
-          connect: integrations?.map(id => ({ id })),
+          connect: integrations?.map((id: string) => ({ id })),
         },
       },
       update: {
         ...data,
         alternatives: {
-          set: alternatives?.map(id => ({ id })),
+          set: alternatives?.map((id: string) => ({ id })),
         },
         categories: {
-          set: categories?.map(id => ({ id })),
+          set: categories?.map((id: string) => ({ id })),
         },
         integrations: {
-          set: integrations?.map(id => ({ id })),
+          set: integrations?.map((id: string) => ({ id })),
         },
       },
     })
 
     if (notifySubmitter) {
-      if (tool.status === ToolStatus.Published && tool.publishedAt) {
-        after(async () => {
-          await notifySubmitterOfToolPublished(tool)
-        })
-      } else if (tool.status === ToolStatus.Scheduled && tool.publishedAt) {
+      if (tool.status === ToolStatus.Scheduled && tool.publishedAt) {
         after(async () => {
           await notifySubmitterOfToolScheduled(tool)
         })
@@ -106,14 +102,15 @@ export const upsertTool = adminProcedure
 
     if (tool.status === ToolStatus.Published) {
       after(async () => {
-        await submitToIndexNow([`https://coldemailkit.com/tools/${tool.slug}`])
+        const { executePublishSideEffects } = await import("./publish")
+        await executePublishSideEffects(tool.id, notifySubmitter)
       })
+    } else {
+      revalidatePath("/admin/tools")
+      revalidatePath("/tools")
+      revalidatePath(`/tools/${tool.slug}`)
+      revalidateTag(`tool-${tool.slug}`)
     }
-
-    revalidatePath("/admin/tools")
-    revalidatePath("/tools")
-    revalidatePath(`/tools/${tool.slug}`)
-    revalidateTag(`tool-${tool.slug}`)
 
     return tool
   })
@@ -146,6 +143,10 @@ export const analyzeToolIntegration = adminProcedure
   .input(z.object({ id: z.string() }))
   .handler(async ({ input: { id } }) => {
     const tool = await db.tool.findUniqueOrThrow({ where: { id } })
+    
+    if (!tool.repositoryUrl) {
+      throw new Error("Tool does not have a repository URL")
+    }
 
     // Get analysis and cache it
     const integration = await analyzeRepositoryIntegration(tool.repositoryUrl)

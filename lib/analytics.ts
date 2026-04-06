@@ -1,4 +1,4 @@
-import type { Logger } from "inngest/middleware/logger"
+type Logger = Pick<Console, "error" | "warn" | "info" | "log">
 import { getPostHogQueryApi } from "~/services/posthog-api"
 import { tryCatch } from "~/utils/helpers"
 

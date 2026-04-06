@@ -1,4 +1,4 @@
--- CreateExtension
+﻿-- CreateExtension
 CREATE EXTENSION IF NOT EXISTS "citext";
 
 -- CreateEnum
@@ -156,11 +156,8 @@ CREATE TABLE "Tool" (
     "trustradiusReviews" INTEGER DEFAULT 0,
     "coldEmailKitRating" DOUBLE PRECISION DEFAULT 0,
     "coldEmailKitReviews" INTEGER DEFAULT 0,
-    "submissionType" TEXT,
-    "paidAt" TIMESTAMP(3),
-    "paymentId" TEXT,
-    "subscriptionId" TEXT,
     "status" "ToolStatus" NOT NULL DEFAULT 'Draft',
+    "paymentStatus" TEXT NOT NULL DEFAULT 'Unpaid',
     "publishedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -576,3 +573,4 @@ ALTER TABLE "_ComplianceToTool" ADD CONSTRAINT "_ComplianceToTool_A_fkey" FOREIG
 
 -- AddForeignKey
 ALTER TABLE "_ComplianceToTool" ADD CONSTRAINT "_ComplianceToTool_B_fkey" FOREIGN KEY ("B") REFERENCES "Tool"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+

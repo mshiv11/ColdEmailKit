@@ -257,6 +257,7 @@ export const ToolPublishActions = ({
 
                                   <Input
                                     type="time"
+                                    step="300"
                                     value={selectedTime}
                                     onChange={e => setSelectedTime(e.target.value)}
                                     className="w-full tabular-nums"
