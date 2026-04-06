@@ -74,7 +74,7 @@ export const fetchData = inngest.createFunction(
       step.run("fetch-tool-analytics-data", async () => {
         await fetchAnalyticsInBatches({
           data: tools.filter(isToolPublished),
-          pathPrefix: "/",
+          pathPrefix: "/tools/",
           logger,
           onSuccess: async (id, data) => {
             await db.tool.update({ where: { id }, data })
@@ -133,6 +133,7 @@ export const fetchData = inngest.createFunction(
       revalidateTag("tools")
       revalidateTag("tool")
       revalidateTag("alternatives")
+      revalidateTag("analytics")
     })
   },
 )
