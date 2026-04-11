@@ -56,6 +56,7 @@ export const env = createEnv({
     ANTHROPIC_API_KEY: z.string().min(1),
     OPENAI_API_KEY: z.string().min(1),
     JINA_API_KEY: z.string().optional(),
+    FIRECRAWL_API_KEY: z.string().optional(),
     STACK_ANALYZER_API_URL: z.string().url().optional(),
     STACK_ANALYZER_API_KEY: z.string().optional(),
     PERPLEXITY_API_KEY: z.string().min(1),

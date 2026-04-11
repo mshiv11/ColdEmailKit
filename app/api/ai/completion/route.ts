@@ -1,24 +1,31 @@
-import { google } from "@ai-sdk/google"
-import { streamText } from "ai"
 import { z } from "zod"
+import {
+  adminCompletionModels,
+  defaultAdminCompletionModel,
+  generateAdminCompletion,
+} from "~/lib/admin-ai"
 import { withAdminAuth } from "~/lib/auth-hoc"
+import { getErrorMessage } from "~/lib/handle-error"
 
 const completionSchema = z.object({
   prompt: z.string(),
-  model: z
-    .enum(["gemini-2.0-pro-exp-02-05", "gemini-2.0-flash-lite-preview-02-05"])
-    .optional()
-    .default("gemini-2.0-flash-lite-preview-02-05"),
+  model: z.enum(adminCompletionModels).optional().default(defaultAdminCompletionModel),
 })
 
 export const POST = withAdminAuth(async req => {
-  const { prompt, model } = completionSchema.parse(await req.json())
+  try {
+    const { prompt, model } = completionSchema.parse(await req.json())
+    const completion = await generateAdminCompletion({ prompt, model })
 
-  const result = streamText({
-    model: google(model),
-    prompt,
-    maxTokens: 300,
-  })
+    return new Response(completion, {
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    })
+  } catch (error) {
+    console.error("AI completion route error:", error)
 
-  return result.toDataStreamResponse()
+    return new Response(getErrorMessage(error), {
+      status: 500,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    })
+  }
 })

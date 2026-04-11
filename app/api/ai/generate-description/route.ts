@@ -1,10 +1,7 @@
-import { anthropic } from "@ai-sdk/anthropic"
-import { google } from "@ai-sdk/google"
-import { streamObject } from "ai"
 import { z } from "zod"
-import { isDev } from "~/env"
+import { generateAdminAlternativeDescription } from "~/lib/admin-ai"
 import { withAdminAuth } from "~/lib/auth-hoc"
-import { descriptionSchema } from "~/server/admin/shared/schema"
+import { getErrorMessage } from "~/lib/handle-error"
 
 export const maxDuration = 60
 
@@ -13,24 +10,19 @@ const generateContentSchema = z.object({
 })
 
 export const POST = withAdminAuth(async req => {
-  const { url } = generateContentSchema.parse(await req.json())
+  try {
+    const { url } = generateContentSchema.parse(await req.json())
+    const description = await generateAdminAlternativeDescription({ url })
 
-  const result = streamObject({
-    model: isDev ? google("gemini-2.5-pro-preview-05-06") : anthropic("claude-sonnet-4-6"),
-    schema: descriptionSchema,
-    system: `
-      You are an expert content creator specializing in reasearching and writing about software.
-      Your task is to generate high-quality, engaging content to display on a directory website.
-      DO NOT use catchphrases like "Empower", "Streamline" etc.
-    `,
-    temperature: 0.3,
-    maxTokens: 5000,
-    prompt: `Provide me details for the following website URL: ${url}.`,
-    onError: error => {
-      console.error(error)
-      throw error
-    },
-  })
+    return new Response(JSON.stringify(description), {
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+    })
+  } catch (error) {
+    console.error("Generate description API error:", error)
 
-  return result.toTextStreamResponse()
+    return new Response(getErrorMessage(error), {
+      status: 500,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    })
+  }
 })

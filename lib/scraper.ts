@@ -3,13 +3,15 @@ import { env } from "~/env"
 import { getErrorMessage } from "~/lib/handle-error"
 import { tryCatch } from "~/utils/helpers"
 
+export type ScrapedWebsiteData = {
+  title: string
+  description: string
+  url: string
+  content: string
+}
+
 type JinaResponse = {
-  data: {
-    title: string
-    description: string
-    url: string
-    content: string
-  }
+  data: ScrapedWebsiteData
 }
 
 /**
@@ -37,6 +39,79 @@ export const scrapeWebsiteData = async (url: string) => {
   }
 
   return data.data
+}
+
+type FirecrawlResponse = {
+  success?: boolean
+  markdown?: string
+  data?: {
+    markdown?: string
+    content?: string
+    title?: string
+    description?: string
+    metadata?: {
+      title?: string
+      description?: string
+      sourceURL?: string
+      url?: string
+    }
+  }
+}
+
+const normalizeFirecrawlResponse = (url: string, data: FirecrawlResponse): ScrapedWebsiteData => {
+  const normalized = data.data ?? {}
+  const metadata = normalized.metadata ?? {}
+  const content = normalized.markdown ?? normalized.content ?? data.markdown
+
+  if (!content) {
+    throw new Error("Firecrawl returned no scrape content.")
+  }
+
+  return {
+    title: normalized.title ?? metadata.title ?? "",
+    description: normalized.description ?? metadata.description ?? "",
+    url: metadata.sourceURL ?? metadata.url ?? url,
+    content,
+  }
+}
+
+export const scrapeWebsiteDataWithFirecrawl = async (url: string) => {
+  if (!env.FIRECRAWL_API_KEY) {
+    throw new Error("Firecrawl fallback is not configured.")
+  }
+
+  const firecrawlApi = wretch("https://api.firecrawl.dev/v1/scrape")
+    .auth(`Bearer ${env.FIRECRAWL_API_KEY}`)
+    .headers({
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    })
+
+  const { data, error } = await tryCatch(
+    firecrawlApi
+      .post({
+        url,
+        formats: ["markdown"],
+      })
+      .json<FirecrawlResponse>(),
+  )
+
+  if (error) {
+    console.error("Firecrawl API error:", error)
+    throw new Error(getErrorMessage(error))
+  }
+
+  return normalizeFirecrawlResponse(url, data)
+}
+
+export const scrapeWebsiteDataWithFallback = async (url: string) => {
+  try {
+    return await scrapeWebsiteData(url)
+  } catch (jinaError) {
+    console.error("Jina Reader error (trying Firecrawl fallback):", jinaError)
+  }
+
+  return scrapeWebsiteDataWithFirecrawl(url)
 }
 
 type JinaSearchResult = {

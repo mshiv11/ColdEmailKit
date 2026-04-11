@@ -5,6 +5,7 @@ import { useFormContext } from "react-hook-form"
 import { toast } from "sonner"
 import { Button } from "~/components/common/button"
 import { Icon } from "~/components/common/icon"
+import { parseAiRouteError } from "~/lib/parse-ai-route-error"
 import type { AlternativeSchema } from "~/server/admin/alternatives/schema"
 import { descriptionSchema } from "~/server/admin/shared/schema"
 
@@ -21,11 +22,13 @@ export const AlternativeGenerateDescription = () => {
     schema: descriptionSchema,
 
     onFinish: ({ error }) => {
-      error ? toast.error(error.message || errorMessage) : toast.success(successMessage)
+      error
+        ? toast.error(parseAiRouteError(error.message, errorMessage))
+        : toast.success(successMessage)
     },
 
-    onError: (error) => {
-      toast.error(error.message || errorMessage)
+    onError: error => {
+      toast.error(parseAiRouteError(error.message, errorMessage))
     },
   })
 

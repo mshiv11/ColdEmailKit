@@ -51,6 +51,7 @@ export const RelationSelector = <T extends Relation>({
 
   const { complete } = useCompletion({
     api: "/api/ai/completion",
+    streamProtocol: "text",
     experimental_throttle: 1000,
 
     onFinish: (_, completion) => {

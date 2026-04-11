@@ -5,6 +5,7 @@ import { useFormContext } from "react-hook-form"
 import { toast } from "sonner"
 import { Button } from "~/components/common/button"
 import { Icon } from "~/components/common/icon"
+import { parseAiRouteError } from "~/lib/parse-ai-route-error"
 import { contentSchema } from "~/server/admin/shared/schema"
 import type { ToolSchema } from "~/server/admin/tools/schema"
 
@@ -20,11 +21,13 @@ export const ToolGenerateContent = () => {
     schema: contentSchema,
 
     onFinish: ({ error }) => {
-      error ? toast.error(error.message || errorMessage) : toast.success(successMessage)
+      error
+        ? toast.error(parseAiRouteError(error.message, errorMessage))
+        : toast.success(successMessage)
     },
 
-    onError: (error) => {
-      toast.error(error.message || errorMessage)
+    onError: error => {
+      toast.error(parseAiRouteError(error.message, errorMessage))
     },
   })
 

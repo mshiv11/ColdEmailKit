@@ -53,7 +53,7 @@ export const Footer = ({ children, className, hideNewsletter, ...props }: Footer
           <Stack className="text-xl opacity-75">
             <DropdownMenu modal={false}>
               <Tooltip tooltip="RSS Feeds">
-                <DropdownMenuTrigger aria-label="RSS Feeds">
+                <DropdownMenuTrigger id="footer-rss-menu-trigger" aria-label="RSS Feeds">
                   <Icon name="lucide/rss" className="text-muted-foreground hover:text-foreground" />
                 </DropdownMenuTrigger>
               </Tooltip>

@@ -67,7 +67,10 @@ const Header = ({ children, className, ...props }: HeaderProps) => {
 
           <nav className="flex flex-wrap gap-4 max-md:hidden">
             <DropdownMenu>
-              <DropdownMenuTrigger className={cx(navLinkVariants({ className: "gap-1" }))}>
+              <DropdownMenuTrigger
+                id="header-browse-menu-trigger"
+                className={cx(navLinkVariants({ className: "gap-1" }))}
+              >
                 Browse{" "}
                 <Icon
                   name="lucide/chevron-down"
