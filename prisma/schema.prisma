@@ -215,6 +215,8 @@ model Tool {
   status          ToolStatus @default(Draft)
   paymentStatus   String     @default("Unpaid")
   publishedAt     DateTime?
+  scheduledNotificationSent Boolean @default(false)
+  publishedNotificationSent Boolean @default(false)
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 

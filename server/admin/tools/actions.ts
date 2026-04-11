@@ -93,9 +93,13 @@ export const upsertTool = adminProcedure
     })
 
     if (notifySubmitter) {
-      if (tool.status === ToolStatus.Scheduled && tool.publishedAt) {
+      if (tool.status === ToolStatus.Scheduled && tool.publishedAt && !tool.scheduledNotificationSent) {
         after(async () => {
           await notifySubmitterOfToolScheduled(tool)
+          await db.tool.update({
+            where: { id: tool.id },
+            data: { scheduledNotificationSent: true },
+          }).catch(console.error)
         })
       }
     }

@@ -19,8 +19,12 @@ export const executePublishSideEffects = async (toolId: string, shouldNotifySubm
 
   // 1. Notify submitter
   // notification lib checks if submitterEmail exists
-  if (shouldNotifySubmitter) {
+  if (shouldNotifySubmitter && !tool.publishedNotificationSent) {
     await notifySubmitterOfToolPublished(tool).catch(console.error)
+    await db.tool.update({
+      where: { id: tool.id },
+      data: { publishedNotificationSent: true },
+    }).catch(console.error)
   }
 
   // 2. Sync to Meilisearch
