@@ -7,8 +7,7 @@ type GlobalPrisma = {
 const globalForPrisma = global as unknown as GlobalPrisma
 
 const shouldUseDirectDatabaseUrl =
-  !!process.env.DATABASE_URL_UNPOOLED &&
-  (process.env.NODE_ENV !== "production" || process.env.NEXT_PHASE === "phase-production-build")
+  process.env.NODE_ENV !== "production" && !!process.env.DATABASE_URL_UNPOOLED
 
 const databaseUrl = shouldUseDirectDatabaseUrl
   ? process.env.DATABASE_URL_UNPOOLED
