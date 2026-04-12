@@ -20,7 +20,7 @@ export type EmailParams = {
 const prepareEmail = async (email: EmailParams): Promise<CreateEmailOptions> => {
   return {
     from: `${config.site.name} <${env.RESEND_SENDER_EMAIL}>`,
-    replyTo: email.replyTo ?? (email.to !== config.site.email ? email.to : undefined),
+    replyTo: email.replyTo ?? "admin@coldemailkit.com",
     to: email.to,
     subject: email.subject,
     react: email.react,
