@@ -8,6 +8,7 @@ export type ComparisonPair = {
   tool1: { id: string; name: string; slug: string; faviconUrl: string | null }
   tool2: { id: string; name: string; slug: string; faviconUrl: string | null }
   faqCount: number
+  status: string
   createdAt: Date
 }
 
@@ -35,6 +36,7 @@ export const findAllComparisonPairs = async (): Promise<ComparisonPair[]> => {
       createdAt: true,
       tool1: { select: { id: true, name: true, slug: true, faviconUrl: true } },
       tool2: { select: { id: true, name: true, slug: true, faviconUrl: true } },
+      status: true,
     },
     orderBy: { createdAt: "desc" },
   })
@@ -46,7 +48,12 @@ export const findAllComparisonPairs = async (): Promise<ComparisonPair[]> => {
     const [id1, id2] = [item.tool1Id, item.tool2Id].sort()
     const key = `${id1}-${id2}`
     if (pairs.has(key)) {
-      if (isFaq) pairs.get(key)!.faqCount++
+      const existing = pairs.get(key)!
+      if (isFaq) {
+        existing.faqCount++
+      } else {
+        existing.status = item.status
+      }
     } else {
       const slug = `${item.tool1.slug}-vs-${item.tool2.slug}`
       pairs.set(key, {
@@ -57,6 +64,7 @@ export const findAllComparisonPairs = async (): Promise<ComparisonPair[]> => {
         tool1: item.tool1,
         tool2: item.tool2,
         faqCount: isFaq ? 1 : 0,
+        status: isFaq ? "Draft" : item.status,
         createdAt: item.createdAt,
       })
     }
@@ -98,43 +106,45 @@ export const findComparisonData = async (tool1Id: string, tool2Id: string) => {
       verdict: true, 
       customTitle: true, 
       customDescription: true,
+      overviewContent: true,
       tool1Description: true,
-      tool2Description: true
+      tool2Description: true,
+      status: true,
+      publishedAt: true,
+      createdAt: true,
+      updatedAt: true,
     },
   })
   
   if (comparison) {
-    // If the DB returned them but they were inserted under swapped IDs, correct them
-    // However, our action `upsertComparisonData` now handles sorting, so it correctly saves
-    // we need to return the correct description for tool1Id and tool2Id.
-    // The query above can match either order. So we must map it back correctly.
-    const dbMatchedMatchedTool1IdFirst = (await db.comparison.findFirst({
-      where: { tool1Id: tool1Id, tool2Id: tool2Id },
-      select: { id: true }
-    })) != null;
-    
-    // Actually `upsertComparisonData` creates them with sorted IDs, 
-    // and correctly applies `tool1Description` to whichever ID was first in the sorted array.
-    // Let's just find the exact one we fetched. 
-    // Wait, the action `upsertComparisonData` uses `[id1, id2] = [tool1Id, tool2Id].sort()`.
-    // It assigned `tool1Description: finalTool1Desc = id1 === tool1Id ? tool1Description_arg : tool2Description_arg`.
-    // So `db-tool1Description` corresponds to `db-tool1Id` (which is `id1`).
-    // If our `tool1Id_arg` === `id1`, then `tool1Description_arg` is `db-tool1Description`.
-    // If our `tool1Id_arg` !== `id1`, then `tool1Description_arg` is `db-tool2Description`.
-    
-    // We don't have the `id1` here from the DB object since we didn't select it. Let's just assume the user sorts it here as well.
-    const [id1, id2] = [tool1Id, tool2Id].sort()
+    const [id1] = [tool1Id, tool2Id].sort()
     
     return {
       verdict: comparison.verdict,
       customTitle: comparison.customTitle,
       customDescription: comparison.customDescription,
+      overviewContent: comparison.overviewContent,
       tool1Description: id1 === tool1Id ? comparison.tool1Description : comparison.tool2Description,
       tool2Description: id1 === tool1Id ? comparison.tool2Description : comparison.tool1Description,
+      status: comparison.status,
+      publishedAt: comparison.publishedAt,
+      createdAt: comparison.createdAt,
+      updatedAt: comparison.updatedAt,
     }
   }
 
-  return { verdict: null, customTitle: null, customDescription: null, tool1Description: null, tool2Description: null }
+  return { 
+    verdict: null, 
+    customTitle: null, 
+    customDescription: null, 
+    overviewContent: null,
+    tool1Description: null, 
+    tool2Description: null,
+    status: "Draft",
+    publishedAt: null,
+    createdAt: null,
+    updatedAt: null,
+  }
 }
 
 /**

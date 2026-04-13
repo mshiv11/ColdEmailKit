@@ -49,8 +49,10 @@ const ComparisonEditPage = async ({ params }: PageProps) => {
         existingVerdict={existingComparisonData.verdict}
         existingCustomTitle={existingComparisonData.customTitle}
         existingCustomDescription={existingComparisonData.customDescription}
+        existingOverviewContent={existingComparisonData.overviewContent}
         existingTool1Description={existingComparisonData.tool1Description}
         existingTool2Description={existingComparisonData.tool2Description}
+        existingStatus={existingComparisonData.status as any}
         existingFaqs={existingFaqs.map((f: any) => ({
           id: f.id,
           question: f.question,

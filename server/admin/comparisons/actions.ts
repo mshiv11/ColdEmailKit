@@ -4,6 +4,7 @@ import { revalidatePath, revalidateTag } from "next/cache"
 import { z } from "zod"
 import { adminProcedure } from "~/lib/safe-actions"
 import { db } from "~/services/db"
+import { ComparisonStatus } from "@prisma/client"
 
 const faqSchema = z.object({
   id: z.string().optional(),
@@ -84,8 +85,10 @@ export const upsertComparisonData = adminProcedure
       verdict: z.string().nullable(),
       customTitle: z.string().nullable().optional(),
       customDescription: z.string().nullable().optional(),
+      overviewContent: z.string().nullable().optional(),
       tool1Description: z.string().nullable().optional(),
       tool2Description: z.string().nullable().optional(),
+      status: z.nativeEnum(ComparisonStatus).default(ComparisonStatus.Draft),
     }),
   )
   .handler(
@@ -96,8 +99,10 @@ export const upsertComparisonData = adminProcedure
         verdict,
         customTitle,
         customDescription,
+        overviewContent,
         tool1Description,
         tool2Description,
+        status,
       },
     }) => {
       // We enforce alphabetical ordering of IDs for the unique constraint
@@ -120,15 +125,20 @@ export const upsertComparisonData = adminProcedure
           verdict,
           customTitle,
           customDescription,
+          overviewContent,
           tool1Description: finalTool1Desc,
           tool2Description: finalTool2Desc,
+          status,
+          ...(status === ComparisonStatus.Published ? { publishedAt: new Date() } : {}),
         },
         update: {
           verdict,
           customTitle,
           customDescription,
+          overviewContent,
           tool1Description: finalTool1Desc,
           tool2Description: finalTool2Desc,
+          status,
         },
         select: { id: true },
       })

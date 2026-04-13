@@ -420,17 +420,26 @@ model ComparisonFaq {
   @@index([tool1Id, tool2Id])
 }
 
+enum ComparisonStatus {
+  Draft
+  Scheduled
+  Published
+}
+
 model Comparison {
-  id                String   @id @default(cuid())
+  id                String           @id @default(cuid())
   tool1Id           String
   tool2Id           String
-  verdict           String?  @db.Text
+  verdict           String?          @db.Text
   customTitle       String?
-  customDescription String?  @db.Text
-  tool1Description  String?  @db.Text
-  tool2Description  String?  @db.Text
-  createdAt         DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  customDescription String?          @db.Text
+  overviewContent   String?          @db.Text
+  tool1Description  String?          @db.Text
+  tool2Description  String?          @db.Text
+  status            ComparisonStatus @default(Draft)
+  publishedAt       DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
   // Relations
   tool1 Tool @relation("ComparisonTool1", fields: [tool1Id], references: [id], onDelete: Cascade)
@@ -439,4 +448,6 @@ model Comparison {
   // Indexes
   @@unique([tool1Id, tool2Id])
   @@index([tool1Id, tool2Id])
+  @@index([status])
+  @@index([publishedAt])
 }

@@ -82,30 +82,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }))
 
-  // Comparisons (derived from ComparisonFaq pairs)
-  const comparisonFaqs = await db.comparisonFaq.findMany({
+  // Comparisons
+  const comparisons = await db.comparison.findMany({
+    where: { status: "Published" },
     select: {
       tool1: { select: { slug: true } },
       tool2: { select: { slug: true } },
       updatedAt: true,
+      publishedAt: true,
     },
   })
 
-  const comparisonSlugs = new Map<string, Date>()
-  for (const faq of comparisonFaqs) {
-    const slug = `${faq.tool1.slug}-vs-${faq.tool2.slug}`
-    const existing = comparisonSlugs.get(slug)
-    if (!existing || faq.updatedAt > existing) {
-      comparisonSlugs.set(slug, faq.updatedAt)
+  const comparisonRoutes = comparisons.map(comp => {
+    const slugs = [comp.tool1.slug, comp.tool2.slug].sort()
+    const slug = `${slugs[0]}-vs-${slugs[1]}`
+    return {
+      url: `${baseUrl}/compare/${slug}`,
+      lastModified: comp.publishedAt || comp.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.85,
     }
-  }
-
-  const comparisonRoutes = Array.from(comparisonSlugs.entries()).map(([slug, updatedAt]) => ({
-    url: `${baseUrl}/compare/${slug}`,
-    lastModified: updatedAt,
-    changeFrequency: "weekly" as const,
-    priority: 0.85,
-  }))
+  })
 
   // Integrations
   const integrations = await db.integration.findMany({

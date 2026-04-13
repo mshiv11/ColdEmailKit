@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { Suspense, cache } from "react"
 import { Button } from "~/components/common/button"
 import { H2 } from "~/components/common/heading"
@@ -58,7 +58,13 @@ export const generateMetadata = async ({ params }: PageProps): Promise<Metadata>
   const parsed = parseComparisonSlug(slug)
   if (!parsed) return {}
 
-  const tools = await findComparisonTools(parsed[0], parsed[1])
+  const [slug1, slug2] = parsed
+
+  if (slug1 > slug2) {
+    redirect(`/compare/${slug2}-vs-${slug1}`)
+  }
+
+  const tools = await findComparisonTools(slug1, slug2)
   if (!tools) return {}
 
   const [tool1, tool2] = tools
@@ -147,6 +153,15 @@ function generateComparisonSchema(
 
 export default async function ComparisonPage({ params }: PageProps) {
   const { slug } = await params
+  
+  const parsed = parseComparisonSlug(slug)
+  if (!parsed) notFound()
+    
+  const [slug1, slug2] = parsed
+  if (slug1 > slug2) {
+    redirect(`/compare/${slug2}-vs-${slug1}`)
+  }
+
   const [tool1, tool2] = await getTools(slug)
   const [faqs, comparisonData] = await Promise.all([
     findComparisonFaqs(tool1.id, tool2.id),
@@ -155,14 +170,13 @@ export default async function ComparisonPage({ params }: PageProps) {
     ),
   ])
 
-  const author = tool1.ownerId ? await db.user.findUnique({ where: { id: tool1.ownerId } }) : null
+  if (!comparisonData || comparisonData.status !== "Published") {
+    notFound()
+  }
 
   const verdict = comparisonData?.verdict
   const customTitle =
     comparisonData?.customTitle || `${tool1.name} vs ${tool2.name}: Full Comparison (2026)`
-  const customDescription =
-    comparisonData?.customDescription ||
-    `Compare ${tool1.name} and ${tool2.name} side-by-side across features, pricing, deliverability, and more. Find the best cold email tool for your outreach needs.`
 
   const breadcrumbItems = [
     { name: "Compare", href: "/compare" },
@@ -201,13 +215,11 @@ export default async function ComparisonPage({ params }: PageProps) {
             Compare {tool1.name} and {tool2.name} side-by-side across features, pricing, deliverability, and more. Find the best cold email tool for your outreach needs.
           </p>
 
-          {author && (
-            <div className="mt-4 flex flex-wrap justify-center items-center gap-4 text-sm text-muted-foreground">
-              Written by <Link href={`/authors/${(author as any).slug || author.id}`}><Author name={author.name || "Unknown"} image={author.image} /></Link>
-              <span className="hidden sm:inline-block border-l h-4" />
-              <span>Updated on {new Date((comparisonData as any)?.updatedAt || (comparisonData as any)?.createdAt || Date.now()).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
-            </div>
-          )}
+          <div className="mt-4 flex flex-wrap justify-center items-center gap-4 text-sm text-muted-foreground">
+            Written by ColdEmailKit Editorial
+            <span className="hidden sm:inline-block border-l h-4" />
+            <span>Updated on {new Date(comparisonData.updatedAt || comparisonData.createdAt || Date.now()).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+          </div>
         </div>
 
         {/* Quick-Jump Anchor Links */}
@@ -232,9 +244,9 @@ export default async function ComparisonPage({ params }: PageProps) {
       </div>
 
       {/* Custom Comparison Overview Section */}
-      {comparisonData?.customDescription && (
+      {comparisonData?.overviewContent && (
         <div className="flex flex-col gap-4 rounded-xl border bg-card p-6 md:p-8 shadow-sm">
-          <ComparisonMarkdown code={comparisonData.customDescription} className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground" />
+          <ComparisonMarkdown code={comparisonData.overviewContent} className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground" />
         </div>
       )}
 

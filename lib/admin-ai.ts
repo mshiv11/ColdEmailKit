@@ -1,6 +1,6 @@
 import { anthropic } from "@ai-sdk/anthropic"
 import { google } from "@ai-sdk/google"
-import { generateObject, generateText } from "ai"
+import { generateObject, generateText, streamObject } from "ai"
 import type { ZodType } from "zod"
 import { env } from "~/env"
 import { getErrorMessage } from "~/lib/handle-error"
@@ -9,7 +9,7 @@ import {
   scrapeWebsiteDataWithFallback,
   searchWebData,
 } from "~/lib/scraper"
-import { contentSchema, descriptionSchema } from "~/server/admin/shared/schema"
+import { contentSchema, descriptionSchema, comparisonSchema } from "~/server/admin/shared/schema"
 import { getUrlHostname } from "~/utils/helpers"
 
 type StructuredObjectOptions<RESULT> = {
@@ -196,16 +196,30 @@ const generateStructuredObjectWithFallback = async <RESULT>(
   } catch (anthropicError) {
     console.error("Anthropic generation failed, falling back to Mistral:", anthropicError)
 
-    try {
-      return await generateObjectWithMistral(options)
-    } catch (mistralError) {
-      console.error("Mistral fallback failed:", mistralError)
-      throw new Error(
-        `Generation failed with both Anthropic and Mistral. Anthropic: ${getErrorMessage(
-          anthropicError,
-        )} Mistral: ${getErrorMessage(mistralError)}`,
-      )
+    let retries = 3;
+    let mistralError: any;
+    
+    while (retries > 0) {
+      try {
+        return await generateObjectWithMistral(options)
+      } catch (err: any) {
+        mistralError = err;
+        if (err.message && err.message.includes("429")) {
+          console.error("Mistral 429 Rate Limit. Waiting 10s before retry...");
+          await new Promise(r => setTimeout(r, 10000));
+          retries--;
+        } else {
+          break; // Stop retrying if it's not a 429
+        }
+      }
     }
+
+    console.error("Mistral fallback failed completely:", mistralError)
+    throw new Error(
+      `Generation failed with both Anthropic and Mistral. Anthropic: ${getErrorMessage(
+        anthropicError,
+      )} Mistral: ${getErrorMessage(mistralError)}`,
+    )
   }
 }
 
@@ -294,6 +308,42 @@ export const generateAdminAlternativeDescription = async ({ url }: { url: string
     prompt: scrapedData
       ? buildScrapedDescriptionPrompt(url, scrapedData)
       : `Provide me details for the following website URL: ${url}.`,
+  })
+}
+
+const COMPARISON_SYSTEM_PROMPT = `You are an expert copywriter for ColdEmailKit, focused on writing highly analytical and definitive side-by-side programmatic software comparisons. Your task is to extract all meaningful differences between the two provided tools and synthesize them into the requested JSON schema.
+Write in a factual, neutral, and helpful tone. Do not use generic marketing language. Do not use em-dash or en-dash. Always rewrite in your own voice. Make definitive statements based on facts.`
+
+export const generateComparisonContent = async ({ tool1, tool2 }: { tool1: string, tool2: string }) => {
+  const [data1, data2] = await Promise.all([
+    searchWebData(`site:coldemailkit.com ${tool1} review OR what is ${tool1}`),
+    searchWebData(`site:coldemailkit.com ${tool2} review OR what is ${tool2}`)
+  ])
+
+  const prompt = `Tool 1: ${tool1}\nData 1:\n${data1}\n\nTool 2: ${tool2}\nData 2:\n${data2}\n\nPlease compare these two tools by generating the required fields.`
+
+  return generateStructuredObjectWithFallback({
+    schema: comparisonSchema,
+    system: COMPARISON_SYSTEM_PROMPT,
+    prompt,
+    temperature: 0.1,
+  })
+}
+
+export const streamComparisonContent = async ({ tool1, tool2 }: { tool1: string, tool2: string }) => {
+  const [data1, data2] = await Promise.all([
+    searchWebData(`site:coldemailkit.com ${tool1} review OR what is ${tool1}`),
+    searchWebData(`site:coldemailkit.com ${tool2} review OR what is ${tool2}`)
+  ])
+
+  const prompt = `Tool 1: ${tool1}\nData 1:\n${data1}\n\nTool 2: ${tool2}\nData 2:\n${data2}\n\nPlease compare these two tools by generating the required fields.`
+
+  return streamObject({
+    model: anthropic("claude-sonnet-4-6"),
+    schema: comparisonSchema,
+    system: COMPARISON_SYSTEM_PROMPT,
+    prompt,
+    temperature: 0.1,
   })
 }
 

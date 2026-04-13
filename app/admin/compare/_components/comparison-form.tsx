@@ -1,7 +1,9 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
+import { experimental_useObject as useObject } from "@ai-sdk/react"
+import { ComparisonStatus } from "@prisma/client"
 import { toast } from "sonner"
 import { Button } from "~/components/common/button"
 import { H3, H5, H6 } from "~/components/common/heading"
@@ -27,6 +29,8 @@ import {
   upsertComparisonData,
 } from "~/server/admin/comparisons/actions"
 import { ComparisonMarkdown } from "~/components/web/comparison-markdown"
+import { parseAiRouteError } from "~/lib/parse-ai-route-error"
+import { comparisonSchema } from "~/server/admin/shared/schema"
 
 type Tool = {
   id: string
@@ -48,8 +52,10 @@ type ComparisonFormProps = {
   existingVerdict: string | null
   existingCustomTitle: string | null
   existingCustomDescription: string | null
+  existingOverviewContent: string | null
   existingTool1Description: string | null
   existingTool2Description: string | null
+  existingStatus: ComparisonStatus
   existingFaqs: FaqEntry[]
 }
 
@@ -59,8 +65,10 @@ export function ComparisonForm({
   existingVerdict,
   existingCustomTitle,
   existingCustomDescription,
+  existingOverviewContent,
   existingTool1Description,
   existingTool2Description,
+  existingStatus,
   existingFaqs,
 }: ComparisonFormProps) {
   const router = useRouter()
@@ -71,6 +79,8 @@ export function ComparisonForm({
   const [verdict, setVerdict] = useState(existingVerdict ?? "")
   const [customTitle, setCustomTitle] = useState(existingCustomTitle ?? "")
   const [customDescription, setCustomDescription] = useState(existingCustomDescription ?? "")
+  const [overviewContent, setOverviewContent] = useState(existingOverviewContent ?? "")
+  const [status, setStatus] = useState<ComparisonStatus>(existingStatus ?? ComparisonStatus.Draft)
   const [faqs, setFaqs] = useState<FaqEntry[]>(existingFaqs)
   const [newQ, setNewQ] = useState("")
   const [newA, setNewA] = useState("")
@@ -83,8 +93,10 @@ export function ComparisonForm({
         verdict: verdict || null,
         customTitle: customTitle || null,
         customDescription: customDescription || null,
+        overviewContent: overviewContent || null,
         tool1Description: desc1 || null,
         tool2Description: desc2 || null,
+        status: status,
       })
       if (error) {
         toast.error("Failed to save descriptions and verdict")
@@ -134,6 +146,56 @@ export function ComparisonForm({
         router.refresh()
       }
     })
+  }
+
+  const [isGenerating, setIsGenerating] = useState(false)
+
+  const { object, submit, stop, isLoading } = useObject({
+    api: "/api/ai/generate-comparison",
+    schema: comparisonSchema,
+    onFinish: async ({ object, error }) => {
+      if (error) {
+        toast.error(parseAiRouteError(error.message, "Something went wrong. Please check console."))
+      } else if (object) {
+        if (object.faqs && Array.isArray(object.faqs)) {
+          toast.info("Saving generated FAQs...")
+          const faqPromises = object.faqs.map((faq: any, idx: number) =>
+            upsertComparisonFaq({
+              tool1Id: tool1.id,
+              tool2Id: tool2.id,
+              question: faq.question,
+              answer: faq.answer,
+              order: faqs.length + idx,
+            })
+          )
+          await Promise.all(faqPromises)
+          toast.success("FAQs saved automatically. Please save the comparison descriptors.")
+        } else {
+          toast.success("Content generated successfully. Please save the comparison to update.")
+        }
+        router.refresh()
+      }
+    },
+  })
+
+  useEffect(() => {
+    if (object) {
+      if (object.customTitle) setCustomTitle(object.customTitle)
+      if (object.customDescription) setCustomDescription(object.customDescription)
+      if (object.overviewContent) setOverviewContent(object.overviewContent)
+      if (object.verdict) setVerdict(object.verdict)
+      if (object.faqs && Array.isArray(object.faqs)) {
+        setFaqs(object.faqs.map((q: any, i: number) => ({ ...q, order: faqs.length + i })))
+      }
+    }
+  }, [object])
+
+  const handleGenerateWithAI = () => {
+    if (isLoading) {
+      stop()
+      return
+    }
+    submit({ tool1: tool1.name, tool2: tool2.name })
   }
 
   const handleDeleteComparison = () => {
@@ -194,8 +256,25 @@ export function ComparisonForm({
 
         <Stack size="sm" className="-my-0.5">
           <Button
+            type="button"
+            onClick={handleGenerateWithAI}
+            disabled={!isLoading && isPending}
+            variant="secondary"
+            className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-950/50"
+            prefix={
+              isLoading ? (
+                <Icon name="lucide/loader" className="animate-spin" />
+              ) : (
+                <Icon name="lucide/sparkles" />
+              )
+            }
+          >
+            {isLoading ? "Stop Generating" : "Generate Content"}
+          </Button>
+
+          <Button
             onClick={handleSaveDescriptions}
-            disabled={isPending}
+            disabled={isPending || isGenerating}
             isPending={isPending}
             variant="primary"
           >
@@ -235,7 +314,36 @@ export function ComparisonForm({
         defaultOpen={true}
       >
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium">Status</label>
+            <select
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              value={status}
+              onChange={e => setStatus(e.target.value as ComparisonStatus)}
+            >
+              <option value={ComparisonStatus.Draft}>Draft</option>
+              <option value={ComparisonStatus.Scheduled}>Scheduled</option>
+              <option value={ComparisonStatus.Published}>Published</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-2 pt-4 border-t">
+            <label className="text-sm font-medium">Main Overview (Markdown format)</label>
+            <TextArea
+              className="min-h-32"
+              placeholder={`Write a detailed overall comparison between ${tool1.name} and ${tool2.name}...`}
+              value={overviewContent}
+              onChange={e => setOverviewContent(e.target.value)}
+            />
+            {overviewContent && (
+              <div className="mt-2 rounded-md border bg-muted/30 p-4">
+                <H6 className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Live Preview</H6>
+                <ComparisonMarkdown code={overviewContent} className="text-sm border-t pt-2" />
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">{tool1.name} description</label>
               <TextArea

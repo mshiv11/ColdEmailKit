@@ -44,6 +44,19 @@ export const getColumns = (): ColumnDef<ComparisonPair>[] => {
       ),
     },
     {
+      accessorKey: "status",
+      size: 120,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      cell: ({ row }) => {
+        const s = row.original.status || "Draft"
+        return (
+          <Badge variant={s === "Published" ? "default" : s === "Scheduled" ? "secondary" : "outline"}>
+            {s}
+          </Badge>
+        )
+      },
+    },
+    {
       accessorKey: "createdAt",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
       cell: ({ row }) => <Note>{formatDate(row.getValue<Date>("createdAt"))}</Note>,

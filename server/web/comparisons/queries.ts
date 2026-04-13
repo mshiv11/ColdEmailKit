@@ -1,4 +1,4 @@
-import { ToolStatus } from "@prisma/client"
+import { ToolStatus, ComparisonStatus } from "@prisma/client"
 import { unstable_cacheLife as cacheLife, unstable_cacheTag as cacheTag } from "next/cache"
 import { comparisonToolPayload, comparisonFaqPayload } from "~/server/web/comparisons/payloads"
 import { db } from "~/services/db"
@@ -68,6 +68,7 @@ export const findComparisonsForTool = async (toolId: string) => {
 
   const comparisons = await db.comparison.findMany({
     where: {
+      status: ComparisonStatus.Published,
       OR: [{ tool1Id: toolId }, { tool2Id: toolId }],
     },
     select: {
@@ -95,8 +96,9 @@ export const findRelatedComparisons = async (
   cacheTag(`related-comparisons-${tool1Id}-${tool2Id}`)
   cacheLife("max")
 
-  const faqs = await db.comparisonFaq.findMany({
+  const relatedComparisons = await db.comparison.findMany({
     where: {
+      status: ComparisonStatus.Published,
       OR: [{ tool1Id: { in: [tool1Id, tool2Id] } }, { tool2Id: { in: [tool1Id, tool2Id] } }],
     },
     select: {
@@ -105,6 +107,7 @@ export const findRelatedComparisons = async (
       tool1: { select: { name: true, slug: true, faviconUrl: true } },
       tool2: { select: { name: true, slug: true, faviconUrl: true } },
     },
+    take: 12,
   })
 
   // Group by pair and deduplicate
@@ -117,9 +120,9 @@ export const findRelatedComparisons = async (
     }
   >()
 
-  for (const faq of faqs) {
-    const key = [faq.tool1Id, faq.tool2Id].sort().join("-")
-    const slug = `${faq.tool1.slug}-vs-${faq.tool2.slug}`
+  for (const comp of relatedComparisons) {
+    const key = [comp.tool1Id, comp.tool2Id].sort().join("-")
+    const slug = `${comp.tool1.slug}-vs-${comp.tool2.slug}`
 
     // Skip the current comparison
     if (slug === currentSlug) continue
@@ -127,8 +130,8 @@ export const findRelatedComparisons = async (
     if (!pairs.has(key)) {
       pairs.set(key, {
         slug,
-        tool1: faq.tool1,
-        tool2: faq.tool2,
+        tool1: comp.tool1,
+        tool2: comp.tool2,
       })
     }
   }

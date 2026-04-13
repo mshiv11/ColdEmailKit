@@ -42,3 +42,27 @@ Do not use em-dash or en-dash. Write in a factual, neutral, helpful tone. Always
  * The schema for the description generator.
  */
 export const descriptionSchema = contentSchema.pick({ description: true })
+
+/**
+ * The schema for generating full programmatic comparisons.
+ */
+export const comparisonSchema = z.object({
+  customTitle: z
+    .string()
+    .describe("SEO optimized title. Format strictly as 'Tool A vs Tool B: Full Comparison (2026)'"),
+  customDescription: z
+    .string()
+    .describe("Compelling meta description. Max 160 characters. Highlight exact use-cases where one wins over the other."),
+  overviewContent: z
+    .string()
+    .describe("Markdown formatted. 3-4 paragraphs summarizing the philosophical and structural differences between the two tools. Do not include Top Features or Pricing as there is already a table for that. Focus on UX, architecture, and core audiences."),
+  verdict: z
+    .string()
+    .describe("Markdown formatted. 2 paragraphs making a definitive, unapologetic verdict on who should choose which tool and why. Do not be perfectly neutral - make a strong, guided recommendation based on team size, need, or budget."),
+  faqs: z.array(
+    z.object({
+      question: z.string(),
+      answer: z.string(),
+    })
+  ).describe("List of exactly 3-5 frequently asked questions comparing these two specific tools."),
+})
