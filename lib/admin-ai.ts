@@ -258,8 +258,8 @@ export const generateAdminToolContent = async ({
   }
 
   if (!searchData && !scrapedData) {
-    throw new Error(
-      "Failed to gather data from both search and website scraping. Please check the URL and try again.",
+    console.warn(
+      "Warning: No data from search or scraping. Generating content from tool name and URL only.",
     )
   }
 
@@ -315,8 +315,8 @@ export const streamAdminToolContent = async ({
   }
 
   if (!searchData && !scrapedData) {
-    throw new Error(
-      "Failed to gather data from both search and website scraping. Please check the URL and try again.",
+    console.warn(
+      "Warning: No data from search or scraping. Streaming content from tool name and URL only.",
     )
   }
 
