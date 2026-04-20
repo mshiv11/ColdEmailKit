@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { generateAdminToolContent } from "~/lib/admin-ai"
+import { streamAdminToolContent } from "~/lib/admin-ai"
 import { withAdminAuth } from "~/lib/auth-hoc"
 import { getErrorMessage } from "~/lib/handle-error"
 
@@ -13,11 +13,9 @@ const generateContentSchema = z.object({
 export const POST = withAdminAuth(async req => {
   try {
     const { url, name } = generateContentSchema.parse(await req.json())
-    const content = await generateAdminToolContent({ url, name })
+    const stream = await streamAdminToolContent({ url, name })
 
-    return new Response(JSON.stringify(content), {
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-    })
+    return stream.toTextStreamResponse()
   } catch (error) {
     console.error("Generate content API error:", error)
 
@@ -27,3 +25,4 @@ export const POST = withAdminAuth(async req => {
     })
   }
 })
+

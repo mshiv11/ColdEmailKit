@@ -428,6 +428,7 @@ enum ComparisonStatus {
 
 model Comparison {
   id                String           @id @default(cuid())
+  slug              String?          @unique
   tool1Id           String
   tool2Id           String
   verdict           String?          @db.Text

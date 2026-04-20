@@ -40,7 +40,7 @@ This project is a modified version of [OpenAlternative](https://github.com/piotr
 | **Original Author** | [Piotr Kulpinski](https://github.com/piotrkulpinski) |
 | **Modified By** | [mshiv11](https://github.com/mshiv11) |
 | **Date of First Modification** | December 22, 2024 |
-| **Latest Modification** | January 31, 2026 |
+| **Latest Modification** | April 21, 2026 |
 
 ### Summary of Changes
 
@@ -53,6 +53,12 @@ The following major changes have been made from the original project:
 - Added integration management for cold email tool connections
 - Implemented SEO schema markup for improved search visibility
 - Updated payment integration from Stripe to Dodo Payments
+- Migrated database from Neon to **Supabase** (PostgreSQL)
+- Migrated hosting and background jobs from Vercel/Inngest to **Railway**
+- Added AI-powered content generation using **Claude (Anthropic)** with streaming via Vercel AI SDK
+- Added programmatic comparison page generation with streaming AI content
+- Replaced Plausible analytics with **PostHog**
+- Added tool ownership, claiming, and verified badge system
 - Various feature enhancements and bug fixes
 
 ### GPL-3.0 Compliance
@@ -86,11 +92,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 ## Tech Stack
 
-- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **Framework**: [Next.js](https://nextjs.org/) (App Router with Turbopack)
 - **Runtime**: [Bun](https://bun.sh/)
-- **Database**: [PostgreSQL](https://www.postgresql.org/) with [Prisma](https://www.prisma.io/)
+- **Database**: [Supabase](https://supabase.com/) (PostgreSQL) with [Prisma](https://www.prisma.io/)
+- **Hosting**: [Railway](https://railway.app/)
 - **Search**: [Meilisearch](https://www.meilisearch.com/)
 - **Authentication**: [Better Auth](https://www.better-auth.com/)
+- **AI**: [Vercel AI SDK](https://sdk.vercel.ai/) with [Anthropic Claude](https://anthropic.com/), [Google Gemini](https://ai.google.dev/), and [Mistral](https://mistral.ai/) (fallback)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **Email**: [Resend](https://resend.com/) with [React Email](https://react.email/)
 - **Analytics**: [PostHog](https://posthog.com/)
@@ -103,17 +111,19 @@ ColdEmailKit uses the following third-party services:
 
 | Service | Purpose | Website |
 |---------|---------|---------|
-| **Neon** | PostgreSQL Database | [neon.tech](https://neon.tech) |
+| **Supabase** | PostgreSQL Database | [supabase.com](https://supabase.com/) |
+| **Railway** | Hosting & Background Jobs | [railway.app](https://railway.app/) |
 | **Meilisearch** | Full-text Search | [meilisearch.com](https://www.meilisearch.com/) |
 | **Upstash** | Redis Cache & Rate Limiting | [upstash.com](https://upstash.com/) |
 | **PostHog** | Web & Product Analytics | [posthog.com](https://posthog.com/) |
 | **Beehiiv** | Newsletter | [beehiiv.com](https://www.beehiiv.com/?via=mshiv) |
 | **Resend** | Transactional Email | [resend.com](https://resend.com/) |
-| **Inngest** | Background Jobs | [inngest.com](https://inngest.com/) |
 | **Cloudflare R2** | File Storage | [cloudflare.com/r2](https://developers.cloudflare.com/r2/) |
 | **Dodo Payments** | Payment Processing | [dodopayments.com](https://dodopayments.com/) |
 | **ScreenshotOne** | Website Screenshots | [screenshotone.com](https://screenshotone.com/?via=mshiv) |
-| **Firecrawl** | Web Scraping | [firecrawl.dev](https://firecrawl.link/mshiv) |
+| **Anthropic** | AI Content Generation (Claude) | [anthropic.com](https://anthropic.com/) |
+| **Jina AI** | Web Search & Scraping | [jina.ai](https://jina.ai/) |
+| **Firecrawl** | Web Scraping (Fallback) | [firecrawl.dev](https://firecrawl.link/mshiv) |
 
 Make sure to set up accounts with these services and add the necessary environment variables to your `.env` file.
 
@@ -154,7 +164,7 @@ Make sure to set up accounts with these services and add the necessary environme
 ### Prerequisites
 
 - [Bun](https://bun.sh/) (v1.2.2 or later)
-- [PostgreSQL](https://www.postgresql.org/) database (recommended: [Neon](https://neon.tech))
+- [PostgreSQL](https://www.postgresql.org/) database (recommended: [Supabase](https://supabase.com/))
 - Node.js 18+ (for some dependencies)
 
 ### Installation
@@ -240,13 +250,21 @@ All commands are run from the root of the project:
 
 ## Deployment
 
-### Vercel (Recommended)
+### Railway (Recommended)
 
-The project is optimized for deployment on [Vercel](https://vercel.com/):
+The project is deployed on [Railway](https://railway.app/):
 
-1. Connect your repository to Vercel
-2. Configure environment variables in Vercel dashboard
-3. Deploy
+1. Connect your GitHub repository to Railway
+2. Configure all environment variables in the Railway dashboard
+3. Set the build command: `bun run build`
+4. Set the start command: `bun run start`
+5. Railway auto-deploys on push to `main`
+
+**Important production environment variables:**
+- `SKIP_ENV_VALIDATION=true` — Required during build phase since server env vars are runtime-only
+- `ANTHROPIC_API_KEY` — Required for AI content generation (Claude)
+- `JINA_API_KEY` — Required for web search and scraping during content generation
+- `DATABASE_URL` — Use the **pooled** connection string from Supabase for production
 
 ### Manual Deployment
 

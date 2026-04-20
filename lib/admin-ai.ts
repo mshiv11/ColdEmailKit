@@ -291,6 +291,64 @@ Based on the above data, generate:
   })
 }
 
+export const streamAdminToolContent = async ({
+  url,
+  name,
+}: {
+  url: string
+  name?: string
+}) => {
+  const toolName = name || getUrlHostname(url)
+
+  let searchData = ""
+  try {
+    searchData = await searchWebData(`${toolName} review features pricing alternatives`)
+  } catch (searchError) {
+    console.error("Jina Search error (continuing without search data):", searchError)
+  }
+
+  let scrapedData: ScrapedWebsiteData | null = null
+  try {
+    scrapedData = await scrapeWebsiteDataWithFallback(url)
+  } catch (scrapeError) {
+    console.error("Website scraping failed:", scrapeError)
+  }
+
+  if (!searchData && !scrapedData) {
+    throw new Error(
+      "Failed to gather data from both search and website scraping. Please check the URL and try again.",
+    )
+  }
+
+  const truncatedContent = scrapedData?.content?.slice(0, 15000) || ""
+  const truncatedSearchData = searchData.slice(0, 15000)
+
+  return streamObject({
+    model: anthropic("claude-sonnet-4-6"),
+    schema: contentSchema,
+    system: TOOL_CONTENT_SYSTEM_PROMPT,
+    temperature: 0.4,
+    prompt: `Research and analyze this cold email tool:
+
+Tool Name: ${toolName}
+Tool Website: ${url}
+
+--- Jina Search Results ---
+${truncatedSearchData || "No search results available."}
+
+--- Official Website Content ---
+Page Title: ${scrapedData?.title || "Unknown"}
+Meta Description: ${scrapedData?.description || "No description"}
+Website Content:
+${truncatedContent || "No website content available."}
+
+Based on the above data, generate:
+1. A compelling tagline (max 60 chars)
+2. A meta description (max 160 chars) that includes the tool name and its core value
+3. Detailed content for the full tool page following the structure defined in your instructions. Use "-" for all bullets. Use ### numbered headings for FAQ questions. Extract FAQ questions from the search results data.`,
+  })
+}
+
 export const generateAdminAlternativeDescription = async ({ url }: { url: string }) => {
   let scrapedData: ScrapedWebsiteData | null = null
 
