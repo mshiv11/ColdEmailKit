@@ -77,8 +77,10 @@ const normalizeFirecrawlResponse = (url: string, data: FirecrawlResponse): Scrap
 
 export const scrapeWebsiteDataWithFirecrawl = async (url: string) => {
   if (!env.FIRECRAWL_API_KEY) {
-    throw new Error("Firecrawl fallback is not configured.")
+    throw new Error("Firecrawl fallback is not configured. Add FIRECRAWL_API_KEY to your environment.")
   }
+
+  console.log("Scraping with Firecrawl:", url)
 
   const firecrawlApi = wretch("https://api.firecrawl.dev/v1/scrape")
     .auth(`Bearer ${env.FIRECRAWL_API_KEY}`)
@@ -106,7 +108,9 @@ export const scrapeWebsiteDataWithFirecrawl = async (url: string) => {
 
 export const scrapeWebsiteDataWithFallback = async (url: string) => {
   try {
-    return await scrapeWebsiteData(url)
+    const result = await scrapeWebsiteData(url)
+    console.log("Scraped successfully with Jina Reader")
+    return result
   } catch (jinaError) {
     console.error("Jina Reader error (trying Firecrawl fallback):", jinaError)
   }
@@ -126,12 +130,93 @@ type JinaSearchResponse = {
 }
 
 /**
- * Searches the web for information about a tool using Jina.ai's Search API.
- * The Search API expects the query to be appended to the path: https://s.jina.ai/<query>
+ * Firecrawl Search API response types.
+ * Endpoint: POST https://api.firecrawl.dev/v2/search
+ */
+type FirecrawlSearchResult = {
+  url: string
+  title: string
+  description: string
+  markdown?: string
+  metadata?: {
+    title?: string
+    description?: string
+    sourceURL?: string
+  }
+}
+
+type FirecrawlSearchResponse = {
+  success: boolean
+  data:
+    | FirecrawlSearchResult[]
+    | {
+        web?: FirecrawlSearchResult[]
+      }
+}
+
+/**
+ * Searches the web using Firecrawl's Search API (v2).
+ * Used as fallback when Jina Search is depleted.
+ * @param query The search query string.
+ * @returns Formatted markdown string of top search results, or empty string on failure.
+ */
+export const searchWebDataWithFirecrawl = async (query: string): Promise<string> => {
+  if (!env.FIRECRAWL_API_KEY) {
+    console.error("Firecrawl Search fallback skipped: FIRECRAWL_API_KEY not configured.")
+    return ""
+  }
+
+  console.log("Searching with Firecrawl:", query)
+
+  const firecrawlApi = wretch("https://api.firecrawl.dev/v2/search")
+    .auth(`Bearer ${env.FIRECRAWL_API_KEY}`)
+    .headers({
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    })
+
+  const { data, error } = await tryCatch(
+    firecrawlApi
+      .post({
+        query,
+        limit: 5,
+        scrapeOptions: {
+          formats: ["markdown"],
+        },
+      })
+      .json<FirecrawlSearchResponse>(),
+  )
+
+  if (error) {
+    console.error("Firecrawl Search API error:", error)
+    return ""
+  }
+
+  // Handle both response formats: array or { web: [] }
+  const results = Array.isArray(data.data) ? data.data : data.data?.web ?? []
+
+  if (results.length === 0) {
+    console.warn("Firecrawl Search returned no results for:", query)
+    return ""
+  }
+
+  return results
+    .slice(0, 5)
+    .map(r => {
+      const content = r.markdown || r.description || ""
+      return `### ${r.title}\n${r.description}\n${content}`
+    })
+    .join("\n\n")
+}
+
+/**
+ * Searches the web for information about a tool.
+ * Tries Jina Search first, falls back to Firecrawl Search if Jina fails.
  * @param query The search query string.
  * @returns Formatted markdown string of top search results, or empty string on failure.
  */
 export const searchWebData = async (query: string): Promise<string> => {
+  // Try Jina Search first
   let jinaApi = wretch(`https://s.jina.ai/${encodeURIComponent(query)}`).headers({
     Accept: "application/json",
   })
@@ -142,13 +227,20 @@ export const searchWebData = async (query: string): Promise<string> => {
 
   const { data, error } = await tryCatch(jinaApi.get().json<JinaSearchResponse>())
 
-  if (error) {
-    console.error("Jina Search API error:", error)
-    return ""
+  if (!error && data?.data?.length > 0) {
+    console.log("Searched successfully with Jina")
+    return data.data
+      .slice(0, 5)
+      .map(r => `### ${r.title}\n${r.description}\n${r.content}`)
+      .join("\n\n")
   }
 
-  return data.data
-    .slice(0, 5)
-    .map(r => `### ${r.title}\n${r.description}\n${r.content}`)
-    .join("\n\n")
+  // Jina failed or returned empty — fall back to Firecrawl Search
+  if (error) {
+    console.error("Jina Search failed (trying Firecrawl Search fallback):", error)
+  } else {
+    console.warn("Jina Search returned empty results, trying Firecrawl Search")
+  }
+
+  return searchWebDataWithFirecrawl(query)
 }
