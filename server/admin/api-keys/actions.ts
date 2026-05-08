@@ -83,3 +83,27 @@ export const revokeApiKey = adminProcedure
 
     revalidatePath("/admin/api-keys")
   })
+
+/**
+ * Permanently delete an API key and all its usage logs via server action.
+ */
+export const deleteApiKey = adminProcedure
+  .createServerAction()
+  .input(z.object({ id: z.string() }))
+  .handler(async ({ input: { id }, ctx }) => {
+    // Verify ownership
+    const apiKey = await db.apiKey.findFirst({
+      where: { id, userId: ctx.user.id },
+    })
+
+    if (!apiKey) {
+      throw new Error("API key not found")
+    }
+
+    // Hard-delete — cascade will remove logs automatically
+    await db.apiKey.delete({
+      where: { id },
+    })
+
+    revalidatePath("/admin/api-keys")
+  })

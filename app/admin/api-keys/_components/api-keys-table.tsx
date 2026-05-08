@@ -8,6 +8,7 @@ import { Icon } from "~/components/common/icon"
 import { Stack } from "~/components/common/stack"
 import type { ApiKeyListItem } from "~/server/admin/api-keys/queries"
 import { CreateApiKeyDialog } from "./create-api-key-dialog"
+import { DeleteApiKeyDialog } from "./delete-api-key-dialog"
 import { RevokeApiKeyDialog } from "./revoke-api-key-dialog"
 
 type ApiKeysTableProps = {
@@ -69,6 +70,7 @@ export function ApiKeysTable({ apiKeys }: ApiKeysTableProps) {
 
 function ApiKeyRow({ apiKey }: { apiKey: ApiKeyListItem }) {
   const [revokeDialogOpen, setRevokeDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const isExpired = apiKey.expiresAt && new Date(apiKey.expiresAt) < new Date()
   const statusVariant = apiKey.isRevoked ? "danger" : isExpired ? "warning" : "success"
@@ -113,18 +115,31 @@ function ApiKeyRow({ apiKey }: { apiKey: ApiKeyListItem }) {
       </td>
       <td className="px-4 py-3 text-muted-foreground">{apiKey._count.logs.toLocaleString()}</td>
       <td className="px-4 py-3 text-right">
-        {!apiKey.isRevoked && (
-          <RevokeApiKeyDialog
+        <Stack size="xs" className="justify-end">
+          {!apiKey.isRevoked && (
+            <RevokeApiKeyDialog
+              apiKey={apiKey}
+              open={revokeDialogOpen}
+              onOpenChange={setRevokeDialogOpen}
+            >
+              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                <Icon name="lucide/ban" className="size-3.5" />
+                <span className="max-sm:sr-only">Revoke</span>
+              </Button>
+            </RevokeApiKeyDialog>
+          )}
+
+          <DeleteApiKeyDialog
             apiKey={apiKey}
-            open={revokeDialogOpen}
-            onOpenChange={setRevokeDialogOpen}
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
           >
-            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-              <Icon name="lucide/ban" className="size-3.5" />
-              <span className="max-sm:sr-only">Revoke</span>
+            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
+              <Icon name="lucide/trash" className="size-3.5" />
+              <span className="max-sm:sr-only">Delete</span>
             </Button>
-          </RevokeApiKeyDialog>
-        )}
+          </DeleteApiKeyDialog>
+        </Stack>
       </td>
     </tr>
   )
