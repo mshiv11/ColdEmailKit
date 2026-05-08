@@ -61,6 +61,7 @@ export const env = createEnv({
     STACK_ANALYZER_API_KEY: z.string().optional(),
     PERPLEXITY_API_KEY: z.string().min(1),
     MISTRAL_API_KEY: z.string().min(1),
+    API_KEY_RATE_LIMIT: z.coerce.number().default(100),
   },
 
   /**

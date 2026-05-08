@@ -96,6 +96,12 @@ export const Sidebar = () => {
         undefined, // Separator
 
         {
+          title: "API Keys",
+          href: "/admin/api-keys",
+          prefix: <Icon name="lucide/shield-half" />,
+        },
+
+        {
           title: "Visit Site",
           href: "/admin/site",
           prefix: <Icon name="lucide/globe" />,

@@ -81,6 +81,7 @@ model User {
   tools    Tool[]
   reports  Report[]
   reviews  Review[]
+  apiKeys  ApiKey[]
 
   // Indexes
   @@index([id])
@@ -451,4 +452,44 @@ model Comparison {
   @@index([tool1Id, tool2Id])
   @@index([status])
   @@index([publishedAt])
+}
+
+model ApiKey {
+  id        String    @id @default(cuid())
+  name      String
+  keyHash   String    @unique
+  keyPrefix String
+  scopes    String[]
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  isRevoked  Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  logs   ApiKeyLog[]
+
+  // Indexes
+  @@index([userId])
+  @@index([keyHash])
+}
+
+model ApiKeyLog {
+  id         String   @id @default(cuid())
+  endpoint   String
+  method     String
+  statusCode Int
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  // Relations
+  apiKey   ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  apiKeyId String
+
+  // Indexes
+  @@index([apiKeyId])
+  @@index([createdAt])
 }
