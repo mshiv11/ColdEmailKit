@@ -4,8 +4,7 @@ import { verifyApiKey } from "~/lib/api-keys"
 import { VALID_SCOPES } from "~/lib/api-key-scopes"
 
 /**
- * GET /api/health — Verify API key and return key metadata.
- * Also available at /api/v1/health.
+ * GET /api/health — Verify API key and return key metadata + endpoint discovery.
  * No specific scope required — any valid API key can access this.
  */
 export async function GET(req: NextRequest) {
@@ -17,15 +16,7 @@ export async function GET(req: NextRequest) {
         status: "unauthenticated",
         error: "Missing or invalid API key. Use: Authorization: Bearer cek_xxx",
         availableScopes: VALID_SCOPES,
-        endpoints: {
-          health: "GET /api/health",
-          tools: "GET /api/tools",
-          toolDetail: "GET /api/tools/:slug",
-          submissions: "GET /api/submissions",
-          drafts: "GET /api/drafts",
-          analytics: "GET /api/analytics",
-          adminApiKeys: "GET /api/admin/api-keys (session auth only)",
-        },
+        endpoints: getEndpointDiscovery(),
       },
       { status: 401 },
     )
@@ -51,13 +42,50 @@ export async function GET(req: NextRequest) {
       expiresAt: apiKey.expiresAt,
       lastUsedAt: apiKey.lastUsedAt,
     },
-    endpoints: {
-      health: "GET /api/health",
-      tools: "GET /api/tools?page=1&limit=25&q=search",
-      toolDetail: "GET /api/tools/:slug",
-      submissions: "GET /api/submissions?page=1&limit=25",
-      drafts: "GET /api/drafts?page=1&limit=25",
-      analytics: "GET /api/analytics",
-    },
+    endpoints: getEndpointDiscovery(),
   })
+}
+
+function getEndpointDiscovery() {
+  return {
+    health: "GET /api/health",
+    tools: {
+      list: "GET /api/tools?page=1&limit=25&q=search&status=Published",
+      create: "POST /api/tools",
+      get: "GET /api/tools/:slug",
+      update: "PUT /api/tools/:slug",
+      delete: "DELETE /api/tools/:slug",
+      publish: "POST /api/tools/:slug/publish",
+    },
+    alternatives: {
+      list: "GET /api/alternatives?page=1&limit=25&q=search",
+      create: "POST /api/alternatives",
+      get: "GET /api/alternatives/:id",
+      update: "PUT /api/alternatives/:id",
+      delete: "DELETE /api/alternatives/:id",
+    },
+    comparisons: {
+      list: "GET /api/comparisons?page=1&limit=25&status=Published",
+      create: "POST /api/comparisons",
+      get: "GET /api/comparisons/:slug (e.g., tool1-vs-tool2)",
+      delete: "DELETE /api/comparisons/:slug",
+    },
+    blog: {
+      list: "GET /api/blog?q=search",
+      create: "POST /api/blog",
+      get: "GET /api/blog/:slug",
+      update: "PUT /api/blog/:slug",
+      delete: "DELETE /api/blog/:slug",
+    },
+    categories: {
+      list: "GET /api/categories?page=1&limit=50&q=search",
+      create: "POST /api/categories",
+      get: "GET /api/categories/:id",
+      update: "PUT /api/categories/:id",
+      delete: "DELETE /api/categories/:id",
+    },
+    analytics: "GET /api/analytics",
+    submissions: "GET /api/submissions?page=1&limit=25",
+    drafts: "GET /api/drafts?page=1&limit=25",
+  }
 }
