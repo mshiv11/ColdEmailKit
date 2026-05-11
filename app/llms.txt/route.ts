@@ -1,6 +1,5 @@
 import { ToolStatus } from "@prisma/client"
 import { NextResponse } from "next/server"
-import { allPosts } from "~/.content-collections/generated"
 import { siteConfig } from "~/config/site"
 import { getToolSuffix } from "~/lib/tools"
 import { toolAlternativesPayload } from "~/server/web/tools/payloads"
@@ -13,11 +12,16 @@ export const GET = async () => {
     select: { name: true, slug: true, tagline: true, alternatives: toolAlternativesPayload },
   })
 
+  const blogPosts = await db.blogPost.findMany({
+    orderBy: { publishedAt: "desc" },
+    select: { title: true, slug: true },
+  })
+
   let content = `# ${siteConfig.name} - ${siteConfig.tagline}
 ${siteConfig.description}\n
 ## Blog Highlights
 Links to our most popular blog posts.\n
-${allPosts.map(post => `- [${post.title}](${siteConfig.url}/blog/${post._meta.path})`).join("\n")}\n
+${blogPosts.map(post => `- [${post.title}](${siteConfig.url}/blog/${post.slug})`).join("\n")}\n
 ## Cold Email Tools\n`
 
   for (const tool of tools) {
