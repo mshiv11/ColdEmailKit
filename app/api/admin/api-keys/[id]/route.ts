@@ -25,6 +25,10 @@ export const DELETE = (req: NextRequest, { params }: { params: Promise<{ id: str
         return NextResponse.json({ error: "API key not found" }, { status: 404 })
       }
 
+      if (apiKey.isSystem) {
+        return NextResponse.json({ error: "System API keys cannot be revoked" }, { status: 403 })
+      }
+
       if (apiKey.isRevoked) {
         return NextResponse.json({ error: "API key is already revoked" }, { status: 400 })
       }

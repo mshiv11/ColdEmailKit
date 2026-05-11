@@ -58,6 +58,10 @@ export const PUT = (req: NextRequest, { params }: { params: Promise<{ slug: stri
     // Extract relation IDs from body
     const { categories, alternatives, integrations } = body
 
+    if (body.content && typeof body.content === "string" && body.content.length > 50000) {
+      return NextResponse.json({ error: "Content field exceeds maximum length of 50000 characters" }, { status: 400 })
+    }
+
     // Allowlist of updatable fields — prevents injection of computed/protected fields
     const allowedFields = [
       "name", "tagline", "description", "content", "websiteUrl", "affiliateUrl",
