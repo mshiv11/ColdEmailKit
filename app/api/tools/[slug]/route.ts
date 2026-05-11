@@ -56,21 +56,36 @@ export const PUT = (req: NextRequest, { params }: { params: Promise<{ slug: stri
     }
 
     // Extract relation IDs from body
-    const { categories, alternatives, integrations, ...data } = body
+    const { categories, alternatives, integrations } = body
 
-    // Clean up: remove fields that shouldn't be directly set
-    delete data.id
-    delete data.createdAt
-    delete data.updatedAt
+    // Allowlist of updatable fields — prevents injection of computed/protected fields
+    const allowedFields = [
+      "name", "tagline", "description", "content", "websiteUrl", "affiliateUrl",
+      "status", "isFeatured", "isSelfHosted", "publishedAt",
+      "pricingStarting", "bestFor", "hasFreeTrial", "discountCode", "discountAmount",
+      "customTitle", "customDescription", "submitterName", "submitterEmail", "submitterNote",
+      "faviconUrl", "screenshotUrl",
+      "overallRating", "totalReviews", "trustScore",
+      "specifications", "pricingSpecs", "inboxFeatures", "warmupFeatures",
+      "leadsFeatures", "enrichmentFeatures", "copywritingFeatures",
+      "outreachFeatures", "deliverabilityFeatures", "linkedinFeatures",
+      "g2Rating", "g2Reviews", "trustpilotRating", "trustpilotReviews",
+      "capterraRating", "capterraReviews", "trustradiusRating", "trustradiusReviews",
+      "coldEmailKitRating", "coldEmailKitReviews",
+    ]
+    const data: Record<string, unknown> = {}
+    for (const key of allowedFields) {
+      if (body[key] !== undefined) data[key] = body[key]
+    }
 
     // Handle slug generation
     if (data.name && !data.slug) {
-      data.slug = slugify(data.name)
+      data.slug = slugify(data.name as string)
     }
 
     // Handle publishedAt date coercion
     if (data.publishedAt) {
-      data.publishedAt = new Date(data.publishedAt)
+      data.publishedAt = new Date(data.publishedAt as string)
     }
 
     // Handle status change to Published

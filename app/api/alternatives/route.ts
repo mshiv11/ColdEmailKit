@@ -67,6 +67,15 @@ export const POST = withApiKeyAuth(["alternatives:write"], async (req) => {
 
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
 
+  // Check for duplicate slug
+  const existing = await db.alternative.findFirst({ where: { slug } })
+  if (existing) {
+    return NextResponse.json(
+      { error: `An alternative with slug "${slug}" already exists` },
+      { status: 409 },
+    )
+  }
+
   const alternative = await db.alternative.create({
     data: {
       name,

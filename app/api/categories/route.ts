@@ -64,6 +64,15 @@ export const POST = withApiKeyAuth(["categories:write"], async (req) => {
 
   const slug = inputSlug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
 
+  // Check for duplicate slug
+  const existing = await db.category.findFirst({ where: { slug } })
+  if (existing) {
+    return NextResponse.json(
+      { error: `A category with slug "${slug}" already exists` },
+      { status: 409 },
+    )
+  }
+
   const category = await db.category.create({
     data: {
       name,

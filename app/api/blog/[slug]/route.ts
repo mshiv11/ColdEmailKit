@@ -1,5 +1,6 @@
 import * as fs from "node:fs/promises"
 import * as path from "node:path"
+import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { withApiKeyAuth } from "~/lib/auth-hoc"
@@ -116,6 +117,13 @@ export const PUT = (req: NextRequest, { params }: { params: Promise<{ slug: stri
 
     await fs.writeFile(newPath, fullContent, "utf-8")
 
+    // Trigger ISR revalidation so the edit is reflected on the live site
+    revalidatePath("/blog")
+    revalidatePath(`/blog/${slug}`)
+    if (newSlug && newSlug !== slug) {
+      revalidatePath(`/blog/${newSlug}`)
+    }
+
     return NextResponse.json({ success: true, slug: finalSlug })
   })(req)
 }
@@ -133,6 +141,11 @@ export const DELETE = (req: NextRequest, { params }: { params: Promise<{ slug: s
 
     try {
       await fs.unlink(filePath)
+
+      // Trigger ISR revalidation so the deletion is reflected on the live site
+      revalidatePath("/blog")
+      revalidatePath(`/blog/${slug}`)
+
       return NextResponse.json({ success: true, deleted: slug })
     } catch {
       return NextResponse.json({ error: "Blog post not found" }, { status: 404 })

@@ -1,5 +1,6 @@
 import * as fs from "node:fs/promises"
 import * as path from "node:path"
+import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { withApiKeyAuth } from "~/lib/auth-hoc"
@@ -109,6 +110,10 @@ export const POST = withApiKeyAuth(["blog:write"], async (req) => {
   })
 
   await fs.writeFile(filePath, `${frontmatter}\n\n${content}`, "utf-8")
+
+  // Trigger ISR revalidation so the new post appears on the live site
+  revalidatePath("/blog")
+  revalidatePath(`/blog/${slug}`)
 
   return NextResponse.json({ success: true, slug }, { status: 201 })
 })

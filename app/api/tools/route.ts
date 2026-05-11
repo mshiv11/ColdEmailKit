@@ -99,6 +99,15 @@ export const POST = withApiKeyAuth(["tools:write"], async (req) => {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "")
 
+    // Check for duplicate slug
+    const existing = await db.tool.findFirst({ where: { slug } })
+    if (existing) {
+      return NextResponse.json(
+        { error: `A tool with slug "${slug}" already exists` },
+        { status: 409 },
+      )
+    }
+
     const tool = await db.tool.create({
       data: {
         name,
