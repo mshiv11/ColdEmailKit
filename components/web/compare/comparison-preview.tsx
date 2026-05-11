@@ -1,5 +1,5 @@
-import { Link } from "~/components/common/link"
 import { Icon } from "~/components/common/icon"
+import { Link } from "~/components/common/link"
 import { Skeleton } from "~/components/common/skeleton"
 import { Listing } from "~/components/web/listing"
 import { FaviconImage } from "~/components/web/ui/favicon"

@@ -1,11 +1,11 @@
 "use client"
 
-import { ReactNode, useState, useRef, useEffect } from "react"
+import { formatNumber } from "@primoui/utils"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 import { Icon } from "~/components/common/icon"
 import { Link } from "~/components/common/link"
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/common/popover"
-import { type ToolOne } from "~/server/web/tools/payloads"
-import { formatNumber } from "@primoui/utils"
+import type { ToolOne } from "~/server/web/tools/payloads"
 
 type PlatformKey = "g2" | "trustpilot" | "capterra" | "trustradius" | "coldEmailKit"
 

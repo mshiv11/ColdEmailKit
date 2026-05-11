@@ -1,6 +1,5 @@
-import { db } from "~/services/db"
-import { allPosts } from "content-collections"
 import type { MetadataRoute } from "next"
+import { db } from "~/services/db"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://coldemailkit.com"
@@ -25,9 +24,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   // Blog posts
-  const blogRoutes = allPosts.map(post => ({
-    url: `${baseUrl}/blog/${post._meta.path}`,
-    lastModified: new Date(post.publishedAt),
+  const posts = await db.blogPost.findMany({ select: { slug: true, publishedAt: true } })
+  const blogRoutes = posts.map(post => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: post.publishedAt,
     changeFrequency: "monthly" as const,
     priority: 0.8,
   }))

@@ -1,22 +1,30 @@
 import { formatDate, getReadTime } from "@primoui/utils"
-import type { Post } from "content-collections"
 import Image from "next/image"
 import type { ComponentProps } from "react"
 import { Card, CardDescription, CardFooter, CardHeader } from "~/components/common/card"
 import { H4 } from "~/components/common/heading"
 import { Link } from "~/components/common/link"
 
+export type PartialBlogPost = {
+  slug: string
+  title: string
+  description: string | null
+  content: string
+  imageUrl: string | null
+  publishedAt: Date
+}
+
 type PostCardProps = ComponentProps<typeof Card> & {
-  post: Post
+  post: PartialBlogPost
 }
 
 export const PostCard = ({ className, post, ...props }: PostCardProps) => {
   return (
     <Card className="overflow-clip" asChild {...props}>
-      <Link href={`/blog/${post._meta.path}`}>
-        {post.image && (
+      <Link href={`/blog/${post.slug}`}>
+        {post.imageUrl && (
           <Image
-            src={post.image}
+            src={post.imageUrl}
             alt={post.title}
             width={1200}
             height={630}
@@ -34,7 +42,7 @@ export const PostCard = ({ className, post, ...props }: PostCardProps) => {
 
         {post.publishedAt && (
           <CardFooter>
-            <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+            <time dateTime={post.publishedAt.toISOString()}>{formatDate(post.publishedAt.toISOString())}</time>
             <span>&bull;</span>
             <span>{getReadTime(post.content)} min read</span>
           </CardFooter>

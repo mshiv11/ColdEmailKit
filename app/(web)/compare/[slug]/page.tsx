@@ -7,18 +7,18 @@ import { Icon } from "~/components/common/icon"
 import { ComparisonFaqs } from "~/components/web/compare/comparison-faqs"
 import { ComparisonMarkdown } from "~/components/web/comparison-markdown"
 
-import { ComparisonToolCard } from "~/components/web/compare/comparison-tool-card"
+import { Link } from "~/components/common/link"
 import { ComparisonTable } from "~/components/web/compare/comparison-table"
+import { ComparisonToolCard } from "~/components/web/compare/comparison-tool-card"
 import { RelatedComparisons } from "~/components/web/compare/related-comparisons"
 import { ExternalLink } from "~/components/web/external-link"
-import { FaviconImage } from "~/components/web/ui/favicon"
-import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
 import { Author } from "~/components/web/ui/author"
-import { Link } from "~/components/common/link"
-import { db } from "~/services/db"
+import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
+import { FaviconImage } from "~/components/web/ui/favicon"
 import { metadataConfig } from "~/config/metadata"
 import { generateBreadcrumbSchema, jsonLdScriptProps, wrapInGraph } from "~/lib/schemas"
 import { findComparisonFaqs, findComparisonTools } from "~/server/web/comparisons/queries"
+import { db } from "~/services/db"
 
 export const revalidate = 604800 // Cache for 7 days (on-demand revalidation via revalidateTag handles freshness)
 
@@ -153,10 +153,10 @@ function generateComparisonSchema(
 
 export default async function ComparisonPage({ params }: PageProps) {
   const { slug } = await params
-  
+
   const parsed = parseComparisonSlug(slug)
   if (!parsed) notFound()
-    
+
   const [slug1, slug2] = parsed
   if (slug1 > slug2) {
     redirect(`/compare/${slug2}-vs-${slug1}`)
@@ -212,13 +212,19 @@ export default async function ComparisonPage({ params }: PageProps) {
           </H2>
 
           <p className="text-muted-foreground text-sm max-w-2xl text-balance">
-            Compare {tool1.name} and {tool2.name} side-by-side across features, pricing, deliverability, and more. Find the best cold email tool for your outreach needs.
+            Compare {tool1.name} and {tool2.name} side-by-side across features, pricing,
+            deliverability, and more. Find the best cold email tool for your outreach needs.
           </p>
 
           <div className="mt-4 flex flex-wrap justify-center items-center gap-4 text-sm text-muted-foreground">
             Written by ColdEmailKit Editorial
             <span className="hidden sm:inline-block border-l h-4" />
-            <span>Updated on {new Date(comparisonData.updatedAt || comparisonData.createdAt || Date.now()).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+            <span>
+              Updated on{" "}
+              {new Date(
+                comparisonData.updatedAt || comparisonData.createdAt || Date.now(),
+              ).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+            </span>
           </div>
         </div>
 
@@ -246,15 +252,26 @@ export default async function ComparisonPage({ params }: PageProps) {
       {/* Custom Comparison Overview Section */}
       {comparisonData?.overviewContent && (
         <div className="flex flex-col gap-4 rounded-xl border bg-card p-6 md:p-8 shadow-sm">
-          <ComparisonMarkdown code={comparisonData.overviewContent} className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground" />
+          <ComparisonMarkdown
+            code={comparisonData.overviewContent}
+            className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground"
+          />
         </div>
       )}
 
       <div className="flex flex-col gap-12" id="comparison-overview">
         {/* Responsive overview — Stacked on mobile, side-by-side on desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start lg:grid-rows-[auto_auto_auto_auto_auto]">
-          <ComparisonToolCard tool={tool1} isFeatured={tool1.isFeatured} customDescription={comparisonData?.tool1Description} />
-          <ComparisonToolCard tool={tool2} isFeatured={tool2.isFeatured} customDescription={comparisonData?.tool2Description} />
+          <ComparisonToolCard
+            tool={tool1}
+            isFeatured={tool1.isFeatured}
+            customDescription={comparisonData?.tool1Description}
+          />
+          <ComparisonToolCard
+            tool={tool2}
+            isFeatured={tool2.isFeatured}
+            customDescription={comparisonData?.tool2Description}
+          />
         </div>
 
         {/* Unified Interactive Features Table */}
@@ -268,7 +285,10 @@ export default async function ComparisonPage({ params }: PageProps) {
           className="flex flex-col gap-4 rounded-xl border bg-card p-6 md:p-8 shadow-sm scroll-mt-24"
         >
           <H2 className="text-xl md:text-2xl m-0">ColdEmailKit's Verdict</H2>
-          <ComparisonMarkdown code={verdict} className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground" />
+          <ComparisonMarkdown
+            code={verdict}
+            className="prose prose-sm md:prose-base dark:prose-invert max-w-none text-muted-foreground"
+          />
         </div>
       )}
 

@@ -1,6 +1,6 @@
-import { ToolStatus, ComparisonStatus } from "@prisma/client"
+import { ComparisonStatus, ToolStatus } from "@prisma/client"
 import { unstable_cacheLife as cacheLife, unstable_cacheTag as cacheTag } from "next/cache"
-import { comparisonToolPayload, comparisonFaqPayload } from "~/server/web/comparisons/payloads"
+import { comparisonFaqPayload, comparisonToolPayload } from "~/server/web/comparisons/payloads"
 import { db } from "~/services/db"
 
 /**

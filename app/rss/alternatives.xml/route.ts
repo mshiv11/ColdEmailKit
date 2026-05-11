@@ -1,8 +1,8 @@
-import { getUrlHostname } from "~/utils/helpers"
 import { ToolStatus } from "@prisma/client"
 import RSS from "rss"
 import { config } from "~/config"
 import { db } from "~/services/db"
+import { getUrlHostname } from "~/utils/helpers"
 import { addSearchParams } from "~/utils/search-params"
 
 export const GET = async () => {

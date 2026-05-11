@@ -1,6 +1,6 @@
-import { getUrlHostname } from "~/utils/helpers"
 import { Button, type ButtonProps, Section } from "@react-email/components"
 import { siteConfig } from "~/config/site"
+import { getUrlHostname } from "~/utils/helpers"
 import { addSearchParams } from "~/utils/search-params"
 
 export const EmailButton = ({ children, href, ...props }: ButtonProps) => {

@@ -12,9 +12,9 @@ import {
 } from "~/components/common/dropdown-menu"
 import { Icon } from "~/components/common/icon"
 import { Link } from "~/components/common/link"
-import { ComparisonsDeleteDialog } from "./comparisons-delete-dialog"
 import type { ComparisonPair } from "~/server/admin/comparisons/queries"
 import { cx } from "~/utils/cva"
+import { ComparisonsDeleteDialog } from "./comparisons-delete-dialog"
 
 type ComparisonActionsProps = ComponentProps<typeof Button> & {
   comparison: ComparisonPair

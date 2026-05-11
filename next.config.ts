@@ -1,4 +1,3 @@
-import { withContentCollections } from "@content-collections/next"
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
@@ -9,12 +8,6 @@ const nextConfig: NextConfig = {
   experimental: {
     ppr: false,
     useCache: true,
-
-    optimizePackageImports: [
-      "@content-collections/core",
-      "@content-collections/mdx",
-      "@content-collections/next",
-    ],
   },
 
   typescript: {
@@ -160,4 +153,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default withContentCollections(nextConfig)
+export default nextConfig

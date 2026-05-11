@@ -1,6 +1,5 @@
 "use server"
 
-import { getUrlHostname } from "~/utils/helpers"
 import { revalidateTag } from "next/cache"
 import { headers } from "next/headers"
 import { after } from "next/server"
@@ -12,6 +11,7 @@ import { sendEmail } from "~/lib/email"
 import { getIP, isRateLimited } from "~/lib/rate-limiter"
 import { userProcedure } from "~/lib/safe-actions"
 import { db } from "~/services/db"
+import { getUrlHostname } from "~/utils/helpers"
 
 /**
  * Check rate limiting for claim actions

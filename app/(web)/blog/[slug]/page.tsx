@@ -1,5 +1,4 @@
 import { formatDate, getReadTime, isTruthy } from "@primoui/utils"
-import { type Post, allPosts } from "content-collections"
 import type { Metadata } from "next"
 import Image from "next/image"
 import { notFound } from "next/navigation"
@@ -24,6 +23,7 @@ import { Section } from "~/components/web/ui/section"
 import { metadataConfig } from "~/config/metadata"
 import { generateArticleSchema, jsonLdScriptProps, wrapInGraph } from "~/lib/schemas"
 import { findTool } from "~/server/web/tools/queries"
+import { db } from "~/services/db"
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -31,7 +31,12 @@ type PageProps = {
 
 const findPostBySlug = cache(async ({ params }: PageProps) => {
   const { slug } = await params
-  const post = allPosts.find(({ _meta }) => _meta.path === slug)
+  const post = await db.blogPost.findUnique({
+    where: { slug },
+    include: {
+      tools: { select: { slug: true } }
+    }
+  })
 
   if (!post) {
     notFound()
@@ -40,25 +45,19 @@ const findPostBySlug = cache(async ({ params }: PageProps) => {
   return post
 })
 
-export const generateStaticParams = () => {
-  return allPosts.map(({ _meta }) => ({ slug: _meta.path }))
-}
-
-const getMetadata = (post: Post): Metadata => {
-  return {
-    title: post.title,
-    description: post.description,
-  }
+export const generateStaticParams = async () => {
+  const posts = await db.blogPost.findMany({ select: { slug: true } })
+  return posts.map((post) => ({ slug: post.slug }))
 }
 
 export const generateMetadata = async (props: PageProps): Promise<Metadata> => {
   const post = await findPostBySlug(props)
-  const url = `/blog/${post._meta.path}`
+  const url = `/blog/${post.slug}`
 
   // Generate keywords for blog post
   const keywords = [
     post.title,
-    ...(post.tools || []),
+    ...post.tools.map(t => t.slug),
     "cold email",
     "email outreach",
     "cold email tools",
@@ -66,36 +65,37 @@ export const generateMetadata = async (props: PageProps): Promise<Metadata> => {
   ]
 
   return {
-    ...getMetadata(post),
+    title: post.title,
+    description: post.description,
     keywords,
     alternates: { ...metadataConfig.alternates, canonical: url },
     openGraph: {
       ...metadataConfig.openGraph,
       url,
       type: "article",
-      images: post.image
-        ? [{ url: post.image, width: 1200, height: 630, alt: post.title }]
+      images: post.imageUrl
+        ? [{ url: post.imageUrl, width: 1200, height: 630, alt: post.title }]
         : undefined,
-      ...(post.publishedAt && { publishedTime: post.publishedAt }),
+      ...(post.publishedAt && { publishedTime: post.publishedAt.toISOString() }),
     },
   }
 }
 
 export default async function BlogPostPage(props: PageProps) {
   const post = await findPostBySlug(props)
-  const tools = await Promise.all(post.tools?.map(slug => findTool({ where: { slug } })) ?? [])
+  const tools = await Promise.all(post.tools.map(t => findTool({ where: { slug: t.slug } })) ?? [])
 
   // Generate Article JSON-LD schema for SEO
   const articleSchema = generateArticleSchema({
     title: post.title,
-    description: post.description,
-    slug: post._meta.path,
-    image: post.image,
-    publishedAt: post.publishedAt,
+    description: post.description || "",
+    slug: post.slug,
+    image: post.imageUrl || undefined,
+    publishedAt: post.publishedAt.toISOString(),
     author: {
-      name: post.author.name,
-      twitterHandle: post.author.twitterHandle,
-      image: post.author.image,
+      name: post.authorName,
+      twitterHandle: post.authorTwitter || undefined,
+      image: post.authorImage || undefined,
     },
     wordCount: post.content.split(/\s+/).length,
     section: "Cold Email Tools",
@@ -112,7 +112,7 @@ export default async function BlogPostPage(props: PageProps) {
             name: "Blog",
           },
           {
-            href: `/blog/${post._meta.path}`,
+            href: `/blog/${post.slug}`,
             name: post.title,
           },
         ]}
@@ -125,10 +125,9 @@ export default async function BlogPostPage(props: PageProps) {
 
           <Stack size="sm" className="mt-2" asChild>
             <Note>
-              {/* <Badge size="lg" variant="outline">Uncategorized</Badge> */}
               {post.publishedAt && (
-                <time dateTime={post.publishedAt} className="">
-                  {formatDate(post.publishedAt)}
+                <time dateTime={post.publishedAt.toISOString()} className="">
+                  {formatDate(post.publishedAt.toISOString())}
                 </time>
               )}
               <span>&bull;</span>
@@ -139,9 +138,9 @@ export default async function BlogPostPage(props: PageProps) {
 
         <Section>
           <Section.Content>
-            {post.image && (
+            {post.imageUrl && (
               <Image
-                src={post.image}
+                src={post.imageUrl}
                 alt={post.title}
                 width={1200}
                 height={630}
@@ -165,18 +164,16 @@ export default async function BlogPostPage(props: PageProps) {
               </H6>
 
               <ExternalLink
-                href={`https://twitter.com/${post.author.twitterHandle}`}
+                href={`https://twitter.com/${post.authorTwitter || "coldemailkit"}`}
                 className="group"
               >
                 <Author
-                  name={post.author.name}
-                  image={post.author.image}
-                  title={`@${post.author.twitterHandle}`}
+                  name={post.authorName}
+                  image={post.authorImage || undefined}
+                  title={`@${post.authorTwitter || "coldemailkit"}`}
                 />
               </ExternalLink>
             </Stack>
-
-            {/* <TOC title="On this page" content={post.content} className="flex-1 overflow-y-auto" /> */}
 
             <InlineMenu
               items={tools.filter(isTruthy).map(({ slug, name, faviconUrl }) => ({

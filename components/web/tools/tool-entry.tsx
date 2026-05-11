@@ -143,7 +143,12 @@ const ToolEntry = ({
               href={externalHref}
               doFollow={isFeatured}
               eventName="click_website"
-              eventProps={{ url: tool.websiteUrl, isFeatured, source: "alternative_cta", toolSlug: tool.slug }}
+              eventProps={{
+                url: tool.websiteUrl,
+                isFeatured,
+                source: "alternative_cta",
+                toolSlug: tool.slug,
+              }}
             >
               Visit {tool.name}
             </ExternalLink>
@@ -159,7 +164,11 @@ const ToolEntry = ({
           </Button>
         </div>
       ) : (
-        <Button suffix={<Icon name="lucide/arrow-right" />} className="not-prose self-start" asChild>
+        <Button
+          suffix={<Icon name="lucide/arrow-right" />}
+          className="not-prose self-start"
+          asChild
+        >
           <Link href={internalHref}>Read more</Link>
         </Button>
       )}

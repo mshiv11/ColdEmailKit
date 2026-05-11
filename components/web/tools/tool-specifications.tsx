@@ -1,17 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Icon } from "~/components/common/icon"
 import { H3 } from "~/components/common/heading"
-import { cx } from "~/utils/cva"
+import { Icon } from "~/components/common/icon"
 import { RatingDots } from "~/components/common/rating-dots"
 import {
   type ToolSpecifications,
   defaultSpecifications,
-  specificationLabels,
-  parseFeatures,
   hasAnyFeatures,
+  parseFeatures,
+  specificationLabels,
 } from "~/types/specifications"
+import { cx } from "~/utils/cva"
 
 interface ToolSpecificationsProps {
   specifications: ToolSpecifications | null | undefined

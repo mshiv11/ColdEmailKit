@@ -1,6 +1,8 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import type { ComponentProps } from "react"
+import { useTransition } from "react"
 import { toast } from "sonner"
 import { Button } from "~/components/common/button"
 import {
@@ -14,12 +16,7 @@ import {
   DialogTrigger,
 } from "~/components/common/dialog"
 import { Icon } from "~/components/common/icon"
-import { useRouter } from "next/navigation"
-import { useTransition } from "react"
-import {
-  deleteAllComparisonFaqs,
-  deleteComparisonData,
-} from "~/server/admin/comparisons/actions"
+import { deleteAllComparisonFaqs, deleteComparisonData } from "~/server/admin/comparisons/actions"
 import type { ComparisonPair } from "~/server/admin/comparisons/queries"
 
 type ComparisonsDeleteDialogProps = ComponentProps<typeof Dialog> & {

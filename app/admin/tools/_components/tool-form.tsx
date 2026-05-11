@@ -14,6 +14,18 @@ import { generateFavicon, generateScreenshot } from "~/actions/media"
 import { ToolActions } from "~/app/admin/tools/_components/tool-actions"
 import { ToolGenerateContent } from "~/app/admin/tools/_components/tool-generate-content"
 import { ToolPublishActions } from "~/app/admin/tools/_components/tool-publish-actions"
+import {
+  CopywritingSection,
+  DeliverabilitySection,
+  EnrichmentSection,
+  InboxSection,
+  LeadsSection,
+  LinkedInSection,
+  OutreachSection,
+  PricingSection,
+  SpecificationsSection,
+  WarmupSection,
+} from "~/components/admin/features"
 import { RelationSelector } from "~/components/admin/relation-selector"
 import { Button } from "~/components/common/button"
 import { Checkbox } from "~/components/common/checkbox"
@@ -46,42 +58,30 @@ import { upsertTool } from "~/server/admin/tools/actions"
 import type { findToolBySlug } from "~/server/admin/tools/queries"
 import { toolSchema } from "~/server/admin/tools/schema"
 import type { ToolOne } from "~/server/web/tools/payloads"
-import { cx } from "~/utils/cva"
 import {
-  SpecificationsSection,
-  PricingSection,
-  InboxSection,
-  WarmupSection,
-  LeadsSection,
-  EnrichmentSection,
-  CopywritingSection,
-  OutreachSection,
-  DeliverabilitySection,
-  LinkedInSection,
-} from "~/components/admin/features"
-import {
-  type ToolSpecifications,
-  type PricingSpecs,
-  type InboxFeatures,
-  type WarmupFeatures,
-  type LeadsFeatures,
-  type EnrichmentFeatures,
   type CopywritingFeatures,
-  type OutreachFeatures,
   type DeliverabilityFeatures,
+  type EnrichmentFeatures,
+  type InboxFeatures,
+  type LeadsFeatures,
   type LinkedInFeatures,
-  parseFeatures,
-  defaultSpecifications,
-  defaultPricingSpecs,
-  defaultInboxFeatures,
-  defaultWarmupFeatures,
-  defaultLeadsFeatures,
-  defaultEnrichmentFeatures,
+  type OutreachFeatures,
+  type PricingSpecs,
+  type ToolSpecifications,
+  type WarmupFeatures,
   defaultCopywritingFeatures,
-  defaultOutreachFeatures,
   defaultDeliverabilityFeatures,
+  defaultEnrichmentFeatures,
+  defaultInboxFeatures,
+  defaultLeadsFeatures,
   defaultLinkedInFeatures,
+  defaultOutreachFeatures,
+  defaultPricingSpecs,
+  defaultSpecifications,
+  defaultWarmupFeatures,
+  parseFeatures,
 } from "~/types/specifications"
+import { cx } from "~/utils/cva"
 
 const ToolStatusChange = ({ tool }: { tool: ToolOne }) => {
   return (

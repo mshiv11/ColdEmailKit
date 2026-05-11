@@ -4,10 +4,10 @@ import { CollapsibleSection } from "~/components/admin/collapsible-section"
 import { RatingInput } from "~/components/admin/feature-inputs"
 import {
   type ToolSpecifications,
-  defaultSpecifications,
-  specificationLabels,
-  parseFeatures,
   countFilledFeatures,
+  defaultSpecifications,
+  parseFeatures,
+  specificationLabels,
 } from "~/types/specifications"
 
 interface SpecificationsSectionProps {

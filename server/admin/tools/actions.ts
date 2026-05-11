@@ -93,13 +93,19 @@ export const upsertTool = adminProcedure
     })
 
     if (notifySubmitter) {
-      if (tool.status === ToolStatus.Scheduled && tool.publishedAt && !tool.scheduledNotificationSent) {
+      if (
+        tool.status === ToolStatus.Scheduled &&
+        tool.publishedAt &&
+        !tool.scheduledNotificationSent
+      ) {
         after(async () => {
           await notifySubmitterOfToolScheduled(tool)
-          await db.tool.update({
-            where: { id: tool.id },
-            data: { scheduledNotificationSent: true },
-          }).catch(console.error)
+          await db.tool
+            .update({
+              where: { id: tool.id },
+              data: { scheduledNotificationSent: true },
+            })
+            .catch(console.error)
         })
       }
     }
@@ -147,7 +153,7 @@ export const analyzeToolIntegration = adminProcedure
   .input(z.object({ id: z.string() }))
   .handler(async ({ input: { id } }) => {
     const tool = await db.tool.findUniqueOrThrow({ where: { id } })
-    
+
     if (!tool.repositoryUrl) {
       throw new Error("Tool does not have a repository URL")
     }

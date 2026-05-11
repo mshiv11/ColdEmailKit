@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Icon } from "~/components/common/icon"
 import { H2 } from "~/components/common/heading"
+import { Icon } from "~/components/common/icon"
 import { cx } from "~/utils/cva"
 
 type FAQItem = {

@@ -2,17 +2,17 @@
 
 import { CollapsibleSection } from "~/components/admin/collapsible-section"
 import {
-  RatingInput,
   BooleanInput,
-  TextFieldInput,
   NumberFieldInput,
+  RatingInput,
+  TextFieldInput,
 } from "~/components/admin/feature-inputs"
 import {
   type LeadsFeatures,
+  countFilledFeatures,
   defaultLeadsFeatures,
   leadsFeaturesLabels,
   parseFeatures,
-  countFilledFeatures,
 } from "~/types/specifications"
 
 interface LeadsSectionProps {

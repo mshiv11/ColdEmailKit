@@ -25,4 +25,3 @@ export const POST = withAdminAuth(async req => {
     })
   }
 })
-

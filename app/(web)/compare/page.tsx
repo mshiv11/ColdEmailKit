@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
-import { Link } from "~/components/common/link"
 import { H1 } from "~/components/common/heading"
 import { Icon } from "~/components/common/icon"
+import { Link } from "~/components/common/link"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import { findAllComparisonPairs } from "~/server/admin/comparisons/queries"
 

@@ -90,7 +90,7 @@ export function CategoryForm({
   // Group available categories by parent
   const groupedCategories = useMemo(() => {
     const acc: Record<string, typeof parents> = {}
-    
+
     // First, initialize all top-level categories as keys
     for (const c of parents) {
       if (!c.parentId) {
@@ -104,7 +104,7 @@ export function CategoryForm({
       if (!c.parentId || c.fullPath.split("/").length >= 3) {
         continue
       }
-      
+
       if (acc[c.parentId]) {
         acc[c.parentId].push(c)
       }
@@ -186,7 +186,10 @@ export function CategoryForm({
               <FormControl>
                 <Input {...field} />
               </FormControl>
-              <p className="text-sm text-muted-foreground">Used as the display name (e.g. &apos;Email Warmup Tools&apos;). Defaults to &apos;{form.getValues("name")} Tools&apos;.</p>
+              <p className="text-sm text-muted-foreground">
+                Used as the display name (e.g. &apos;Email Warmup Tools&apos;). Defaults to &apos;
+                {form.getValues("name")} Tools&apos;.
+              </p>
               <FormMessage />
             </FormItem>
           )}
@@ -201,7 +204,9 @@ export function CategoryForm({
               <FormControl>
                 <Input {...field} />
               </FormControl>
-              <p className="text-sm text-muted-foreground">Used for SEO and introductory text on the category page.</p>
+              <p className="text-sm text-muted-foreground">
+                Used for SEO and introductory text on the category page.
+              </p>
               <FormMessage />
             </FormItem>
           )}

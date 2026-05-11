@@ -1,13 +1,13 @@
 "use client"
 
 import { CollapsibleSection } from "~/components/admin/collapsible-section"
-import { RatingInput, BooleanInput, SelectInput } from "~/components/admin/feature-inputs"
+import { BooleanInput, RatingInput, SelectInput } from "~/components/admin/feature-inputs"
 import {
   type LinkedInFeatures,
+  countFilledFeatures,
   defaultLinkedInFeatures,
   linkedInFeaturesLabels,
   parseFeatures,
-  countFilledFeatures,
 } from "~/types/specifications"
 
 interface LinkedInSectionProps {

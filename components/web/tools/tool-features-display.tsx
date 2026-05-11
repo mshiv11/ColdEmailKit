@@ -1,40 +1,40 @@
 "use client"
 
-import { ToolSpecificationsDisplay } from "./tool-specifications"
-import { CollapsibleFeatureSection } from "./collapsible-feature-section"
 import { H2 } from "~/components/common/heading"
 import {
-  type ToolSpecifications,
-  type PricingSpecs,
-  type InboxFeatures,
-  type WarmupFeatures,
-  type LeadsFeatures,
-  type EnrichmentFeatures,
   type CopywritingFeatures,
-  type OutreachFeatures,
   type DeliverabilityFeatures,
+  type EnrichmentFeatures,
+  type InboxFeatures,
+  type LeadsFeatures,
   type LinkedInFeatures,
-  defaultPricingSpecs,
-  defaultInboxFeatures,
-  defaultWarmupFeatures,
-  defaultLeadsFeatures,
-  defaultEnrichmentFeatures,
-  defaultCopywritingFeatures,
-  defaultOutreachFeatures,
-  defaultDeliverabilityFeatures,
-  defaultLinkedInFeatures,
-  pricingSpecsLabels,
-  inboxFeaturesLabels,
-  warmupFeaturesLabels,
-  leadsFeaturesLabels,
-  enrichmentFeaturesLabels,
+  type OutreachFeatures,
+  type PricingSpecs,
+  type ToolSpecifications,
+  type WarmupFeatures,
   copywritingFeaturesLabels,
-  outreachFeaturesLabels,
+  defaultCopywritingFeatures,
+  defaultDeliverabilityFeatures,
+  defaultEnrichmentFeatures,
+  defaultInboxFeatures,
+  defaultLeadsFeatures,
+  defaultLinkedInFeatures,
+  defaultOutreachFeatures,
+  defaultPricingSpecs,
+  defaultWarmupFeatures,
   deliverabilityFeaturesLabels,
-  linkedInFeaturesLabels,
-  parseFeatures,
+  enrichmentFeaturesLabels,
   hasAnyFeatures,
+  inboxFeaturesLabels,
+  leadsFeaturesLabels,
+  linkedInFeaturesLabels,
+  outreachFeaturesLabels,
+  parseFeatures,
+  pricingSpecsLabels,
+  warmupFeaturesLabels,
 } from "~/types/specifications"
+import { CollapsibleFeatureSection } from "./collapsible-feature-section"
+import { ToolSpecificationsDisplay } from "./tool-specifications"
 
 interface ToolFeaturesDisplayProps {
   specifications?: ToolSpecifications | null

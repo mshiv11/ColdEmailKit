@@ -21,9 +21,9 @@ import {
   FormMessage,
 } from "~/components/common/form"
 import { H3 } from "~/components/common/heading"
+import { Icon } from "~/components/common/icon"
 import { Input } from "~/components/common/input"
 import { Link } from "~/components/common/link"
-import { Icon } from "~/components/common/icon"
 import {
   Select,
   SelectContent,

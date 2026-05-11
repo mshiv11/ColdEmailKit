@@ -1,11 +1,9 @@
-import * as fs from "node:fs/promises"
-import * as path from "node:path"
 import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { withApiKeyAuth } from "~/lib/auth-hoc"
-
-const POSTS_DIR = path.join(process.cwd(), "content/posts")
+import { db } from "~/services/db"
+import { Prisma } from "@prisma/client"
 
 /**
  * GET /api/blog — List all blog posts with metadata.
@@ -16,58 +14,41 @@ export const GET = withApiKeyAuth(["blog:read"], async (req) => {
   const q = searchParams.get("q") || undefined
 
   try {
-    const files = await fs.readdir(POSTS_DIR)
-    const mdxFiles = files.filter(f => f.endsWith(".mdx"))
-
-    const posts = await Promise.all(
-      mdxFiles.map(async (filename) => {
-        const slug = filename.replace(/\.mdx$/, "")
-        const content = await fs.readFile(path.join(POSTS_DIR, filename), "utf-8")
-
-        const frontmatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/)
-        if (!frontmatterMatch) return null
-
-        const fm = frontmatterMatch[1]
-        const meta: Record<string, string> = {}
-
-        for (const line of fm.split(/\r?\n/)) {
-          if (line.startsWith("  ")) continue // skip nested
-          const match = line.match(/^(\w+):\s*["']?(.+?)["']?\s*$/)
-          if (match) meta[match[1]] = match[2]
+    const whereClause: Prisma.BlogPostWhereInput = q
+      ? {
+          OR: [
+            { title: { contains: q, mode: "insensitive" } },
+            { description: { contains: q, mode: "insensitive" } },
+          ],
         }
+      : {}
 
-        return {
-          slug,
-          title: meta.title || slug,
-          description: meta.description || "",
-          publishedAt: meta.publishedAt || "",
-          image: meta.image || null,
-        }
-      }),
-    )
-
-    let filteredPosts = posts.filter(Boolean)
-
-    if (q) {
-      const query = q.toLowerCase()
-      filteredPosts = filteredPosts.filter(
-        (p) =>
-          p && (p.title.toLowerCase().includes(query) || p.description.toLowerCase().includes(query)),
-      )
-    }
-
-    // Sort by publishedAt descending
-    filteredPosts.sort((a, b) => {
-      const da = a?.publishedAt ? new Date(a.publishedAt).getTime() : 0
-      const db2 = b?.publishedAt ? new Date(b.publishedAt).getTime() : 0
-      return db2 - da
+    const posts = await db.blogPost.findMany({
+      where: whereClause,
+      orderBy: { publishedAt: "desc" },
+      select: {
+        slug: true,
+        title: true,
+        description: true,
+        publishedAt: true,
+        imageUrl: true,
+      },
     })
+
+    const formattedPosts = posts.map(p => ({
+      slug: p.slug,
+      title: p.title,
+      description: p.description || "",
+      publishedAt: p.publishedAt,
+      image: p.imageUrl,
+    }))
 
     return NextResponse.json({
-      posts: filteredPosts,
-      totalCount: filteredPosts.length,
+      posts: formattedPosts,
+      totalCount: formattedPosts.length,
     })
-  } catch {
+  } catch (error) {
+    console.error(error)
     return NextResponse.json({ posts: [], totalCount: 0 })
   }
 })
@@ -90,53 +71,49 @@ export const POST = withApiKeyAuth(["blog:write"], async (req) => {
     )
   }
 
-  const filePath = path.join(POSTS_DIR, `${slug}.mdx`)
-
   // Check if already exists
-  try {
-    await fs.access(filePath)
+  const existing = await db.blogPost.findUnique({ where: { slug } })
+  if (existing) {
     return NextResponse.json({ error: "A post with this slug already exists" }, { status: 409 })
-  } catch {
-    // File doesn't exist — good
   }
 
-  const frontmatter = buildFrontmatter({
-    title, description, image,
-    publishedAt: publishedAt || new Date().toISOString().split("T")[0],
-    authorName: authorName || "ColdEmailKit",
-    authorImage: authorImage || "/authors/default.jpg",
-    authorTwitter: authorTwitter || "@coldemailkit",
-    tools,
-  })
-
-  await fs.writeFile(filePath, `${frontmatter}\n\n${content}`, "utf-8")
-
-  // Trigger ISR revalidation so the new post appears on the live site
-  revalidatePath("/blog")
-  revalidatePath(`/blog/${slug}`)
-
-  return NextResponse.json({ success: true, slug }, { status: 201 })
-})
-
-function buildFrontmatter(meta: Record<string, unknown>): string {
-  const lines = ["---"]
-  lines.push(`title: "${meta.title}"`)
-  lines.push(`description: "${meta.description || ""}"`)
-  if (meta.image) lines.push(`image: "${meta.image}"`)
-  lines.push(`publishedAt: ${meta.publishedAt}`)
-  lines.push("author:")
-  lines.push(`  name: ${meta.authorName}`)
-  lines.push(`  image: "${meta.authorImage}"`)
-  lines.push(`  twitterHandle: "${meta.authorTwitter}"`)
-
-  const tools = meta.tools as string[] | undefined
-  if (tools?.length) {
-    lines.push("tools:")
-    for (const t of tools) {
-      lines.push(`  - ${t}`)
+  try {
+    // Only connect tools that exist to avoid Prisma errors
+    let validToolSlugs: string[] = []
+    if (tools && Array.isArray(tools) && tools.length > 0) {
+      const existingTools = await db.tool.findMany({
+        where: { slug: { in: tools } },
+        select: { slug: true }
+      })
+      validToolSlugs = existingTools.map(t => t.slug)
     }
-  }
 
-  lines.push("---")
-  return lines.join("\n")
-}
+    await db.blogPost.create({
+      data: {
+        slug,
+        title,
+        description: description || null,
+        imageUrl: image || null,
+        content,
+        publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
+        authorName: authorName || "ColdEmailKit",
+        authorImage: authorImage || "/authors/default.jpg",
+        authorTwitter: authorTwitter || "@coldemailkit",
+        ...(validToolSlugs.length > 0 && {
+          tools: {
+            connect: validToolSlugs.map(t => ({ slug: t }))
+          }
+        })
+      }
+    })
+
+    // Trigger ISR revalidation so the new post appears on the live site
+    revalidatePath("/blog")
+    revalidatePath(`/blog/${slug}`)
+
+    return NextResponse.json({ success: true, slug }, { status: 201 })
+  } catch (error) {
+    console.error("Failed to create post:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+})

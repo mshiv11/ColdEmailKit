@@ -59,6 +59,7 @@ The following major changes have been made from the original project:
 - Added programmatic comparison page generation with streaming AI content
 - Replaced Plausible analytics with **PostHog**
 - Added tool ownership, claiming, and verified badge system
+- Migrated blog architecture from static MDX files to a dynamic, database-backed system using Prisma and next-mdx-remote
 - Various feature enhancements and bug fixes
 
 ### GPL-3.0 Compliance
@@ -281,6 +282,60 @@ The project is deployed on [Railway](https://railway.app/):
    ```
 
 Ensure all environment variables are properly set in your production environment.
+
+---
+
+## API Keys (Hermes Agent)
+
+ColdEmailKit includes a built-in API key system for programmatic access. This is primarily used by **Hermes Agent** (the AI agent) to automate dashboard operations.
+
+### Creating a Key via Admin UI
+
+1. Navigate to **Admin → API Keys** in the sidebar
+2. Click **"New API Key"**
+3. Set the name (e.g., `Hermes Agent`) and select the required scopes
+4. Click **Create Key** — copy the raw key immediately (it won't be shown again)
+
+### Creating a Key via curl
+
+```bash
+curl -X POST https://coldemailkit.com/api/admin/api-keys \
+  -H "Cookie: <your-admin-session-cookie>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Hermes Agent",
+    "scopes": ["tools:read", "tools:write", "submissions:manage", "analytics:read", "cron:manage", "settings:read"]
+  }'
+```
+
+### Using the Key
+
+Include the key in the `Authorization` header:
+
+```bash
+curl https://coldemailkit.com/api/some-endpoint \
+  -H "Authorization: Bearer cek_your_key_here"
+```
+
+### Available Scopes
+
+| Scope | Description |
+|-------|-------------|
+| `tools:read` | Read tool data |
+| `tools:write` | Create/update tools |
+| `submissions:manage` | Manage tool submissions |
+| `analytics:read` | Read analytics data |
+| `cron:manage` | Trigger cron jobs |
+| `settings:read` | Read site settings |
+
+### Revoking a Key
+
+Revoke via the admin UI (click **Revoke** on any active key) or via API:
+
+```bash
+curl -X DELETE https://coldemailkit.com/api/admin/api-keys/<key-id> \
+  -H "Cookie: <your-admin-session-cookie>"
+```
 
 ---
 

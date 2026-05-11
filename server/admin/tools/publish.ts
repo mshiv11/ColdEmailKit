@@ -1,13 +1,13 @@
 import { ToolStatus } from "@prisma/client"
 import { revalidatePath, revalidateTag } from "next/cache"
-import { submitToIndexNow } from "~/services/indexnow"
-import { notifySubmitterOfToolPublished } from "~/lib/notifications"
 import { indexTools } from "~/lib/indexing"
+import { notifySubmitterOfToolPublished } from "~/lib/notifications"
 import { getPostLaunchTemplate, sendSocialPost } from "~/lib/socials"
 import type { ToolOne } from "~/server/web/tools/payloads"
 import { db } from "~/services/db"
+import { submitToIndexNow } from "~/services/indexnow"
 
-export const executePublishSideEffects = async (toolId: string, shouldNotifySubmitter: boolean = true) => {
+export const executePublishSideEffects = async (toolId: string, shouldNotifySubmitter = true) => {
   // Fetch full tool payload needed for side effects
   const tool = await db.tool.findUnique({
     where: { id: toolId },
@@ -21,10 +21,12 @@ export const executePublishSideEffects = async (toolId: string, shouldNotifySubm
   // notification lib checks if submitterEmail exists
   if (shouldNotifySubmitter && !tool.publishedNotificationSent) {
     await notifySubmitterOfToolPublished(tool).catch(console.error)
-    await db.tool.update({
-      where: { id: tool.id },
-      data: { publishedNotificationSent: true },
-    }).catch(console.error)
+    await db.tool
+      .update({
+        where: { id: tool.id },
+        data: { publishedNotificationSent: true },
+      })
+      .catch(console.error)
   }
 
   // 2. Sync to Meilisearch

@@ -1,7 +1,7 @@
-import { getUrlHostname } from "~/utils/helpers"
 import { Link, Text } from "@react-email/components"
 import { config } from "~/config"
 import { EmailWrapper, type EmailWrapperProps } from "~/emails/components/wrapper"
+import { getUrlHostname } from "~/utils/helpers"
 
 type EmailProps = EmailWrapperProps & {
   name?: string

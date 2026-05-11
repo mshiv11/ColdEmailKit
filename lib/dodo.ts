@@ -5,9 +5,10 @@ import { env } from "~/env"
 const isProduction = process.env.NODE_ENV === "production"
 
 // Use live API key in production, test key in development
-const apiKey = isProduction && env.DODO_PAYMENTS_LIVE_API_KEY
-  ? env.DODO_PAYMENTS_LIVE_API_KEY
-  : env.DODO_PAYMENTS_API_KEY
+const apiKey =
+  isProduction && env.DODO_PAYMENTS_LIVE_API_KEY
+    ? env.DODO_PAYMENTS_LIVE_API_KEY
+    : env.DODO_PAYMENTS_API_KEY
 
 export const dodo = new DodoPayments({
   bearerToken: apiKey,

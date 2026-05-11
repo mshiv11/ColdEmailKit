@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Icon } from "~/components/common/icon"
 import { H2 } from "~/components/common/heading"
-import { FAQSchema } from "~/components/web/seo/faq-schema"
+import { Icon } from "~/components/common/icon"
 import { ComparisonMarkdown } from "~/components/web/comparison-markdown"
+import { FAQSchema } from "~/components/web/seo/faq-schema"
 import type { ComparisonFaqItem } from "~/server/web/comparisons/payloads"
 
 type ComparisonFaqsProps = {

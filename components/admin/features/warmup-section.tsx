@@ -2,17 +2,17 @@
 
 import { CollapsibleSection } from "~/components/admin/collapsible-section"
 import {
-  RatingInput,
   BooleanInput,
-  TextFieldInput,
+  RatingInput,
   SelectInput,
+  TextFieldInput,
 } from "~/components/admin/feature-inputs"
 import {
   type WarmupFeatures,
-  defaultWarmupFeatures,
-  warmupFeaturesLabels,
-  parseFeatures,
   countFilledFeatures,
+  defaultWarmupFeatures,
+  parseFeatures,
+  warmupFeaturesLabels,
 } from "~/types/specifications"
 
 interface WarmupSectionProps {

@@ -1,10 +1,10 @@
 "use server"
 
+import { ComparisonStatus } from "@prisma/client"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { z } from "zod"
 import { adminProcedure } from "~/lib/safe-actions"
 import { db } from "~/services/db"
-import { ComparisonStatus } from "@prisma/client"
 
 const faqSchema = z.object({
   id: z.string().optional(),
@@ -61,14 +61,14 @@ export const deleteComparisonData = adminProcedure
   .input(z.object({ tool1Id: z.string(), tool2Id: z.string() }))
   .handler(async ({ input: { tool1Id, tool2Id } }) => {
     const [id1, id2] = [tool1Id, tool2Id].sort()
-    
+
     await db.comparison.deleteMany({
       where: {
         tool1Id: id1,
         tool2Id: id2,
       },
     })
-    
+
     revalidateTag(`comparison-data-${tool1Id}-${tool2Id}`)
     revalidateTag(`comparison-data-${tool2Id}-${tool1Id}`)
     revalidatePath("/admin/compare")
@@ -107,10 +107,10 @@ export const upsertComparisonData = adminProcedure
     }) => {
       // We enforce alphabetical ordering of IDs for the unique constraint
       const [id1, id2] = [tool1Id, tool2Id].sort()
-      
+
       // Determine which description maps to which tool based on the sort
-      const finalTool1Desc = id1 === tool1Id ? tool1Description : tool2Description;
-      const finalTool2Desc = id1 === tool1Id ? tool2Description : tool1Description;
+      const finalTool1Desc = id1 === tool1Id ? tool1Description : tool2Description
+      const finalTool2Desc = id1 === tool1Id ? tool2Description : tool1Description
 
       const comparison = await db.comparison.upsert({
         where: {
@@ -143,12 +143,13 @@ export const upsertComparisonData = adminProcedure
         select: { id: true },
       })
 
-    revalidateTag(`comparison-data-${tool1Id}-${tool2Id}`)
-    revalidateTag(`comparison-data-${tool2Id}-${tool1Id}`)
-    revalidatePath("/admin/compare")
+      revalidateTag(`comparison-data-${tool1Id}-${tool2Id}`)
+      revalidateTag(`comparison-data-${tool2Id}-${tool1Id}`)
+      revalidatePath("/admin/compare")
 
-    return comparison
-  })
+      return comparison
+    },
+  )
 
 export const reorderComparisonFaqs = adminProcedure
   .createServerAction()

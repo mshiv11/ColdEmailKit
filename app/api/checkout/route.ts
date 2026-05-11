@@ -15,7 +15,8 @@ const checkoutSchema = z.object({
 export async function POST(req: Request) {
   try {
     const json = await req.json()
-    const { productId, quantity, email, returnUrl, isSubscription, toolSlug } = checkoutSchema.parse(json)
+    const { productId, quantity, email, returnUrl, isSubscription, toolSlug } =
+      checkoutSchema.parse(json)
 
     const billingAddress = {
       city: "New York",

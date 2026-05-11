@@ -2,18 +2,18 @@
 
 import { CollapsibleSection } from "~/components/admin/collapsible-section"
 import {
-  RatingInput,
   BooleanInput,
-  TextFieldInput,
   NumberFieldInput,
+  RatingInput,
   SelectInput,
+  TextFieldInput,
 } from "~/components/admin/feature-inputs"
 import {
   type EnrichmentFeatures,
+  countFilledFeatures,
   defaultEnrichmentFeatures,
   enrichmentFeaturesLabels,
   parseFeatures,
-  countFilledFeatures,
 } from "~/types/specifications"
 
 interface EnrichmentSectionProps {

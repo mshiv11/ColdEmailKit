@@ -1,37 +1,37 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useMemo, useState } from "react"
+import { Button } from "~/components/common/button"
 import { Icon } from "~/components/common/icon"
 import { Input } from "~/components/common/input"
-import { Switch } from "~/components/common/switch"
-import { Button } from "~/components/common/button"
-import { ExternalLink } from "~/components/web/external-link"
 import { RatingDots } from "~/components/common/rating-dots"
+import { Switch } from "~/components/common/switch"
+import { ExternalLink } from "~/components/web/external-link"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import type { ComparisonTool } from "~/server/web/comparisons/payloads"
 import {
-  parseFeatures,
-  hasAnyFeatures,
-  defaultSpecifications,
-  specificationLabels,
-  defaultPricingSpecs,
-  pricingSpecsLabels,
-  defaultInboxFeatures,
-  inboxFeaturesLabels,
-  defaultWarmupFeatures,
-  warmupFeaturesLabels,
-  defaultLeadsFeatures,
-  leadsFeaturesLabels,
-  defaultEnrichmentFeatures,
-  enrichmentFeaturesLabels,
-  defaultCopywritingFeatures,
   copywritingFeaturesLabels,
-  defaultOutreachFeatures,
-  outreachFeaturesLabels,
+  defaultCopywritingFeatures,
   defaultDeliverabilityFeatures,
-  deliverabilityFeaturesLabels,
+  defaultEnrichmentFeatures,
+  defaultInboxFeatures,
+  defaultLeadsFeatures,
   defaultLinkedInFeatures,
+  defaultOutreachFeatures,
+  defaultPricingSpecs,
+  defaultSpecifications,
+  defaultWarmupFeatures,
+  deliverabilityFeaturesLabels,
+  enrichmentFeaturesLabels,
+  hasAnyFeatures,
+  inboxFeaturesLabels,
+  leadsFeaturesLabels,
   linkedInFeaturesLabels,
+  outreachFeaturesLabels,
+  parseFeatures,
+  pricingSpecsLabels,
+  specificationLabels,
+  warmupFeaturesLabels,
 } from "~/types/specifications"
 
 type ComparisonTableProps = {
@@ -54,7 +54,7 @@ function normalizeValue(value: unknown): string {
 
 function TableCellValue({ value }: { value: string }) {
   if (value && value.endsWith("/5") && value !== "/5") {
-    const num = parseFloat(value.split("/")[0])
+    const num = Number.parseFloat(value.split("/")[0])
     if (!isNaN(num)) {
       return <RatingDots value={num} max={5} />
     }

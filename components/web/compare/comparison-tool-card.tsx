@@ -3,13 +3,13 @@ import { Button } from "~/components/common/button"
 import { H2 } from "~/components/common/heading"
 import { Icon } from "~/components/common/icon"
 import { Link } from "~/components/common/link"
-import { ExternalLink } from "~/components/web/external-link"
+import { Tooltip } from "~/components/common/tooltip"
 import { ComparisonToolDetails } from "~/components/web/compare/comparison-tool-details"
+import { ExternalLink } from "~/components/web/external-link"
 import { StarRating } from "~/components/web/tools/star-rating"
 import { TrustBreakdownHover } from "~/components/web/tools/trust-breakdown-hover"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import { VerifiedBadge } from "~/components/web/verified-badge"
-import { Tooltip } from "~/components/common/tooltip"
 import type { ComparisonTool } from "~/server/web/comparisons/payloads"
 
 type ComparisonToolCardProps = {
@@ -23,7 +23,11 @@ type ComparisonToolCardProps = {
  * Uses CSS subgrid rows so sections align across the two columns.
  * Row order: header | description | CTA | screenshot | details
  */
-export function ComparisonToolCard({ tool, isFeatured, customDescription }: ComparisonToolCardProps) {
+export function ComparisonToolCard({
+  tool,
+  isFeatured,
+  customDescription,
+}: ComparisonToolCardProps) {
   const href = tool.affiliateUrl || tool.websiteUrl
   const description = customDescription || tool.description
 

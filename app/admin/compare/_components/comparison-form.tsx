@@ -1,35 +1,35 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { useEffect, useState, useTransition } from "react"
 import { experimental_useObject as useObject } from "@ai-sdk/react"
 import { ComparisonStatus } from "@prisma/client"
+import { useRouter } from "next/navigation"
+import { useEffect, useState, useTransition } from "react"
 import { toast } from "sonner"
-import { Button } from "~/components/common/button"
-import { H3, H5, H6 } from "~/components/common/heading"
-import { Icon } from "~/components/common/icon"
 import { CollapsibleSection } from "~/components/admin/collapsible-section"
-import { Stack } from "~/components/common/stack"
-import { Note } from "~/components/common/note"
-import { TextArea } from "~/components/common/textarea"
-import { Input } from "~/components/common/input"
-import { ExternalLink } from "~/components/web/external-link"
-import { siteConfig } from "~/config/site"
+import { Button } from "~/components/common/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/common/dropdown-menu"
+import { H3, H5, H6 } from "~/components/common/heading"
+import { Icon } from "~/components/common/icon"
+import { Input } from "~/components/common/input"
+import { Note } from "~/components/common/note"
+import { Stack } from "~/components/common/stack"
+import { TextArea } from "~/components/common/textarea"
+import { ComparisonMarkdown } from "~/components/web/comparison-markdown"
+import { ExternalLink } from "~/components/web/external-link"
+import { siteConfig } from "~/config/site"
+import { parseAiRouteError } from "~/lib/parse-ai-route-error"
 import {
-  upsertComparisonFaq,
-  deleteComparisonFaq,
   deleteAllComparisonFaqs,
+  deleteComparisonFaq,
   revalidateComparison,
   upsertComparisonData,
+  upsertComparisonFaq,
 } from "~/server/admin/comparisons/actions"
-import { ComparisonMarkdown } from "~/components/web/comparison-markdown"
-import { parseAiRouteError } from "~/lib/parse-ai-route-error"
 import { comparisonSchema } from "~/server/admin/shared/schema"
 
 type Tool = {
@@ -166,7 +166,7 @@ export function ComparisonForm({
               question: faq.question,
               answer: faq.answer,
               order: faqs.length + idx,
-            })
+            }),
           )
           await Promise.all(faqPromises)
           toast.success("FAQs saved automatically. Please save the comparison descriptors.")
@@ -337,7 +337,9 @@ export function ComparisonForm({
             />
             {overviewContent && (
               <div className="mt-2 rounded-md border bg-muted/30 p-4">
-                <H6 className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Live Preview</H6>
+                <H6 className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                  Live Preview
+                </H6>
                 <ComparisonMarkdown code={overviewContent} className="text-sm border-t pt-2" />
               </div>
             )}
@@ -385,7 +387,9 @@ export function ComparisonForm({
           </div>
 
           <div className="flex flex-col gap-2 pt-4 border-t">
-            <label className="text-sm font-medium">Final Verdict (Bottom of page - Markdown and URLs supported)</label>
+            <label className="text-sm font-medium">
+              Final Verdict (Bottom of page - Markdown and URLs supported)
+            </label>
             <TextArea
               className="min-h-32"
               placeholder={`Write the final verdict comparing ${tool1.name} and ${tool2.name}...`}
@@ -394,7 +398,9 @@ export function ComparisonForm({
             />
             {verdict && (
               <div className="mt-2 rounded-md border bg-muted/30 p-4">
-                <H6 className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Live Preview</H6>
+                <H6 className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                  Live Preview
+                </H6>
                 <ComparisonMarkdown code={verdict} className="text-sm border-t pt-2" />
               </div>
             )}
@@ -449,7 +455,9 @@ export function ComparisonForm({
               />
               {newA && (
                 <div className="mt-2 rounded-md border bg-muted/30 p-4">
-                  <H6 className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Live Preview</H6>
+                  <H6 className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                    Live Preview
+                  </H6>
                   <ComparisonMarkdown code={newA} className="text-sm border-t pt-2" />
                 </div>
               )}

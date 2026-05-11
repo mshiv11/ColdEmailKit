@@ -4,6 +4,7 @@ import { Suspense } from "react"
 import { CountBadge, CountBadgeSkeleton } from "~/app/(web)/(home)/count-badge"
 import { AlternativePreviewSkeleton } from "~/components/web/alternatives/alternative-preview"
 import { AlternativePreview } from "~/components/web/alternatives/alternative-preview"
+import { BuiltWith } from "~/components/web/built-with"
 import {
   CategoryPreview,
   CategoryPreviewSkeleton,
@@ -12,7 +13,6 @@ import {
   ComparisonPreview,
   ComparisonPreviewSkeleton,
 } from "~/components/web/compare/comparison-preview"
-import { BuiltWith } from "~/components/web/built-with"
 import { ContributionGraph } from "~/components/web/contribution-graph"
 import { NewsletterForm } from "~/components/web/newsletter-form"
 import { FAQSchema, generateHomepageFAQs } from "~/components/web/seo/faq-schema"
@@ -23,9 +23,9 @@ import { Intro, IntroDescription, IntroTitle } from "~/components/web/ui/intro"
 import { config } from "~/config"
 import { metadataConfig } from "~/config/metadata"
 import {
+  generateFAQPageSchema,
   generateOrganizationSchema,
   generateWebsiteSchema,
-  generateFAQPageSchema,
   jsonLdScriptProps,
   wrapInGraph,
 } from "~/lib/schemas"

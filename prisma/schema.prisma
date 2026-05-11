@@ -238,6 +238,7 @@ model Tool {
   comparisonFaqsTool2 ComparisonFaq[] @relation("ComparisonFaqTool2")
   comparisonsTool1    Comparison[]    @relation("ComparisonTool1")
   comparisonsTool2    Comparison[]    @relation("ComparisonTool2")
+  blogPosts           BlogPost[]
 
   @@index([id, slug])
   @@index([name])
@@ -492,4 +493,25 @@ model ApiKeyLog {
   // Indexes
   @@index([apiKeyId])
   @@index([createdAt])
+}
+
+model BlogPost {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String   @db.Citext
+  description   String?  @db.Text
+  content       String   @db.Text
+  imageUrl      String?
+  authorName    String
+  authorImage   String?
+  authorTwitter String?
+  publishedAt   DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relation to mentioned tools
+  tools         Tool[]
+
+  @@index([slug])
+  @@index([publishedAt])
 }

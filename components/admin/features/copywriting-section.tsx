@@ -1,13 +1,13 @@
 "use client"
 
 import { CollapsibleSection } from "~/components/admin/collapsible-section"
-import { RatingInput, BooleanInput } from "~/components/admin/feature-inputs"
+import { BooleanInput, RatingInput } from "~/components/admin/feature-inputs"
 import {
   type CopywritingFeatures,
-  defaultCopywritingFeatures,
   copywritingFeaturesLabels,
-  parseFeatures,
   countFilledFeatures,
+  defaultCopywritingFeatures,
+  parseFeatures,
 } from "~/types/specifications"
 
 interface CopywritingSectionProps {

@@ -1,11 +1,8 @@
-import * as fs from "node:fs/promises"
-import * as path from "node:path"
 import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { withApiKeyAuth } from "~/lib/auth-hoc"
-
-const POSTS_DIR = path.join(process.cwd(), "content/posts")
+import { db } from "~/services/db"
 
 /**
  * GET /api/blog/[slug] — Read a blog post by slug.
@@ -14,52 +11,43 @@ const POSTS_DIR = path.join(process.cwd(), "content/posts")
 export const GET = (req: NextRequest, { params }: { params: Promise<{ slug: string }> }) => {
   return withApiKeyAuth(["blog:read"], async () => {
     const { slug } = await params
-    const filePath = path.join(POSTS_DIR, `${slug}.mdx`)
 
     try {
-      const fileContent = await fs.readFile(filePath, "utf-8")
-
-      const frontmatterMatch = fileContent.match(/^---\r?\n([\s\S]*?)\r?\n---/)
-      const content = frontmatterMatch
-        ? fileContent.slice(frontmatterMatch[0].length).trim()
-        : fileContent
-
-      // Parse frontmatter
-      const meta: Record<string, unknown> = {}
-      const authorObj: Record<string, string> = {}
-      const toolsArr: string[] = []
-      let inAuthor = false
-      let inTools = false
-
-      if (frontmatterMatch) {
-        for (const line of frontmatterMatch[1].split(/\r?\n/)) {
-          if (line.startsWith("author:")) { inAuthor = true; inTools = false; continue }
-          if (line.startsWith("tools:")) { inTools = true; inAuthor = false; continue }
-          if (inAuthor && line.startsWith("  ")) {
-            const m = line.match(/^\s+(\w+):\s*["']?(.+?)["']?\s*$/)
-            if (m) authorObj[m[1]] = m[2]
-            continue
-          }
-          if (inTools && line.startsWith("  -")) {
-            toolsArr.push(line.replace(/^\s+-\s*/, "").trim())
-            continue
-          }
-          inAuthor = false; inTools = false
-          const m = line.match(/^(\w+):\s*["']?(.+?)["']?\s*$/)
-          if (m) meta[m[1]] = m[2]
+      const post = await db.blogPost.findUnique({
+        where: { slug },
+        include: {
+          tools: { select: { slug: true } }
         }
+      })
+
+      if (!post) {
+        return NextResponse.json({ error: "Blog post not found" }, { status: 404 })
       }
 
-      if (Object.keys(authorObj).length) meta.author = authorObj
-      if (toolsArr.length) meta.tools = toolsArr
+      const meta: Record<string, unknown> = {
+        title: post.title,
+        description: post.description,
+        image: post.imageUrl,
+        publishedAt: post.publishedAt,
+        author: {
+          name: post.authorName,
+          image: post.authorImage,
+          twitterHandle: post.authorTwitter,
+        },
+      }
+
+      if (post.tools.length > 0) {
+        meta.tools = post.tools.map(t => t.slug)
+      }
 
       return NextResponse.json({
         slug,
         frontmatter: meta,
-        content,
+        content: post.content,
       })
-    } catch {
-      return NextResponse.json({ error: "Blog post not found" }, { status: 404 })
+    } catch (error) {
+      console.error(error)
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 })
     }
   })(req)
 }
@@ -77,54 +65,57 @@ export const PUT = (req: NextRequest, { params }: { params: Promise<{ slug: stri
     const body = await req.json()
     const { title, description, image, publishedAt, authorName, authorImage, authorTwitter, tools, content, newSlug } = body
 
-    const currentPath = path.join(POSTS_DIR, `${slug}.mdx`)
-
-    // Make sure existing file exists
-    try {
-      await fs.access(currentPath)
-    } catch {
+    const existing = await db.blogPost.findUnique({ where: { slug } })
+    if (!existing) {
       return NextResponse.json({ error: "Blog post not found" }, { status: 404 })
     }
 
     const finalSlug = newSlug || slug
-    const newPath = path.join(POSTS_DIR, `${finalSlug}.mdx`)
 
-    // Build new content
-    const lines = ["---"]
-    lines.push(`title: "${title}"`)
-    lines.push(`description: "${description || ""}"`)
-    if (image) lines.push(`image: "${image}"`)
-    lines.push(`publishedAt: ${publishedAt || new Date().toISOString().split("T")[0]}`)
-    lines.push("author:")
-    lines.push(`  name: ${authorName || "ColdEmailKit"}`)
-    lines.push(`  image: "${authorImage || "/authors/default.jpg"}"`)
-    lines.push(`  twitterHandle: "${authorTwitter || "@coldemailkit"}"`)
-
-    if (tools?.length) {
-      lines.push("tools:")
-      for (const t of tools) {
-        lines.push(`  - ${t}`)
+    try {
+      // Connect only valid tools
+      let validToolSlugs: string[] = []
+      if (tools && Array.isArray(tools)) {
+        const existingTools = await db.tool.findMany({
+          where: { slug: { in: tools } },
+          select: { slug: true }
+        })
+        validToolSlugs = existingTools.map(t => t.slug)
       }
+
+      await db.blogPost.update({
+        where: { slug },
+        data: {
+          ...(newSlug && newSlug !== slug && { slug: newSlug }),
+          ...(title !== undefined && { title }),
+          ...(description !== undefined && { description: description || null }),
+          ...(image !== undefined && { imageUrl: image || null }),
+          ...(publishedAt !== undefined && { publishedAt: new Date(publishedAt) }),
+          ...(authorName !== undefined && { authorName }),
+          ...(authorImage !== undefined && { authorImage: authorImage || null }),
+          ...(authorTwitter !== undefined && { authorTwitter: authorTwitter || null }),
+          ...(content !== undefined && { content }),
+          ...(tools !== undefined && {
+            tools: {
+              set: [], // Disconnect old tools
+              connect: validToolSlugs.map(t => ({ slug: t }))
+            }
+          })
+        }
+      })
+
+      // Trigger ISR revalidation so the edit is reflected on the live site
+      revalidatePath("/blog")
+      revalidatePath(`/blog/${slug}`)
+      if (newSlug && newSlug !== slug) {
+        revalidatePath(`/blog/${newSlug}`)
+      }
+
+      return NextResponse.json({ success: true, slug: finalSlug })
+    } catch (error) {
+      console.error(error)
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 })
     }
-
-    lines.push("---")
-    const fullContent = `${lines.join("\n")}\n\n${content || ""}`
-
-    // If slug changed, delete old file
-    if (newSlug && newSlug !== slug) {
-      await fs.unlink(currentPath).catch(() => {})
-    }
-
-    await fs.writeFile(newPath, fullContent, "utf-8")
-
-    // Trigger ISR revalidation so the edit is reflected on the live site
-    revalidatePath("/blog")
-    revalidatePath(`/blog/${slug}`)
-    if (newSlug && newSlug !== slug) {
-      revalidatePath(`/blog/${newSlug}`)
-    }
-
-    return NextResponse.json({ success: true, slug: finalSlug })
   })(req)
 }
 
@@ -137,17 +128,19 @@ export const PATCH = PUT
 export const DELETE = (req: NextRequest, { params }: { params: Promise<{ slug: string }> }) => {
   return withApiKeyAuth(["blog:write"], async () => {
     const { slug } = await params
-    const filePath = path.join(POSTS_DIR, `${slug}.mdx`)
 
     try {
-      await fs.unlink(filePath)
+      await db.blogPost.delete({
+        where: { slug }
+      })
 
       // Trigger ISR revalidation so the deletion is reflected on the live site
       revalidatePath("/blog")
       revalidatePath(`/blog/${slug}`)
 
       return NextResponse.json({ success: true, deleted: slug })
-    } catch {
+    } catch (error) {
+      console.error(error)
       return NextResponse.json({ error: "Blog post not found" }, { status: 404 })
     }
   })(req)

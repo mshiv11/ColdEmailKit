@@ -1,7 +1,6 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { getUrlHostname } from "~/utils/helpers"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -32,6 +31,7 @@ import { claimsConfig } from "~/config/claims"
 import { siteConfig } from "~/config/site"
 import { useSession } from "~/lib/auth-client"
 import type { ToolOne } from "~/server/web/tools/payloads"
+import { getUrlHostname } from "~/utils/helpers"
 
 type ToolClaimDialogProps = {
   tool: ToolOne

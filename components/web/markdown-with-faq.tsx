@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { Markdown } from "~/components/web/markdown"
-import { Icon } from "~/components/common/icon"
+import { useMemo, useState } from "react"
 import { H2 } from "~/components/common/heading"
+import { Icon } from "~/components/common/icon"
+import { Markdown } from "~/components/web/markdown"
 import { cx } from "~/utils/cva"
 
 type MarkdownWithFAQProps = {

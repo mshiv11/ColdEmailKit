@@ -77,7 +77,9 @@ const normalizeFirecrawlResponse = (url: string, data: FirecrawlResponse): Scrap
 
 export const scrapeWebsiteDataWithFirecrawl = async (url: string) => {
   if (!env.FIRECRAWL_API_KEY) {
-    throw new Error("Firecrawl fallback is not configured. Add FIRECRAWL_API_KEY to your environment.")
+    throw new Error(
+      "Firecrawl fallback is not configured. Add FIRECRAWL_API_KEY to your environment.",
+    )
   }
 
   console.log("Scraping with Firecrawl:", url)
@@ -193,7 +195,7 @@ export const searchWebDataWithFirecrawl = async (query: string): Promise<string>
   }
 
   // Handle both response formats: array or { web: [] }
-  const results = Array.isArray(data.data) ? data.data : data.data?.web ?? []
+  const results = Array.isArray(data.data) ? data.data : (data.data?.web ?? [])
 
   if (results.length === 0) {
     console.warn("Firecrawl Search returned no results for:", query)

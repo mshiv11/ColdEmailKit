@@ -2,17 +2,17 @@
 
 import { CollapsibleSection } from "~/components/admin/collapsible-section"
 import {
-  RatingInput,
   BooleanInput,
-  TextFieldInput,
+  RatingInput,
   SelectInput,
+  TextFieldInput,
 } from "~/components/admin/feature-inputs"
 import {
   type InboxFeatures,
+  countFilledFeatures,
   defaultInboxFeatures,
   inboxFeaturesLabels,
   parseFeatures,
-  countFilledFeatures,
 } from "~/types/specifications"
 
 interface InboxSectionProps {

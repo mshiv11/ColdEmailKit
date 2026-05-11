@@ -4,10 +4,10 @@ import { CollapsibleSection } from "~/components/admin/collapsible-section"
 import { BooleanInput, TextFieldInput } from "~/components/admin/feature-inputs"
 import {
   type PricingSpecs,
-  defaultPricingSpecs,
-  pricingSpecsLabels,
-  parseFeatures,
   countFilledFeatures,
+  defaultPricingSpecs,
+  parseFeatures,
+  pricingSpecsLabels,
 } from "~/types/specifications"
 
 interface PricingSectionProps {

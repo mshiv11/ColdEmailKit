@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server"
 import { headers } from "next/headers"
+import { NextResponse } from "next/server"
 import { calculateRating, fetchToolData, generateContent } from "~/lib/intelligence"
 import { db } from "~/services/db"
 

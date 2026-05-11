@@ -4,7 +4,6 @@ import {
   toolCategoriesPayload,
   toolTopicsPayload,
 } from "~/server/web/tools/payloads"
-import { allPosts } from "content-collections"
 import { db } from "~/services/db"
 import { getMeiliIndex } from "~/services/meilisearch"
 import { stripMarkdown } from "~/utils/markdown"
@@ -120,12 +119,13 @@ export const indexComparisons = async () => {
  * @returns Enqueued task
  */
 export const indexBlogPosts = async () => {
-  if (!allPosts.length) return
+  const posts = await db.blogPost.findMany()
+  if (!posts.length) return
 
   return await getMeiliIndex("blog").addDocuments(
-    allPosts.map(post => ({
-      id: post._meta.path,
-      slug: post._meta.path,
+    posts.map(post => ({
+      id: post.slug,
+      slug: post.slug,
       name: post.title,
       description: post.description,
     })),

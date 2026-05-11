@@ -22,17 +22,19 @@ import { Listing } from "~/components/web/listing"
 import { MarkdownWithFAQ } from "~/components/web/markdown-with-faq"
 import { OverlayImage } from "~/components/web/overlay-image"
 import { RepositoryDetails } from "~/components/web/repository-details"
+import { FAQSchema, generateToolFAQs } from "~/components/web/seo/faq-schema"
 import { ShareButtons } from "~/components/web/share-buttons"
+import { MobileBottomCTA } from "~/components/web/tools/mobile-bottom-cta"
 import { StarRating } from "~/components/web/tools/star-rating"
-import { ToolFeaturesDisplay } from "~/components/web/tools/tool-features-display"
+import { StickyToolHeader } from "~/components/web/tools/sticky-tool-header"
 import { ToolActions } from "~/components/web/tools/tool-actions"
 import { ToolAlternatives } from "~/components/web/tools/tool-alternatives"
+import { ToolComparisons } from "~/components/web/tools/tool-comparisons"
+import { ToolFeaturesDisplay } from "~/components/web/tools/tool-features-display"
 import { ToolIntegrations } from "~/components/web/tools/tool-integrations"
-import { StickyToolHeader } from "~/components/web/tools/sticky-tool-header"
-import { TrustBreakdownHover } from "~/components/web/tools/trust-breakdown-hover"
 import { ToolListSkeleton } from "~/components/web/tools/tool-list"
 import { ToolReviews } from "~/components/web/tools/tool-reviews"
-import { MobileBottomCTA } from "~/components/web/tools/mobile-bottom-cta"
+import { TrustBreakdownHover } from "~/components/web/tools/trust-breakdown-hover"
 import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
 import { FaviconImage } from "~/components/web/ui/favicon"
 import { IntroDescription } from "~/components/web/ui/intro"
@@ -40,18 +42,16 @@ import { Section } from "~/components/web/ui/section"
 import { Tag } from "~/components/web/ui/tag"
 import { VerifiedBadge } from "~/components/web/verified-badge"
 import { metadataConfig } from "~/config/metadata"
-import { getToolSuffix, isToolPublished } from "~/lib/tools"
 import {
-  generateSoftwareApplicationSchema,
   generateBreadcrumbSchema,
+  generateSoftwareApplicationSchema,
   jsonLdScriptProps,
   wrapInGraph,
 } from "~/lib/schemas"
-import { FAQSchema, generateToolFAQs } from "~/components/web/seo/faq-schema"
-import { ToolComparisons } from "~/components/web/tools/tool-comparisons"
+import { getToolSuffix, isToolPublished } from "~/lib/tools"
+import { findComparisonsForTool } from "~/server/web/comparisons/queries"
 import type { ToolOne } from "~/server/web/tools/payloads"
 import { findTool, findToolSlugs } from "~/server/web/tools/queries"
-import { findComparisonsForTool } from "~/server/web/comparisons/queries"
 
 export const revalidate = 604800 // Cache for 7 days (on-demand revalidation via revalidateTag handles freshness)
 

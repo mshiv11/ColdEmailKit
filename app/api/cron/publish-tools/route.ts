@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server"
-import { headers } from "next/headers"
-import { db } from "~/services/db"
-import { executePublishSideEffects } from "~/server/admin/tools/publish"
 import { ToolStatus } from "@prisma/client"
+import { headers } from "next/headers"
+import { NextResponse } from "next/server"
+import { executePublishSideEffects } from "~/server/admin/tools/publish"
+import { db } from "~/services/db"
 
 export const maxDuration = 300 // 5 minutes
 
@@ -31,17 +31,17 @@ export async function GET(req: Request) {
   try {
     // Determine the current time on a 5-minute increment boundary for robustness
     const now = new Date()
-    
+
     // Find tools scheduled to be published that are at or past their publish time
     const toolsToPublish = await db.tool.findMany({
       where: {
         status: ToolStatus.Scheduled,
-        publishedAt: { lte: now }
+        publishedAt: { lte: now },
       },
       select: {
         id: true,
-        name: true
-      }
+        name: true,
+      },
     })
 
     if (toolsToPublish.length === 0) {

@@ -3,12 +3,12 @@
 import { formatDate } from "@primoui/utils"
 import type { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "~/components/common/badge"
+import { Link } from "~/components/common/link"
 import { Note } from "~/components/common/note"
 import { DataTableColumnHeader } from "~/components/data-table/data-table-column-header"
 import { FaviconImage } from "~/components/web/ui/favicon"
-import { Link } from "~/components/common/link"
-import { ComparisonActions } from "./comparison-actions"
 import type { ComparisonPair } from "~/server/admin/comparisons/queries"
+import { ComparisonActions } from "./comparison-actions"
 
 export const getColumns = (): ColumnDef<ComparisonPair>[] => {
   return [
@@ -50,7 +50,9 @@ export const getColumns = (): ColumnDef<ComparisonPair>[] => {
       cell: ({ row }) => {
         const s = row.original.status || "Draft"
         return (
-          <Badge variant={s === "Published" ? "default" : s === "Scheduled" ? "secondary" : "outline"}>
+          <Badge
+            variant={s === "Published" ? "default" : s === "Scheduled" ? "secondary" : "outline"}
+          >
             {s}
           </Badge>
         )

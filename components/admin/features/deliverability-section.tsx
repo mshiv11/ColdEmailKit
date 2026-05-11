@@ -1,13 +1,13 @@
 "use client"
 
 import { CollapsibleSection } from "~/components/admin/collapsible-section"
-import { RatingInput, BooleanInput, TextFieldInput } from "~/components/admin/feature-inputs"
+import { BooleanInput, RatingInput, TextFieldInput } from "~/components/admin/feature-inputs"
 import {
   type DeliverabilityFeatures,
+  countFilledFeatures,
   defaultDeliverabilityFeatures,
   deliverabilityFeaturesLabels,
   parseFeatures,
-  countFilledFeatures,
 } from "~/types/specifications"
 
 interface DeliveraSectionProps {

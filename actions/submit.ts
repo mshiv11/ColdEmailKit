@@ -1,7 +1,6 @@
 "use server"
 
 import { slugify } from "@primoui/utils"
-import { getUrlHostname } from "~/utils/helpers"
 import { headers } from "next/headers"
 import { after } from "next/server"
 import { createServerAction } from "zsa"
@@ -11,6 +10,7 @@ import { notifySubmitterOfToolSubmitted } from "~/lib/notifications"
 import { getIP, isRateLimited } from "~/lib/rate-limiter"
 import { submitToolSchema } from "~/server/web/shared/schema"
 import { db } from "~/services/db"
+import { getUrlHostname } from "~/utils/helpers"
 import { isDisposableEmail } from "~/utils/helpers"
 
 /**
@@ -85,9 +85,7 @@ export const submitTool = createServerAction()
     const isAdmin = session?.user.role === "admin"
     const emailDomain = session?.user.email.split("@")[1]
     const toolDomain = getUrlHostname(data.websiteUrl)
-    const ownerId = !isAdmin && emailDomain === toolDomain
-      ? session?.user.id
-      : undefined
+    const ownerId = !isAdmin && emailDomain === toolDomain ? session?.user.id : undefined
 
     // Save the tool to the database
     const tool = await db.tool.create({

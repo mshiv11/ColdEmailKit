@@ -26,10 +26,7 @@ export const DashboardToolListing = async ({ searchParams }: DashboardPageProps)
     ? { ownerId: session.user.id }
     : { OR: [{ submitterEmail: session.user.email }, { ownerId: session.user.id }] }
 
-  const toolsPromise = findTools(
-    { ...parsedParams, status: status },
-    whereFilter,
-  )
+  const toolsPromise = findTools({ ...parsedParams, status: status }, whereFilter)
 
   return (
     <Suspense fallback={<DataTableSkeleton />}>

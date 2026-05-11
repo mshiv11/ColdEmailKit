@@ -7,6 +7,7 @@ import { Badge } from "~/components/common/badge"
 import { H6 } from "~/components/common/heading"
 import { Link } from "~/components/common/link"
 import { Stack } from "~/components/common/stack"
+import { FAQSchema, generateCategoryFAQs } from "~/components/web/seo/faq-schema"
 import { ToolListingSkeleton } from "~/components/web/tools/tool-listing"
 import { ToolQuery } from "~/components/web/tools/tool-query"
 import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
@@ -20,7 +21,6 @@ import {
   jsonLdScriptProps,
   wrapInGraph,
 } from "~/lib/schemas"
-import { FAQSchema, generateCategoryFAQs } from "~/components/web/seo/faq-schema"
 import type { CategoryOne } from "~/server/web/categories/payloads"
 import {
   findCategoryByPath,

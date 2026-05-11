@@ -1,14 +1,14 @@
-import { notFound } from "next/navigation"
 import { ToolStatus } from "@prisma/client"
+import { notFound } from "next/navigation"
 import { withAdminPage } from "~/components/admin/auth-hoc"
 import { Wrapper } from "~/components/admin/wrapper"
 import { H1 } from "~/components/common/heading"
 import { Icon } from "~/components/common/icon"
 import { Link } from "~/components/common/link"
 import { FaviconImage } from "~/components/web/ui/favicon"
-import { ComparisonForm } from "../_components/comparison-form"
-import { findPairFaqs, findComparisonData } from "~/server/admin/comparisons/queries"
+import { findComparisonData, findPairFaqs } from "~/server/admin/comparisons/queries"
 import { db } from "~/services/db"
+import { ComparisonForm } from "../_components/comparison-form"
 
 type PageProps = {
   params: Promise<{ slug: string }>

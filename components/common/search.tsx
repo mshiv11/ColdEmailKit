@@ -1,7 +1,6 @@
 "use client"
 
 import { type HotkeyItem, useDebouncedState, useHotkeys } from "@mantine/hooks"
-import { getUrlHostname } from "~/utils/helpers"
 import { usePathname, useRouter } from "next/navigation"
 import { posthog } from "posthog-js"
 import { type ReactNode, useEffect, useRef, useState } from "react"
@@ -23,6 +22,7 @@ import { Icon } from "~/components/common/icon"
 import { Kbd } from "~/components/common/kbd"
 import { useSearch } from "~/contexts/search-context"
 import { useSession } from "~/lib/auth-client"
+import { getUrlHostname } from "~/utils/helpers"
 
 type SearchResultsProps<T> = {
   name: string

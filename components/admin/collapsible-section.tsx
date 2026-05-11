@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, type ReactNode } from "react"
-import { Icon } from "~/components/common/icon"
-import { H3 } from "~/components/common/heading"
+import { type ReactNode, useState } from "react"
 import { Badge } from "~/components/common/badge"
+import { H3 } from "~/components/common/heading"
+import { Icon } from "~/components/common/icon"
 import { cx } from "~/utils/cva"
 
 interface CollapsibleSectionProps {

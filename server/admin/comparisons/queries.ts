@@ -102,9 +102,9 @@ export const findComparisonData = async (tool1Id: string, tool2Id: string) => {
         { tool1Id: tool2Id, tool2Id: tool1Id },
       ],
     },
-    select: { 
-      verdict: true, 
-      customTitle: true, 
+    select: {
+      verdict: true,
+      customTitle: true,
       customDescription: true,
       overviewContent: true,
       tool1Description: true,
@@ -115,10 +115,10 @@ export const findComparisonData = async (tool1Id: string, tool2Id: string) => {
       updatedAt: true,
     },
   })
-  
+
   if (comparison) {
     const [id1] = [tool1Id, tool2Id].sort()
-    
+
     return {
       verdict: comparison.verdict,
       customTitle: comparison.customTitle,
@@ -133,12 +133,12 @@ export const findComparisonData = async (tool1Id: string, tool2Id: string) => {
     }
   }
 
-  return { 
-    verdict: null, 
-    customTitle: null, 
-    customDescription: null, 
+  return {
+    verdict: null,
+    customTitle: null,
+    customDescription: null,
     overviewContent: null,
-    tool1Description: null, 
+    tool1Description: null,
     tool2Description: null,
     status: "Draft",
     publishedAt: null,

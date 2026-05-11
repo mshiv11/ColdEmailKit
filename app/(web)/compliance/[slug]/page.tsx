@@ -1,4 +1,3 @@
-import { getUrlHostname } from "~/utils/helpers"
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import type { SearchParams } from "nuqs/server"
@@ -21,6 +20,7 @@ import { metadataConfig } from "~/config/metadata"
 import type { ComplianceOne } from "~/server/web/compliance/payloads"
 import { findCompliance, findComplianceSlugs } from "~/server/web/compliance/queries"
 import { findToolsWithCategories } from "~/server/web/tools/queries"
+import { getUrlHostname } from "~/utils/helpers"
 
 type PageProps = {
   params: Promise<{ slug: string }>

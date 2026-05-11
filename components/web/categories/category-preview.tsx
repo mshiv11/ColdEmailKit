@@ -1,12 +1,12 @@
-import { Link } from "~/components/common/link"
-import { Listing } from "~/components/web/listing"
-import { Grid } from "~/components/web/ui/grid"
-import { Card, CardHeader, CardFooter } from "~/components/common/card"
+import plur from "plur"
+import { Card, CardFooter, CardHeader } from "~/components/common/card"
 import { H4 } from "~/components/common/heading"
 import { Icon } from "~/components/common/icon"
+import { Link } from "~/components/common/link"
 import { Skeleton } from "~/components/common/skeleton"
+import { Listing } from "~/components/web/listing"
+import { Grid } from "~/components/web/ui/grid"
 import { findCategories } from "~/server/web/categories/queries"
-import plur from "plur"
 
 const CategoryPreview = async () => {
   const categories = await findCategories({ where: { parentId: null }, take: 6 })

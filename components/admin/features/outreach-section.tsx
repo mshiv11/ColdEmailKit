@@ -1,14 +1,14 @@
 "use client"
 
 import { CollapsibleSection } from "~/components/admin/collapsible-section"
-import { RatingInput, BooleanInput, TextFieldInput } from "~/components/admin/feature-inputs"
+import { BooleanInput, RatingInput, TextFieldInput } from "~/components/admin/feature-inputs"
 import { H3 } from "~/components/common/heading"
 import {
   type OutreachFeatures,
+  countFilledFeatures,
   defaultOutreachFeatures,
   outreachFeaturesLabels,
   parseFeatures,
-  countFilledFeatures,
 } from "~/types/specifications"
 
 interface OutreachSectionProps {

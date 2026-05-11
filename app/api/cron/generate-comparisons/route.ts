@@ -1,9 +1,9 @@
 import { ComparisonStatus } from "@prisma/client"
 import { headers } from "next/headers"
 import { env } from "~/env"
-import { db } from "~/services/db"
-import { getErrorMessage } from "~/lib/handle-error"
 import { generateComparisonContent } from "~/lib/admin-ai"
+import { getErrorMessage } from "~/lib/handle-error"
+import { db } from "~/services/db"
 
 // Note: Ensure this duration matches or exceeds the Vercel/Railway max duration
 export const maxDuration = 300
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
   try {
     console.log("[CRON] Starting programmatic comparison generation loop...")
-    
+
     // Find up to 1 Draft comparison and try to process it
     const pair = await db.comparison.findFirst({
       where: {
@@ -27,15 +27,17 @@ export async function POST(req: Request) {
         tool1: true,
         tool2: true,
       },
-      orderBy: { createdAt: "asc" }
+      orderBy: { createdAt: "asc" },
     })
 
     if (!pair) {
-      return new Response("No Draft comparisons found in the queue. Everything is up to date.", { status: 200 })
+      return new Response("No Draft comparisons found in the queue. Everything is up to date.", {
+        status: 200,
+      })
     }
 
     console.log(`[CRON] Generating AI content for: ${pair.tool1.name} vs ${pair.tool2.name}`)
-    
+
     // Generate AI content
     const content = await generateComparisonContent({
       tool1: pair.tool1.name,
@@ -52,7 +54,7 @@ export async function POST(req: Request) {
         verdict: content.verdict,
         status: ComparisonStatus.Scheduled, // Set to scheduled so it'll be published when the time is right
         publishedAt: new Date(Date.now() + 1000 * 60 * 60 * 24), // Schedule for tomorrow
-      }
+      },
     })
 
     // Insert FAQs
@@ -78,20 +80,25 @@ export async function POST(req: Request) {
               answer: faq.answer,
               order: idx,
             },
-          })
-        )
+          }),
+        ),
       )
     }
 
-    console.log(`[CRON] Successfully generated content and scheduled ${pair.tool1.name} vs ${pair.tool2.name}`)
+    console.log(
+      `[CRON] Successfully generated content and scheduled ${pair.tool1.name} vs ${pair.tool2.name}`,
+    )
 
-    return new Response(JSON.stringify({ 
-      success: true, 
-      message: `Generated and scheduled comparison for ${pair.tool1.name} vs ${pair.tool2.name}` 
-    }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    })
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: `Generated and scheduled comparison for ${pair.tool1.name} vs ${pair.tool2.name}`,
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    )
   } catch (error) {
     console.error("[CRON] Generation error:", error)
     return new Response(getErrorMessage(error), { status: 500 })

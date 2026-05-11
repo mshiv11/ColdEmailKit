@@ -75,12 +75,15 @@ export const toolSchema = z.object({
   deliverabilityFeatures: z.object({}).passthrough().optional().default({}),
   linkedinFeatures: z.object({}).passthrough().optional().default({}),
 
-  publishedAt: z.coerce.date().nullish().transform(date => {
-    if (!date) return date
-    // clamp to nearest 5 minute boundary
-    const ms = 1000 * 60 * 5
-    return new Date(Math.round(date.getTime() / ms) * ms)
-  }),
+  publishedAt: z.coerce
+    .date()
+    .nullish()
+    .transform(date => {
+      if (!date) return date
+      // clamp to nearest 5 minute boundary
+      const ms = 1000 * 60 * 5
+      return new Date(Math.round(date.getTime() / ms) * ms)
+    }),
   status: z.nativeEnum(ToolStatus).default("Draft"),
   alternatives: z.array(z.string()).optional(),
   categories: z.array(z.string()).optional(),

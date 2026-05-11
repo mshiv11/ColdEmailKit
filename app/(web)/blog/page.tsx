@@ -1,10 +1,10 @@
-import { allPosts } from "content-collections"
 import type { Metadata } from "next"
 import { PostCard } from "~/components/web/posts/post-card"
 import { Breadcrumbs } from "~/components/web/ui/breadcrumbs"
 import { Grid } from "~/components/web/ui/grid"
 import { Intro, IntroDescription, IntroTitle } from "~/components/web/ui/intro"
 import { metadataConfig } from "~/config/metadata"
+import { db } from "~/services/db"
 
 export const metadata: Metadata = {
   title: "ColdEmailKit Blog",
@@ -14,8 +14,18 @@ export const metadata: Metadata = {
   alternates: { ...metadataConfig.alternates, canonical: "/blog" },
 }
 
-export default function BlogPage() {
-  const posts = allPosts.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
+export default async function BlogPage() {
+  const posts = await db.blogPost.findMany({
+    orderBy: { publishedAt: "desc" },
+    select: {
+      slug: true,
+      title: true,
+      description: true,
+      content: true,
+      imageUrl: true,
+      publishedAt: true,
+    }
+  })
 
   return (
     <>
@@ -36,7 +46,7 @@ export default function BlogPage() {
       {posts.length ? (
         <Grid>
           {posts.map(post => (
-            <PostCard key={post._meta.path} post={post} />
+            <PostCard key={post.slug} post={post} />
           ))}
         </Grid>
       ) : (
