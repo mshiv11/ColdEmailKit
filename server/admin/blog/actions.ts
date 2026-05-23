@@ -5,6 +5,7 @@ import * as path from "node:path"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { adminProcedure } from "~/lib/safe-actions"
+import { db } from "~/services/db"
 
 const POSTS_DIR = path.join(process.cwd(), "content/posts")
 const REDIRECTS_FILE = path.join(process.cwd(), "content/blog-redirects.json")
@@ -43,7 +44,6 @@ export const readBlogPost = async (
 
     // Simple YAML parsing (for our known structure)
     const frontmatter: Record<string, unknown> = {}
-    const currentKey = ""
     let inAuthor = false
     const authorObj: Record<string, string> = {}
     const toolsArr: string[] = []
@@ -87,6 +87,32 @@ export const readBlogPost = async (
 
     return { frontmatter, content }
   } catch {
+    // Database fallback
+    try {
+      const post = await db.blogPost.findUnique({
+        where: { slug },
+        include: { tools: { select: { slug: true } } }
+      })
+      if (post) {
+        return {
+          frontmatter: {
+            title: post.title,
+            description: post.description || "",
+            image: post.imageUrl || "",
+            publishedAt: post.publishedAt.toISOString().split("T")[0],
+            author: {
+              name: post.authorName,
+              image: post.authorImage || "",
+              twitterHandle: post.authorTwitter || "",
+            },
+            tools: post.tools.map((t: { slug: string }) => t.slug),
+          },
+          content: post.content,
+        }
+      }
+    } catch (dbErr) {
+      console.error("Database fallback failed in readBlogPost:", dbErr)
+    }
     return null
   }
 }
@@ -132,12 +158,59 @@ author:
   name: ${input.authorName}
   image: "${input.authorImage}"
   twitterHandle: "${input.authorTwitter}"
-${input.tools?.length ? `tools:\n${input.tools.map(t => `  - ${t}`).join("\n")}` : ""}
+${input.tools?.length ? `tools:\n${input.tools.map((t: string) => `  - ${t}`).join("\n")}` : ""}
 ---
 
 ${input.content}`.trim()
 
-    await fs.writeFile(filePath, frontmatter, "utf-8")
+    // Write to disk
+    await fs.writeFile(filePath, frontmatter, "utf-8").catch((err) => {
+      console.warn("Failed to write mdx file to disk (might be serverless):", err)
+    })
+
+    // Connect only valid tools
+    let validToolSlugs: string[] = []
+    if (input.tools && Array.isArray(input.tools) && input.tools.length > 0) {
+      const existingTools = await db.tool.findMany({
+        where: { slug: { in: input.tools } },
+        select: { slug: true }
+      })
+      validToolSlugs = existingTools.map((t: { slug: string }) => t.slug)
+    }
+
+    // Update in database
+    await db.blogPost.upsert({
+      where: { slug: input.oldSlug || input.slug },
+      update: {
+        slug: input.slug,
+        title: input.title,
+        description: input.description || null,
+        imageUrl: input.image || null,
+        content: input.content,
+        publishedAt: new Date(input.publishedAt),
+        authorName: input.authorName,
+        authorImage: input.authorImage || null,
+        authorTwitter: input.authorTwitter || null,
+        tools: {
+          set: [],
+          connect: validToolSlugs.map((t: string) => ({ slug: t }))
+        }
+      },
+      create: {
+        slug: input.slug,
+        title: input.title,
+        description: input.description || null,
+        imageUrl: input.image || null,
+        content: input.content,
+        publishedAt: new Date(input.publishedAt),
+        authorName: input.authorName,
+        authorImage: input.authorImage || null,
+        authorTwitter: input.authorTwitter || null,
+        tools: {
+          connect: validToolSlugs.map((t: string) => ({ slug: t }))
+        }
+      }
+    })
 
     revalidatePath("/admin/blog")
     revalidatePath("/blog")
@@ -160,6 +233,12 @@ export const createBlogPost = adminProcedure
       if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err
     }
 
+    // Check database if post already exists
+    const existing = await db.blogPost.findUnique({ where: { slug: input.slug } })
+    if (existing) {
+      throw new Error("A post with this slug already exists in the database")
+    }
+
     // Build frontmatter
     const frontmatter = `---
 title: "${input.title}"
@@ -170,12 +249,45 @@ author:
   name: ${input.authorName}
   image: "${input.authorImage}"
   twitterHandle: "${input.authorTwitter}"
-${input.tools?.length ? `tools:\n${input.tools.map(t => `  - ${t}`).join("\n")}` : ""}
+${input.tools?.length ? `tools:\n${input.tools.map((t: string) => `  - ${t}`).join("\n")}` : ""}
 ---
 
 ${input.content}`.trim()
 
-    await fs.writeFile(filePath, frontmatter, "utf-8")
+    // Write to disk
+    await fs.writeFile(filePath, frontmatter, "utf-8").catch((err) => {
+      console.warn("Failed to write mdx file to disk:", err)
+    })
+
+    // Connect only valid tools
+    let validToolSlugs: string[] = []
+    if (input.tools && Array.isArray(input.tools) && input.tools.length > 0) {
+      const existingTools = await db.tool.findMany({
+        where: { slug: { in: input.tools } },
+        select: { slug: true }
+      })
+      validToolSlugs = existingTools.map((t: { slug: string }) => t.slug)
+    }
+
+    // Create in database
+    await db.blogPost.create({
+      data: {
+        slug: input.slug,
+        title: input.title,
+        description: input.description || null,
+        imageUrl: input.image || null,
+        content: input.content,
+        publishedAt: new Date(input.publishedAt),
+        authorName: input.authorName,
+        authorImage: input.authorImage || null,
+        authorTwitter: input.authorTwitter || null,
+        ...(validToolSlugs.length > 0 && {
+          tools: {
+            connect: validToolSlugs.map((t: string) => ({ slug: t }))
+          }
+        })
+      }
+    })
 
     revalidatePath("/admin/blog")
     revalidatePath("/blog")
@@ -188,7 +300,10 @@ export const deleteBlogPost = adminProcedure
   .input(z.object({ slug: z.string() }))
   .handler(async ({ input }) => {
     const filePath = path.join(POSTS_DIR, `${input.slug}.mdx`)
-    await fs.unlink(filePath)
+    await fs.unlink(filePath).catch(() => {})
+
+    // Delete in database
+    await db.blogPost.delete({ where: { slug: input.slug } }).catch(() => {})
 
     revalidatePath("/admin/blog")
     revalidatePath("/blog")
