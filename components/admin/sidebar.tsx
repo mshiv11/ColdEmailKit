@@ -63,6 +63,11 @@ export const Sidebar = () => {
           prefix: <Icon name="lucide/replace" />,
         },
         {
+          title: "Ads",
+          href: "/admin/ads",
+          prefix: <Icon name="lucide/sparkles" />,
+        },
+        {
           title: "Categories",
           href: "/admin/categories",
           prefix: <Icon name="lucide/tags" />,
@@ -75,7 +80,7 @@ export const Sidebar = () => {
         {
           title: "Blog",
           href: "/admin/blog",
-          prefix: <Icon name="lucide/file-text" />,
+          prefix: <Icon name="lucide/rss" />,
         },
         {
           title: "Users",

@@ -22,10 +22,24 @@ export const findAd = async ({ where, orderBy, ...args }: Prisma.AdFindFirstArgs
   cacheTag("ads")
   cacheLife("hours")
 
+  const queryWhere = { ...where }
+  if (queryWhere.type && queryWhere.type !== "All") {
+    const requestedType = queryWhere.type
+    delete queryWhere.type
+    queryWhere.AND = [
+      {
+        OR: [
+          { type: requestedType },
+          { type: "All" }
+        ]
+      }
+    ]
+  }
+
   return db.ad.findFirst({
     ...args,
     orderBy: orderBy ?? { startsAt: "desc" },
-    where: { startsAt: { lte: new Date() }, endsAt: { gt: new Date() }, ...where },
+    where: { startsAt: { lte: new Date() }, endsAt: { gt: new Date() }, ...queryWhere },
     select: adOnePayload,
   })
 }

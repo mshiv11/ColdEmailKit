@@ -1,15 +1,39 @@
 import Image from "next/image"
+import { headers } from "next/headers"
 import type { ComponentProps } from "react"
 import { Badge } from "~/components/common/badge"
 import { Button } from "~/components/common/button"
 import { Card } from "~/components/common/card"
-import { ExternalLink } from "~/components/web/external-link"
+import { Link } from "~/components/common/link"
 import { Container } from "~/components/web/ui/container"
 import { findAd } from "~/server/web/ads/queries"
 import { cx } from "~/utils/cva"
 
+const getPageTypeFromPathname = (path: string) => {
+  if (path === "/") return "home"
+  if (path.startsWith("/categories")) return "category"
+  if (path.startsWith("/tools")) return "tool"
+  if (path.startsWith("/blog")) return "blog"
+  if (path.startsWith("/alternatives")) return "alternatives"
+  return "other"
+}
+
 export const AdBanner = async ({ className, ...props }: ComponentProps<typeof Card>) => {
-  const ad = await findAd({ where: { type: "Banner" } })
+  const headerList = await headers()
+  const pathname = headerList.get("x-current-path") || "/"
+  const pageType = getPageTypeFromPathname(pathname)
+
+  // Find active banner targeting this page or global
+  const ad = await findAd({
+    where: {
+      type: "Banner",
+      OR: [
+        { displayPages: { has: pageType } },
+        { displayPages: { has: "all" } },
+        { displayPages: { equals: [] } }
+      ]
+    }
+  })
 
   if (!ad) {
     return null
@@ -22,26 +46,27 @@ export const AdBanner = async ({ className, ...props }: ComponentProps<typeof Ca
         asChild
         {...props}
       >
-        <ExternalLink
-          href={ad.websiteUrl}
-          eventName="click_ad"
-          eventProps={{ url: ad.websiteUrl, type: ad.type, source: "banner" }}
+        <Link
+          href="/advertisement"
+          className="no-underline flex items-center w-full justify-between"
         >
           <Badge variant="outline" className="leading-none max-sm:order-last">
             Ad
           </Badge>
 
-          <div className="text-xs leading-tight text-secondary-foreground mr-auto sm:text-sm">
+          <div className="text-xs leading-tight text-secondary-foreground mr-auto sm:text-sm flex items-center">
             {ad.faviconUrl && (
               <Image
                 src={ad.faviconUrl}
                 alt={ad.name}
-                width={32}
-                height={32}
-                className="flex float-left align-middle mr-1.5 size-3.5 rounded-sm sm:size-4"
+                width={16}
+                height={16}
+                className="align-middle mr-1.5 size-3.5 rounded-sm sm:size-4 object-contain"
               />
             )}
-            <strong className="font-medium text-foreground">{ad.name}</strong> — {ad.description}
+            <div>
+              <strong className="font-medium text-foreground">{ad.name}</strong> — {ad.description}
+            </div>
           </div>
 
           <Button
@@ -52,7 +77,7 @@ export const AdBanner = async ({ className, ...props }: ComponentProps<typeof Ca
           >
             <span>{ad.buttonLabel ?? "Learn More"}</span>
           </Button>
-        </ExternalLink>
+        </Link>
       </Card>
     </Container>
   )

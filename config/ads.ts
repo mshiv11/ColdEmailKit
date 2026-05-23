@@ -31,6 +31,7 @@ export const adsConfig = {
       "Reach out to our audience of professional tech enthusiasts, boost your sales and brand awareness.",
     buttonLabel: `Advertise on ${siteConfig.name}`,
     faviconUrl: null,
+    displayPages: [],
   } satisfies AdOne,
 
   testimonials: [

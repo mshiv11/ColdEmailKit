@@ -1,5 +1,6 @@
 import { isExternalUrl } from "@primoui/utils"
 import type { Prisma } from "@prisma/client"
+import { headers } from "next/headers"
 import type { ComponentProps } from "react"
 import { Badge } from "~/components/common/badge"
 import { Button } from "~/components/common/button"
@@ -31,12 +32,35 @@ type AdCardProps = CardProps & {
   defaultOverride?: Partial<AdOne>
 }
 
+const getPageTypeFromPathname = (path: string) => {
+  if (path === "/") return "home"
+  if (path.startsWith("/categories")) return "category"
+  if (path.startsWith("/tools")) return "tool"
+  if (path.startsWith("/blog")) return "blog"
+  if (path.startsWith("/alternatives")) return "alternatives"
+  return "other"
+}
+
 const AdCard = async ({ className, where, overrideAd, defaultOverride, ...props }: AdCardProps) => {
   // Default ad values to display if no ad is found
   const defaultAd = { ...config.ads.defaultAd, ...defaultOverride }
 
+  // Detect current page path to filter targeted ads
+  const headerList = await headers()
+  const pathname = headerList.get("x-current-path") || "/"
+  const pageType = getPageTypeFromPathname(pathname)
+
   // Resolve the ad data from the override or database (don't query if override is defined)
-  const resolvedAd = overrideAd !== undefined ? overrideAd : await findAd({ where })
+  const resolvedAd = overrideAd !== undefined ? overrideAd : await findAd({
+    where: {
+      ...where,
+      OR: [
+        { displayPages: { has: pageType } },
+        { displayPages: { has: "all" } },
+        { displayPages: { equals: [] } }
+      ]
+    }
+  })
 
   // Final ad data to display
   const ad = resolvedAd ?? defaultAd

@@ -21,6 +21,7 @@ enum AdType {
   SelfHosted
   BlogPost
   All
+  TopBar
 }
 
 enum ToolStatus {
@@ -145,6 +146,7 @@ model Ad {
   buttonLabel    String?
   faviconUrl     String?
   type           AdType   @default(All)
+  displayPages   String[] @default([])
   startsAt       DateTime
   endsAt         DateTime
   sessionId      String?

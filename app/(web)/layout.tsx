@@ -1,4 +1,5 @@
 import Script from "next/script"
+import { headers } from "next/headers"
 import { type PropsWithChildren, Suspense } from "react"
 import type { Graph } from "schema-dts"
 import Providers from "~/app/(web)/providers"
@@ -9,6 +10,8 @@ import { Footer } from "~/components/web/footer"
 import { Header, HeaderBackdrop } from "~/components/web/header"
 import { Container } from "~/components/web/ui/container"
 import { config } from "~/config"
+
+
 
 export default async function RootLayout({ children }: PropsWithChildren) {
   const url = config.site.url
@@ -64,6 +67,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   return (
     <Providers>
       <div className="flex flex-col min-h-dvh overflow-clip pt-(--header-offset)">
+
         <Header />
         <HeaderBackdrop />
 
