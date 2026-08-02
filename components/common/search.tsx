@@ -289,7 +289,7 @@ export const Search = () => {
 
       {!!results && (
         <div className="px-3 py-2 text-[10px] text-muted-foreground/50 not-first:border-t">
-          Found {results.reduce((acc, curr) => acc + curr.estimatedTotalHits, 0)} results in{" "}
+          Found {results.reduce((acc: number, curr) => acc + curr.estimatedTotalHits, 0)} results in{" "}
           {Math.max(...results.map(r => r.processingTimeMs))}ms
         </div>
       )}

@@ -97,7 +97,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 - **Runtime**: [Bun](https://bun.sh/)
 - **Database**: [Supabase](https://supabase.com/) (PostgreSQL) with [Prisma](https://www.prisma.io/)
 - **Hosting**: [Railway](https://railway.app/)
-- **Search**: [Meilisearch](https://www.meilisearch.com/)
+- **Search**: PostgreSQL full-text / Prisma database queries (Native, no external service required)
 - **Authentication**: [Better Auth](https://www.better-auth.com/)
 - **AI**: [Vercel AI SDK](https://sdk.vercel.ai/) with [Anthropic Claude](https://anthropic.com/), [Google Gemini](https://ai.google.dev/), and [Mistral](https://mistral.ai/) (fallback)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
@@ -114,7 +114,7 @@ ColdEmailKit uses the following third-party services:
 |---------|---------|---------|
 | **Supabase** | PostgreSQL Database | [supabase.com](https://supabase.com/) |
 | **Railway** | Hosting & Background Jobs | [railway.app](https://railway.app/) |
-| **Meilisearch** | Full-text Search | [meilisearch.com](https://www.meilisearch.com/) |
+| **PostgreSQL Search** | Database Search (Prisma) | Native |
 | **Upstash** | Redis Cache & Rate Limiting | [upstash.com](https://upstash.com/) |
 | **PostHog** | Web & Product Analytics | [posthog.com](https://posthog.com/) |
 | **Beehiiv** | Newsletter | [beehiiv.com](https://www.beehiiv.com/?via=mshiv) |
@@ -214,7 +214,7 @@ Copy `.env.example` to `.env` and configure the following variables:
 | **Site** | `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SITE_EMAIL` | ✅ |
 | **Database** | `DATABASE_URL`, `DATABASE_URL_UNPOOLED` | ✅ |
 | **Auth** | `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, OAuth credentials | ✅ |
-| **Search** | `MEILISEARCH_HOST`, `MEILISEARCH_ADMIN_KEY` | ✅ |
+| **Search** | `MEILISEARCH_HOST`, `MEILISEARCH_ADMIN_KEY` | Optional (Uses PostgreSQL search) |
 | **Cache** | `REDIS_REST_URL`, `REDIS_REST_TOKEN` | ✅ |
 | **Email** | `RESEND_API_KEY`, `RESEND_SENDER_EMAIL` | ✅ |
 | **Storage** | S3 configuration variables | ✅ |
@@ -245,7 +245,76 @@ All commands are run from the root of the project:
 | `bun run db:push` | Push Prisma schema to database |
 | `bun run db:pull` | Pull Prisma schema from database |
 | `bun run db:reset` | Reset Prisma schema |
+| `npm run db:backup` | Full PostgreSQL database snapshot (Local + Cloudflare R2) |
 | `bun run email` | Start React Email development server |
+
+## 🛡️ Database Environment Isolation (Dev vs. Production)
+
+To prevent accidental data wipes during local development, schema migrations, or AI agent executions, ColdEmailKit enforces strict separation between the **Development Database** and the **Production Database**:
+
+| Environment | Project Name | Supabase Ref | Purpose & Scope |
+|-------------|--------------|--------------|-----------------|
+| **Production** | `CEK` | `phpsekmsbokkrtlkdtli` | **Live Production Site Only** — Configured exclusively inside Railway environment variables. Never connected to local dev or experimental scripts. |
+| **Development** | `CEK-Dev` | `esmqbinlxysmrcqzjcvo` | **Local Dev & AI Testing** — Configured in `.env.local` for local `bun run dev`, AI agent runs, and schema testing. |
+
+### 🚨 Mandatory Development Prerequisite (HARD RULE)
+
+- **ALL AI Prompt Executions & Feature Implementations MUST Run in Dev (`CEK-Dev`)**: Every code change, feature request, schema modification, and AI assistant task MUST be executed exclusively in the Development Environment (`CEK-Dev`).
+- **Production Isolation**: Under no circumstances should local AI agents or local development scripts connect to or execute commands against the Production Database (`CEK`).
+- **Production Promotion**: Production updates occur **only** after changes are verified in `CEK-Dev` and pushed to the `main` branch on GitHub for Railway deployment.
+
+### How Environment Isolation Prevents Data Loss
+
+1. **Local AI & Dev Operations Target `CEK-Dev`**: Any experimental schema refactoring, `prisma db push`, or automated testing operates solely on the isolated `CEK-Dev` database.
+2. **Production Protected on Railway**: Production credentials exist only in Railway's environment configuration. Pushing code to `main` triggers Railway to build and apply production migrations safely.
+3. **Offsite R2 Backups**: Running `npm run db:backup` creates an immediate snapshot locally and uploads it to Cloudflare R2 before any major change.
+
+---
+
+## Database Backups & Data Protection
+
+ColdEmailKit includes an automated, offsite database backup system that dumps all 31 PostgreSQL tables directly from `pg_class` without schema model dependencies.
+
+### Running a Backup
+
+Run a backup on demand anytime (creates a gzipped snapshot locally and uploads to Cloudflare R2):
+
+```bash
+npm run db:backup
+```
+
+- **Local Snapshot Location**: `backups/local/<timestamp>/`
+- **Offsite Cloudflare R2 Location**: `s3://<S3_BUCKET>/db-backups/<timestamp>/`
+- **Output Format**: Gzipped JSON for each table (`Tool.json.gz`, `Comparison.json.gz`, etc.) + `manifest.json`.
+
+---
+
+## 🚨 Incident Post-Mortem: Database Reset Prevention
+
+### What Caused the Database Data Loss?
+
+During major schema refactoring (adding enums like `AuthSetup`, `WarmupAvailability`, `AttributeState`, integer `refId` primary keys, and new schema tables), executing `prisma db push` or `prisma db push --accept-data-loss` / `--force-reset` on non-empty PostgreSQL databases causes Prisma to execute a `DROP TABLE ... CASCADE` followed by `CREATE TABLE ...` when non-null column additions or type changes conflict with existing schema rows.
+
+### Mandatory Rules for AI Agents & Developers
+
+To prevent database data loss in future developments:
+
+1. **BACKUP FIRST**: Always run `npm run db:backup` BEFORE running any database schema changes, migrations, or destructive commands.
+2. **NO FORCE RESETS**: NEVER run `prisma db push --accept-data-loss` or `prisma db push --force-reset` against a production or shared database.
+3. **SAFE MIGRATIONS**: Use `prisma migrate dev --create-only` or custom SQL migration scripts with explicit fallback/default values for new non-null columns.
+
+---
+
+## Data Restoration Log (July 2026)
+
+Following an accidental database reset, the production catalog was 100% recovered and verified against `sitemap.xml`:
+
+- **101 Published Tools** (100% matching sitemap, including `skysenders`, `mails-ai`, `straight-mail`, `kendo`, and `cufinder`)
+- **21 Canonical Comparison Pages** (`instantly-vs-manyreach`, `salesintel-vs-zoominfo`, `apollo-vs-zoominfo`, `outreach-vs-salesloft`, etc.)
+- **14 Alternatives** (+572 relational links)
+- **9 Categories** (+212 relational links)
+- **Integrations** & Admin User configuration (`sainimrityunjay@gmail.com`)
+
 
 ---
 

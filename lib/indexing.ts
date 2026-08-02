@@ -1,133 +1,26 @@
-import { type Prisma, ToolStatus } from "@prisma/client"
-import {
-  toolAlternativesPayload,
-  toolCategoriesPayload,
-  toolTopicsPayload,
-} from "~/server/web/tools/payloads"
-import { db } from "~/services/db"
-import { getMeiliIndex } from "~/services/meilisearch"
-import { stripMarkdown } from "~/utils/markdown"
+import { type Prisma } from "@prisma/client"
 
 /**
- * Index tools in MeiliSearch
- * @returns Enqueued task
+ * Direct database search is used instead of external Meilisearch indexing.
+ * Functions preserved as no-ops for backwards compatibility.
  */
-export const indexTools = async ({ where }: { where?: Prisma.ToolWhereInput }) => {
-  const tools = await db.tool.findMany({
-    where: { status: { in: [ToolStatus.Scheduled, ToolStatus.Published] }, ...where },
-    include: {
-      alternatives: toolAlternativesPayload,
-      categories: toolCategoriesPayload,
-      topics: toolTopicsPayload,
-    },
-  })
-
-  if (!tools.length) return
-
-  return await getMeiliIndex("tools").addDocuments(
-    tools.map(tool => ({
-      id: tool.id,
-      name: tool.name,
-      slug: tool.slug,
-      tagline: tool.tagline,
-      description: tool.description,
-      websiteUrl: tool.websiteUrl,
-      faviconUrl: tool.faviconUrl,
-      isFeatured: tool.isFeatured,
-      score: tool.score,
-      pageviews: tool.pageviews,
-      status: tool.status,
-      alternatives: tool.alternatives.map(a => a.name),
-      categories: tool.categories.map(c => c.name),
-      topics: tool.topics.map(t => t.slug),
-    })),
-  )
+export const indexTools = async (_opts?: { where?: Prisma.ToolWhereInput }) => {
+  return null
 }
 
-/**
- * Index alternatives in MeiliSearch
- * @returns Enqueued task
- */
-export const indexAlternatives = async ({ where }: { where?: Prisma.AlternativeWhereInput }) => {
-  const alternatives = await db.alternative.findMany({ where })
-
-  if (!alternatives.length) return
-
-  return await getMeiliIndex("alternatives").addDocuments(
-    alternatives.map(alternative => ({
-      id: alternative.id,
-      name: alternative.name,
-      slug: alternative.slug,
-      description: alternative.description,
-      websiteUrl: alternative.websiteUrl,
-      faviconUrl: alternative.faviconUrl,
-      pageviews: alternative.pageviews,
-    })),
-  )
+export const indexAlternatives = async (_opts?: { where?: Prisma.AlternativeWhereInput }) => {
+  return null
 }
 
-/**
- * Index categories in MeiliSearch
- * @param categories
- * @returns Enqueued task
- */
-export const indexCategories = async ({ where }: { where?: Prisma.CategoryWhereInput }) => {
-  const categories = await db.category.findMany({ where })
-
-  if (!categories.length) return
-
-  return await getMeiliIndex("categories").addDocuments(
-    categories.map(category => ({
-      id: category.id,
-      name: category.name,
-      slug: category.slug,
-      description: category.description,
-      fullPath: category.fullPath,
-    })),
-  )
+export const indexCategories = async (_opts?: { where?: Prisma.CategoryWhereInput }) => {
+  return null
 }
 
-/**
- * Index comparisons in MeiliSearch
- * @returns Enqueued task
- */
 export const indexComparisons = async () => {
-  const comparisons = await db.comparison.findMany({
-    include: {
-      tool1: true,
-      tool2: true,
-    },
-  })
-
-  if (!comparisons.length) return
-
-  return await getMeiliIndex("comparisons").addDocuments(
-    comparisons.map(comparison => ({
-      id: comparison.id,
-      slug: `${comparison.tool1.slug}-vs-${comparison.tool2.slug}`,
-      name: `${comparison.tool1.name} vs ${comparison.tool2.name}`,
-      description:
-        comparison.customDescription ||
-        (comparison.verdict ? stripMarkdown(comparison.verdict) : null) ||
-        `Compare ${comparison.tool1.name} vs ${comparison.tool2.name}`,
-    })),
-  )
+  return null
 }
 
-/**
- * Index blog posts in MeiliSearch
- * @returns Enqueued task
- */
 export const indexBlogPosts = async () => {
-  const posts = await db.blogPost.findMany()
-  if (!posts.length) return
-
-  return await getMeiliIndex("blog").addDocuments(
-    posts.map(post => ({
-      id: post.slug,
-      slug: post.slug,
-      name: post.title,
-      description: post.description,
-    })),
-  )
+  return null
 }
+

@@ -3,8 +3,8 @@ import { config } from "~/config"
 import { env } from "~/env"
 
 export const meili = new MeiliSearch({
-  host: env.MEILISEARCH_HOST,
-  apiKey: env.MEILISEARCH_ADMIN_KEY,
+  host: env.MEILISEARCH_HOST || "http://localhost:7700",
+  apiKey: env.MEILISEARCH_ADMIN_KEY || "",
 })
 
 /**

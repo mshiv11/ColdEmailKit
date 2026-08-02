@@ -160,8 +160,14 @@ model Ad {
 
 model Tool {
   id              String     @id @default(cuid())
+  /// Immutable integer identity. Never changes, never reused. All comparison
+  /// logic (pair keys, registry rows, demand records) keys on this, never on slug.
+  refId           Int        @unique @default(autoincrement())
   name            String     @db.Citext
   slug            String     @unique
+  /// Every slug this tool has ever had, current one excluded. Used to 301
+  /// historical and variant slugs onto the canonical URL.
+  slugAliases     String[]   @default([])
   websiteUrl      String     @unique
   affiliateUrl    String?
   repositoryUrl   String?    @unique
@@ -241,12 +247,15 @@ model Tool {
   comparisonsTool1    Comparison[]    @relation("ComparisonTool1")
   comparisonsTool2    Comparison[]    @relation("ComparisonTool2")
   blogPosts           BlogPost[]
+  attributes          ToolAttributes[]
+  variants            ToolVariant[]
 
   @@index([id, slug])
   @@index([name])
   @@index([status])
   @@index([isFeatured, score])
   @@index([ownerId])
+  @@index([slugAliases], type: Gin)
 }
 
 model Alternative {
@@ -517,4 +526,187 @@ model BlogPost {
 
   @@index([slug])
   @@index([publishedAt])
+}
+
+// ---------------------------------------------------------------------------
+// Comparison layer
+// ---------------------------------------------------------------------------
+
+enum AttributeState {
+  /// Reviewed and promoted. This is what renders.
+  Live
+  /// Written by the extractor. Never rendered, never promoted automatically.
+  PendingReview
+}
+
+enum WarmupAvailability {
+  Included
+  PaidAddon
+  None
+}
+
+enum AuthSetup {
+  Automated
+  Guided
+  Manual
+}
+
+/// A purchasable plan (Starter / Growth / Scale). Drives the ?a=&b= variant
+/// parameters. Exactly one variant per tool carries isDefault, and that is the
+/// plan the bare (unparameterised) compare URL renders.
+model ToolVariant {
+  id        String   @id @default(cuid())
+  toolId    String
+  /// URL-safe identifier used in ?a={key}. Unique per tool, never reused.
+  key       String
+  name      String
+  isDefault Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tool Tool @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@unique([toolId, key])
+  @@index([toolId, isDefault])
+}
+
+/// The comparison spine (spec §1.2). Every field is nullable: a tool either has
+/// a value or is explicitly NULL, and NULL renders as a dash. `nullFields`
+/// records which keys were reviewed and deliberately left empty, so "checked,
+/// genuinely absent" is distinguishable from "never looked at" — the extractor
+/// populates it, the noindex threshold in §6 ignores it.
+model ToolAttributes {
+  id     String         @id @default(cuid())
+  toolId String
+  /// "" for the tool's default attributes, otherwise a ToolVariant.key.
+  /// Not an FK because a nullable column cannot carry the unique constraint
+  /// below (Postgres treats NULLs as distinct).
+  variantKey String     @default("")
+  state      AttributeState @default(PendingReview)
+
+  // Pricing
+  entryPriceMonthly Decimal? @db.Decimal(10, 2)
+  pricePerSeat      Decimal? @db.Decimal(10, 2)
+  pricePerInbox     Decimal? @db.Decimal(10, 2)
+  pricePerCredit    Decimal? @db.Decimal(10, 4)
+  freePlan          Boolean?
+  freeTrialDays     Int?
+  annualDiscountPct Int?
+  refundWindowDays  Int?
+
+  // Sending
+  dailySendLimit          Int?
+  unlimitedInboxes        Boolean?
+  inboxRotation           Boolean?
+  sendingScheduleControls Boolean?
+  spintax                 Boolean?
+  abTesting               Boolean?
+
+  // Deliverability
+  warmupIncluded       WarmupAvailability?
+  warmupCostMonthly    Decimal?            @db.Decimal(10, 2)
+  customTrackingDomain Boolean?
+  spfDkimDmarcSetup    AuthSetup?
+  bounceHandling       Boolean?
+  verificationIncluded Boolean?
+
+  // Data
+  leadDatabase  Boolean?
+  databaseSize  Int?
+  emailFinder   Boolean?
+  phoneNumbers  Boolean?
+  intentSignals Boolean?
+
+  // Integrations
+  crmIntegrations String[] @default([])
+  apiAccess       Boolean?
+  webhooks        Boolean?
+  zapier          Boolean?
+
+  // Support
+  supportChannels    String[] @default([])
+  onboardingIncluded Boolean?
+
+  /// Attribute keys reviewed and deliberately set to NULL.
+  nullFields String[] @default([])
+  /// Count of non-null attribute values, maintained on write. Feeds the §6
+  /// noindex threshold without recomputing across every row on render.
+  populatedCount Int @default(0)
+
+  // Extraction provenance
+  sourceUrls  String[]  @default([])
+  extractedAt DateTime?
+  reviewedAt  DateTime?
+  reviewedBy  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  tool Tool @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@unique([toolId, variantKey, state])
+  @@index([toolId, state])
+  @@index([state])
+}
+
+/// The pair registry (spec §2.2). One pair_key maps to exactly one canonical
+/// URL, enforced by unique constraints on both columns. Whichever slug went
+/// first is frozen here forever; every other ordering 301s onto it.
+///
+/// Deliberately separate from Comparison: the canonical URL must survive a
+/// comparison being unpublished or deleted, otherwise the 301 target dies and
+/// the accumulated link equity goes with it.
+model ComparisonPair {
+  id String @id @default(cuid())
+
+  /// sorted([a.refId, b.refId]).join(":") — numeric sort, never slug-derived.
+  pairKey String @unique
+  /// The frozen canonical, e.g. "instantly-vs-listkit". URL is /compare/{canonicalSlug}.
+  canonicalSlug String @unique
+
+  /// Lower and higher refId of the pair, denormalised for sibling lookups.
+  toolARefId Int
+  toolBRefId Int
+
+  frozenAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([toolARefId])
+  @@index([toolBRefId])
+}
+
+/// Trailing-90-day demand per pair. Populated by scripts/import-demand.ts from
+/// a GSC export plus a keyword volume file. Feeds both the §5 publish gate and
+/// the §4 link mesh ranking. A pair absent from this table has no demand
+/// evidence and cannot be published.
+model PairDemand {
+  pairKey        String   @id
+  impressions90d Int      @default(0)
+  clicks90d      Int      @default(0)
+  keywordVolume  Int      @default(0)
+  topQuery       String?
+  source         String?
+  importedAt     DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([impressions90d])
+}
+
+/// Pairs that failed the §5 demand gate. Written, never published.
+model ComparisonCandidate {
+  id      String @id @default(cuid())
+  pairKey String @unique
+
+  toolARefId     Int
+  toolBRefId     Int
+  impressions90d Int    @default(0)
+  keywordVolume  Int    @default(0)
+  /// Why the gate rejected it, for the review queue.
+  reason String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([impressions90d])
 }
