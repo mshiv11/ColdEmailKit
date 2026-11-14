@@ -7,6 +7,7 @@ import {
   parseAsStringEnum,
 } from "nuqs/server"
 import { z } from "zod"
+import { normalizeBestFor } from "~/lib/best-for"
 import { getSortingStateParser } from "~/lib/parsers"
 
 export const toolsTableParamsSchema = {
@@ -47,7 +48,10 @@ export const toolSchema = z.object({
   totalReviews: z.coerce.number().optional(),
   trustScore: z.coerce.number().optional(),
   pricingStarting: z.string().optional(),
-  bestFor: z.string().optional(),
+  bestFor: z
+    .string()
+    .optional()
+    .transform(value => (value === undefined ? value : normalizeBestFor(value))),
   customTitle: z.string().optional(),
   overallRating: z.coerce.number().min(0).max(5).optional(),
 

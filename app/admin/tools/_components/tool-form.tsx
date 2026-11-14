@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import type { z } from "zod"
 import { useServerAction } from "zsa-react"
+import { BEST_FOR_OPTIONS, parseBestFor, serializeBestFor } from "~/lib/best-for"
 import { generateFavicon, generateScreenshot } from "~/actions/media"
 import { ToolActions } from "~/app/admin/tools/_components/tool-actions"
 import { ToolGenerateContent } from "~/app/admin/tools/_components/tool-generate-content"
@@ -227,7 +228,7 @@ export function ToolForm({
       totalReviews: tool?.totalReviews ?? 0,
       trustScore: tool?.trustScore ?? 0,
       pricingStarting: tool?.pricingStarting ?? "",
-      bestFor: tool?.bestFor ?? "",
+      bestFor: serializeBestFor(parseBestFor(tool?.bestFor)),
       overallRating: tool?.overallRating ?? 0,
       submitterName: tool?.submitterName ?? "",
       submitterEmail: tool?.submitterEmail ?? "",
@@ -831,15 +832,8 @@ export function ToolForm({
           control={form.control}
           name="bestFor"
           render={({ field }) => {
-            const options = [
-              "Solopreneurs",
-              "Agencies",
-              "Freelancers",
-              "Recruiters",
-              "Enterprises",
-              "Small business",
-            ]
-            const selected = field.value ? field.value.split(",") : []
+            const options = BEST_FOR_OPTIONS
+            const selected: string[] = parseBestFor(field.value)
 
             return (
               <FormItem>
@@ -855,7 +849,7 @@ export function ToolForm({
                             const newSelected = checked
                               ? [...selected, option]
                               : selected.filter(s => s !== option)
-                            field.onChange(newSelected.join(","))
+                            field.onChange(serializeBestFor(newSelected))
                           }}
                         />
                         <label

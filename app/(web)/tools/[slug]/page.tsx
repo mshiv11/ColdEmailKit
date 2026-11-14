@@ -49,6 +49,7 @@ import {
   wrapInGraph,
 } from "~/lib/schemas"
 import { getToolSuffix, isToolPublished } from "~/lib/tools"
+import { formatBestFor } from "~/lib/best-for"
 import { findComparisonsForTool } from "~/server/web/comparisons/queries"
 import type { ToolOne } from "~/server/web/tools/payloads"
 import { findTool, findToolSlugs } from "~/server/web/tools/queries"
@@ -218,10 +219,10 @@ export default async function ToolPage(props: PageProps) {
 
               {/* Trust signal badges — above the fold for immediate credibility */}
               <div className="flex flex-wrap items-center gap-2">
-                {tool.bestFor && (
+                {formatBestFor(tool.bestFor) && (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                     <Icon name="lucide/briefcase" className="size-3.5" />
-                    Best for: {tool.bestFor.replaceAll(",", ", ")}
+                    Best for: {formatBestFor(tool.bestFor)}
                   </span>
                 )}
                 {tool.pricingStarting && (
