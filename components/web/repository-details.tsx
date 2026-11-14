@@ -9,6 +9,7 @@ import { Stack } from "~/components/common/stack"
 import { ExternalLink } from "~/components/web/external-link"
 import { ToolBadges } from "~/components/web/tools/tool-badges"
 import { Insights } from "~/components/web/ui/insights"
+import { formatBestFor } from "~/lib/best-for"
 import type { ToolOne } from "~/server/web/tools/payloads"
 import { cx } from "~/utils/cva"
 
@@ -40,10 +41,10 @@ export const RepositoryDetails = ({ className, tool, ...props }: RepositoryDetai
           icon: <Icon name="lucide/dollar-sign" />,
         }
       : undefined,
-    tool.bestFor
+    formatBestFor(tool.bestFor)
       ? {
           label: "Best for",
-          value: tool.bestFor.replaceAll(",", ", "),
+          value: formatBestFor(tool.bestFor),
           icon: <Icon name="lucide/briefcase" />,
         }
       : undefined,

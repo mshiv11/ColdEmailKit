@@ -3,6 +3,7 @@ import { ToolStatus } from "@prisma/client"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { withApiKeyAuth } from "~/lib/auth-hoc"
+import { normalizeBestFor } from "~/lib/best-for"
 import { db } from "~/services/db"
 
 /**
@@ -80,6 +81,11 @@ export const PUT = (req: NextRequest, { params }: { params: Promise<{ slug: stri
     const data: Record<string, unknown> = {}
     for (const key of allowedFields) {
       if (body[key] !== undefined) data[key] = body[key]
+    }
+
+    // Keep "Best for" in sync with the admin toggles
+    if (typeof data.bestFor === "string") {
+      data.bestFor = normalizeBestFor(data.bestFor)
     }
 
     // Handle slug generation

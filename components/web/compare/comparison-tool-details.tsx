@@ -4,6 +4,7 @@ import { Card } from "~/components/common/card"
 import { H5 } from "~/components/common/heading"
 import { Icon } from "~/components/common/icon"
 import { Insights } from "~/components/web/ui/insights"
+import { formatBestFor } from "~/lib/best-for"
 import type { ComparisonTool } from "~/server/web/comparisons/payloads"
 import { cx } from "~/utils/cva"
 
@@ -39,10 +40,10 @@ export const ComparisonToolDetails = ({
           icon: <Icon name="lucide/dollar-sign" />,
         }
       : undefined,
-    tool.bestFor
+    formatBestFor(tool.bestFor)
       ? {
           label: "Best for",
-          value: tool.bestFor.replaceAll(",", ", "),
+          value: formatBestFor(tool.bestFor),
           icon: <Icon name="lucide/briefcase" />,
         }
       : undefined,
